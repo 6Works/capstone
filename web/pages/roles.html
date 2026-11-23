@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tier 1: Persona Selection — Conversational Voice Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex font-sans antialiased overflow-x-hidden">
+
+  <!-- Shared Sidebar Container -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
+      <div class="flex items-center space-x-3">
+        <a href="/" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left"></i></a>
+        <span class="text-xs font-semibold text-slate-400">Platform</span>
+        <span class="text-xs text-slate-300">/</span>
+        <span class="text-xs font-bold text-indigo-600">Tier 1: AI Persona & Role Selection</span>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2 text-xs font-mono bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full text-indigo-800">
+          <span>Active Persona:</span>
+          <strong id="headerActiveRoleName" class="font-bold">Intelligent Interviewer</strong>
+        </div>
+        <a href="/interviewer-mode" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition flex items-center space-x-1.5 shadow-sm">
+          <span>Step 2: Sub-Modes</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- Executive Progress Stepper Banner -->
+    <div class="bg-slate-900 text-white px-8 py-6 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto space-y-6">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-indigo-400 mb-1">
+              <i class="fa-solid fa-masks-theater"></i>
+              <span>Agent Specialization & Persona Layer</span>
+            </div>
+            <h1 class="text-2xl font-black tracking-tight">AI Role & Persona Selection Studio</h1>
+            <p class="text-sm text-slate-400 mt-1 max-w-3xl">
+              Choose the foundational identity, domain expertise, and tone for your AI agent. Selecting the <strong>Intelligent Human-Like Interviewer</strong> transitions to a dedicated <strong>Tier 2 Sub-Mode Configuration Page</strong> to specify whether Mira operates as an autonomous interviewer or as a live human co-pilot.
+            </p>
+          </div>
+        </div>
+
+        <!-- 3-Step Selection Progress Bar -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+          
+          <!-- Step 1: Active -->
+          <div class="p-3 bg-indigo-950/80 rounded-xl border-2 border-indigo-500 flex items-center space-x-3 shadow-lg shadow-indigo-950/50">
+            <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-indigo-500/30">
+              <span class="animate-pulse">1</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-[10px] uppercase font-bold text-indigo-300 tracking-wider">Step 1 · Current Selection</div>
+              <div class="text-xs font-extrabold text-white truncate">Choose Persona Profile</div>
+              <div class="text-[10px] text-indigo-300 font-medium">Interviewer, Screener, Coach</div>
+            </div>
+          </div>
+
+          <!-- Step 2: Next Page -->
+          <a href="/interviewer-mode" class="p-3 bg-slate-800/80 hover:bg-slate-800 rounded-xl border border-slate-700 flex items-center space-x-3 transition group">
+            <div class="w-8 h-8 rounded-lg bg-slate-700 group-hover:bg-indigo-600 text-slate-300 group-hover:text-white flex items-center justify-center text-sm font-bold transition">
+              2
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-[10px] uppercase font-bold text-slate-400 group-hover:text-indigo-400 tracking-wider transition">Step 2 · Dedicated Page</div>
+              <div class="text-xs font-bold text-slate-200 group-hover:text-white truncate transition">Interviewer Sub-Mode Setup</div>
+              <div class="text-[10px] text-slate-400">Solo Interviewer vs Human Co-Pilot →</div>
+            </div>
+          </a>
+
+          <!-- Step 3: Deployment -->
+          <div class="p-3 bg-slate-800/40 rounded-xl border border-slate-700/60 flex items-center space-x-3 opacity-70">
+            <div class="w-8 h-8 rounded-lg bg-slate-700 text-slate-400 flex items-center justify-center text-sm font-bold">
+              3
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Step 3 · Deployment</div>
+              <div class="text-xs font-bold text-slate-300 truncate">Live Cockpit Session</div>
+              <div class="text-[10px] text-slate-500">Autonomous Voice or Silent HUD</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
+      
+      <!-- Tier 1: Role Selection Cards -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-id-card-clip text-indigo-600 mr-2"></i>
+              Available AI Personas & Operational Roles
+            </h2>
+            <p class="text-xs text-slate-500">Click any persona card below to activate it or enter its dedicated sub-mode configuration.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="rolesGrid">
+          
+          <!-- Role 1: Interviewer (Primary with Sub-Modes) -->
+          <div class="p-6 rounded-2xl border-2 border-indigo-600 bg-indigo-50/30 shadow-md flex flex-col justify-between space-y-4 relative">
+            <div class="absolute top-4 right-4">
+              <span class="text-[10px] font-black uppercase tracking-wider bg-indigo-600 text-white px-2.5 py-1 rounded-full shadow-xs">
+                Dual-Mode Architecture
+              </span>
+            </div>
+
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md shadow-indigo-100 mb-3">
+                <i class="fa-solid fa-user-tie"></i>
+              </div>
+              <h3 class="text-lg font-extrabold text-slate-900 leading-snug">Intelligent Human-Like Interviewer</h3>
+              <div class="text-[11px] text-indigo-700 font-bold uppercase tracking-wider mt-0.5">Hiring & Talent Assessment</div>
+              <p class="text-xs text-slate-600 mt-2.5 leading-relaxed">
+                Mira acts as an executive engineering hiring manager. Designed with two operational sub-modes: she can conduct the entire technical interview alone (Mode A) or act as a silent, intelligent co-pilot assisting an actual human interviewer live in the room (Mode B).
+              </p>
+            </div>
+
+            <div class="p-4 bg-white rounded-xl border border-indigo-100 space-y-2 text-xs">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Available Sub-Modes:</div>
+              <div class="grid grid-cols-2 gap-2 text-[11px]">
+                <div class="p-2 bg-indigo-50/60 rounded border border-indigo-100 flex items-center space-x-1.5 font-bold text-indigo-900">
+                  <i class="fa-solid fa-microphone text-indigo-600 text-xs"></i>
+                  <span>Solo Interviewer</span>
+                </div>
+                <div class="p-2 bg-slate-50 rounded border border-slate-200 flex items-center space-x-1.5 font-bold text-slate-800">
+                  <i class="fa-solid fa-user-astronaut text-slate-600 text-xs"></i>
+                  <span>Human Co-Pilot</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <a href="/interviewer-mode" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-200 transition flex items-center justify-center space-x-2 group">
+                <span>Select & Configure Sub-Modes on Dedicated Page (Step 2)</span>
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Role 2: Tech Screener -->
+          <div class="p-6 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4 relative">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl mb-3">
+                <i class="fa-solid fa-network-wired"></i>
+              </div>
+              <h3 class="text-lg font-extrabold text-slate-900 leading-snug">Technical Architecture Screener</h3>
+              <div class="text-[11px] text-emerald-700 font-bold uppercase tracking-wider mt-0.5">Engineering Assessment</div>
+              <p class="text-xs text-slate-600 mt-2.5 leading-relaxed">
+                Specialized in deep-dive distributed systems, concurrency bottlenecks, consensus algorithms, and CAP theorem trade-offs. Poses targeted questions and assesses trade-off depth.
+              </p>
+            </div>
+
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Target Focus:</div>
+              <div class="text-[11px] text-slate-700 font-medium">Distributed caching, database sharding, transaction sagas, and horizontal scaling.</div>
+            </div>
+
+            <div class="pt-2">
+              <button onclick="activateStandardRole('tech_screener')" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-700 font-bold text-xs transition flex items-center justify-center space-x-2">
+                <span>Activate Technical Screener Role</span>
+                <i class="fa-solid fa-check"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Role 3: Executive Coach -->
+          <div class="p-6 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4 relative">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl mb-3">
+                <i class="fa-solid fa-chess-knight"></i>
+              </div>
+              <h3 class="text-lg font-extrabold text-slate-900 leading-snug">Leadership & Behavioral Coach</h3>
+              <div class="text-[11px] text-amber-700 font-bold uppercase tracking-wider mt-0.5">Executive Development</div>
+              <p class="text-xs text-slate-600 mt-2.5 leading-relaxed">
+                Socratic behavioral coaching using the STAR methodology (Situation, Task, Action, Result). Evaluates conflict resolution, organizational leadership, and executive communication.
+              </p>
+            </div>
+
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Target Focus:</div>
+              <div class="text-[11px] text-slate-700 font-medium">STAR rubric framing, team motivation, cross-functional diplomacy, and executive presence.</div>
+            </div>
+
+            <div class="pt-2">
+              <button onclick="activateStandardRole('executive_coach')" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-amber-600 hover:text-white text-slate-700 font-bold text-xs transition flex items-center justify-center space-x-2">
+                <span>Activate Leadership Coach Role</span>
+                <i class="fa-solid fa-check"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Role 4: Customer Support Specialist -->
+          <div class="p-6 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4 relative">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-xl mb-3">
+                <i class="fa-solid fa-headset"></i>
+              </div>
+              <h3 class="text-lg font-extrabold text-slate-900 leading-snug">Customer Success & Empathy Specialist</h3>
+              <div class="text-[11px] text-rose-700 font-bold uppercase tracking-wider mt-0.5">Customer Operations</div>
+              <p class="text-xs text-slate-600 mt-2.5 leading-relaxed">
+                Simulates distressed enterprise clients during mission-critical production outages. Evaluates emotional intelligence, de-escalation pacing, and rapid structured troubleshooting.
+              </p>
+            </div>
+
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Target Focus:</div>
+              <div class="text-[11px] text-slate-700 font-medium">Emotional de-escalation, SLA adherence, root-cause transparency, and customer retention.</div>
+            </div>
+
+            <div class="pt-2">
+              <button onclick="activateStandardRole('customer_support')" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-rose-600 hover:text-white text-slate-700 font-bold text-xs transition flex items-center justify-center space-x-2">
+                <span>Activate Customer Specialist Role</span>
+                <i class="fa-solid fa-check"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SOLID Architectural Principle Deep Dive -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center">
+          <i class="fa-solid fa-code text-indigo-600 mr-2"></i>
+          Decoupled Multi-Tier Architecture & Psychological Flow
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <span class="font-bold text-slate-900">Psychological Clarity & Focus</span>
+            <p class="text-[11px] text-slate-600">
+              Separating persona selection (Tier 1) from the operational sub-mode configuration (Tier 2) ensures candidates or interviewers focus with serious intent without UI clutter.
+            </p>
+          </div>
+
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <span class="font-bold text-slate-900">Single Responsibility (SRP)</span>
+            <p class="text-[11px] text-slate-600">
+              <code>/roles</code> owns Persona identity cataloging; <code>/interviewer-mode</code> owns sub-mode operational switching and live interview telemetry.
+            </p>
+          </div>
+
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <span class="font-bold text-slate-900">Open/Closed Principle (OCP)</span>
+            <p class="text-[11px] text-slate-600">
+              New personas and multi-tier sub-modes register seamlessly without touching existing speech, ASR, or TTS microservices.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/js/sidebar.js"></script>
+  <script>
+    renderSidebar('roles');
+
+    async function activateStandardRole(roleId) {
+      try {
+        await fetch('/api/roles/configure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role_id: roleId })
+        });
+        const roleNames = {
+          'tech_screener': 'Technical Screener',
+          'executive_coach': 'Leadership Coach',
+          'customer_support': 'Customer Specialist'
+        };
+        document.getElementById('headerActiveRoleName').innerText = roleNames[roleId] || roleId;
+        alert(`Activated ${roleNames[roleId]} persona!`);
+      } catch (e) {
+        alert('Could not configure role: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>
