@@ -78,18 +78,28 @@ _WHISPER_CACHE = {}
 class WhisperTransformerASR(IASRService):
     """
     High-Performance Offline Whisper Transformer ASR Service powered by faster-whisper (CTranslate2).
-    Supports INT8 CPU quantization, Silero Voice Activity Detection (VAD), and ultra-low latency inference.
+    Supports INT8 CPU quantization, Silero Voice Activity Detection (VAD), and Acoustic Vocabulary Biasing
+    for accurate proper noun and South Asian name recognition (Sachin, Nandu, Bablu, Rahul, Aradhya, etc.).
     Adheres strictly to SOLID: Open for extension with any CTranslate2/Whisper model size, closed for modification.
     """
 
+    DEFAULT_PROMPT = (
+        "Interview dialogue and proper names: "
+        "Sachin, Nandu, Bablu, Rahul, Aradhya, Priya, Vikram, Ananya, Rohit, "
+        "Rohan, Neha, Amit, Sneha, Aditya, Pooja, Rajesh, Suresh, Deepa, Karthik, "
+        "Sanjay, Manish, Alok, Divya, Meera, Shreya, Varun, Gaurav, Tanvi, Ritu, "
+        "Nikhil, Harish, Swati, Rakesh, Vishal."
+    )
+
     def __init__(
         self,
-        model_size: str = "tiny.en",
+        model_size: str = "small.en",
         device: str = "cpu",
         compute_type: str = "int8",
         language: str = "en",
         vad_filter: bool = True,
-        beam_size: int = 5
+        beam_size: int = 5,
+        initial_prompt: Optional[str] = None
     ):
         self.model_size = model_size
         self.device = device
@@ -97,6 +107,7 @@ class WhisperTransformerASR(IASRService):
         self.language = language
         self.vad_filter = vad_filter
         self.beam_size = beam_size
+        self.initial_prompt = initial_prompt if initial_prompt is not None else self.DEFAULT_PROMPT
         self.model = None
         self._is_initialized = False
 
@@ -153,11 +164,17 @@ class WhisperTransformerASR(IASRService):
                 if isinstance(self.model, faster_whisper.WhisperModel):
                     # faster-whisper CTranslate2 inference with optional VAD
                     lang_param = None if self.model_size.endswith(".en") else self.language
+                    # Determine initial prompt from payload metadata or default instance prompt
+                    prompt = payload.metadata.get("initial_prompt") if payload.metadata else None
+                    if prompt is None:
+                        prompt = self.initial_prompt
+
                     segments, info = self.model.transcribe(
                         payload.file_path,
                         language=lang_param,
                         beam_size=self.beam_size,
-                        vad_filter=self.vad_filter
+                        vad_filter=self.vad_filter,
+                        initial_prompt=prompt
                     )
                     
                     text_parts = []

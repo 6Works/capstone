@@ -90,8 +90,8 @@ def get_available_providers():
         },
         "available_providers": {
             "asr": [
-                {"id": "whisper", "name": "faster-whisper Tiny.en INT8 (Offline ultra-fast ~200ms)", "status": "active"},
-                {"id": "whisper_small", "name": "faster-whisper Small.en INT8 (Offline high-accuracy)", "status": "active"},
+                {"id": "whisper", "name": "faster-whisper Small.en INT8 (High Accuracy - Name Optimized)", "status": "active"},
+                {"id": "whisper_tiny", "name": "faster-whisper Tiny.en INT8 (Offline Ultra-Fast ~200ms)", "status": "active"},
                 {"id": "google", "name": "Google Web Speech (Fast cloud free)", "status": "active"},
                 {"id": "mock", "name": "Mock ASR (Synthetic deterministic)", "status": "testing"}
             ],
@@ -261,6 +261,7 @@ def test_stage1_audio():
 class ASRTestRequest(BaseModel):
     text: Optional[str] = "What time is it right now?"
     provider: Optional[str] = "whisper"
+    initial_prompt: Optional[str] = None
 
 
 @app.post("/api/test/stage2-asr")
@@ -271,10 +272,10 @@ def test_stage2_asr(req: ASRTestRequest):
     from services.asr import GoogleWebSpeechASR, WhisperTransformerASR, MockASR
 
     target_provider = req.provider or active_config.get("asr_provider", "whisper")
-    if target_provider in ["whisper", "whisper_tiny"]:
-        asr_svc = WhisperTransformerASR(model_size="tiny.en", compute_type="int8")
-    elif target_provider == "whisper_small":
-        asr_svc = WhisperTransformerASR(model_size="small.en", compute_type="int8")
+    if target_provider in ["whisper", "whisper_small"]:
+        asr_svc = WhisperTransformerASR(model_size="small.en", compute_type="int8", initial_prompt=req.initial_prompt)
+    elif target_provider == "whisper_tiny":
+        asr_svc = WhisperTransformerASR(model_size="tiny.en", compute_type="int8", initial_prompt=req.initial_prompt)
     elif target_provider == "google":
         asr_svc = GoogleWebSpeechASR(language="en-US")
     else:
@@ -313,7 +314,8 @@ async def transcribe_audio_file(
     provider: str = Form("whisper"),
     vad_filter: bool = Form(True),
     beam_size: int = Form(5),
-    language: str = Form("en")
+    language: str = Form("en"),
+    initial_prompt: Optional[str] = Form(None)
 ):
     """
     Direct Stage 2 ASR Execution on uploaded audio (mic recording or file).
@@ -335,21 +337,23 @@ async def transcribe_audio_file(
         if file_size_bytes < 44:
             raise HTTPException(status_code=400, detail="Audio file too small or empty")
 
-        if provider in ["whisper", "whisper_tiny"]:
-            asr_svc = WhisperTransformerASR(
-                model_size="tiny.en",
-                compute_type="int8",
-                language=language,
-                vad_filter=vad_filter,
-                beam_size=beam_size
-            )
-        elif provider == "whisper_small":
+        if provider in ["whisper", "whisper_small"]:
             asr_svc = WhisperTransformerASR(
                 model_size="small.en",
                 compute_type="int8",
                 language=language,
                 vad_filter=vad_filter,
-                beam_size=beam_size
+                beam_size=beam_size,
+                initial_prompt=initial_prompt
+            )
+        elif provider == "whisper_tiny":
+            asr_svc = WhisperTransformerASR(
+                model_size="tiny.en",
+                compute_type="int8",
+                language=language,
+                vad_filter=vad_filter,
+                beam_size=beam_size,
+                initial_prompt=initial_prompt
             )
         elif provider == "google":
             asr_svc = GoogleWebSpeechASR(language="en-US" if language == "en" else language)
@@ -377,7 +381,8 @@ async def transcribe_audio_file(
 
 class ASRBenchmarkRequest(BaseModel):
     text: Optional[str] = "The quick brown fox jumps over the lazy dog"
-    providers: Optional[List[str]] = ["whisper_tiny", "whisper_small", "google", "mock"]
+    providers: Optional[List[str]] = ["whisper_small", "whisper_tiny", "google", "mock"]
+    initial_prompt: Optional[str] = None
 
 
 @app.post("/api/asr/benchmark")
@@ -398,15 +403,15 @@ def benchmark_asr_models(req: ASRBenchmarkRequest):
         engine.runAndWait()
 
         results = []
-        providers_to_test = req.providers or ["whisper_tiny", "whisper_small", "google", "mock"]
+        providers_to_test = req.providers or ["whisper_small", "whisper_tiny", "google", "mock"]
 
         for pid in providers_to_test:
-            if pid in ["whisper_tiny", "whisper"]:
-                svc = WhisperTransformerASR(model_size="tiny.en", compute_type="int8")
-                label = "Whisper Tiny.en (INT8)"
-            elif pid == "whisper_small":
-                svc = WhisperTransformerASR(model_size="small.en", compute_type="int8")
-                label = "Whisper Small.en (INT8)"
+            if pid in ["whisper_small", "whisper"]:
+                svc = WhisperTransformerASR(model_size="small.en", compute_type="int8", initial_prompt=req.initial_prompt)
+                label = "Whisper Small.en (INT8 - Name Optimized)"
+            elif pid == "whisper_tiny":
+                svc = WhisperTransformerASR(model_size="tiny.en", compute_type="int8", initial_prompt=req.initial_prompt)
+                label = "Whisper Tiny.en (INT8 - Fast)"
             elif pid == "google":
                 svc = GoogleWebSpeechASR(language="en-US")
                 label = "Google Web Speech (Cloud)"
