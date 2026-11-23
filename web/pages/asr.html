@@ -104,8 +104,8 @@
           <div>
             <label class="block font-bold text-slate-700 mb-1">Target Engine / Model</label>
             <select id="asrProviderSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500">
-              <option value="whisper" selected>faster-whisper Tiny.en INT8 (Ultra Fast ~200ms)</option>
-              <option value="whisper_small">faster-whisper Small.en INT8 (High Accuracy)</option>
+              <option value="whisper" selected>faster-whisper Small.en INT8 (High Accuracy - Name Optimized)</option>
+              <option value="whisper_tiny">faster-whisper Tiny.en INT8 (Offline Ultra-Fast ~200ms)</option>
               <option value="google">Google Web Speech (Cloud API)</option>
               <option value="mock">Mock ASR (Synthetic deterministic)</option>
             </select>
@@ -145,6 +145,31 @@
               <option value="hi">Hindi (hi)</option>
               <option value="zh">Chinese (zh)</option>
             </select>
+          </div>
+        </div>
+
+        <!-- Acoustic Lexical Prior & Proper Name Biasing Box -->
+        <div class="pt-3 border-t border-slate-100 space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block font-bold text-slate-800 text-xs flex items-center space-x-1.5">
+              <i class="fa-solid fa-address-card text-emerald-600"></i>
+              <span>Lexical Conditioning & Proper Name Biasing (initial_prompt)</span>
+            </label>
+            <span class="text-[10px] text-slate-500">Conditions Whisper's autoregressive decoder to accurately recognize South Asian names & jargon</span>
+          </div>
+          <div class="flex space-x-2">
+            <input type="text" id="asrPromptInput" value="Sachin, Nandu, Bablu, Rahul, Aradhya, Priya, Vikram, Ananya, Rohit, Rohan, Neha, Amit, Sneha, Aditya, Pooja, Rajesh, Suresh, Deepa, Karthik, Sanjay, Manish" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500">
+            <button onclick="resetDefaultPrompt()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs rounded-xl font-semibold shrink-0">
+              Reset Names
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-1.5 text-[10px]">
+            <span class="text-slate-400 self-center">Quick insert:</span>
+            <button onclick="appendPromptName('Sachin')" class="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200">+ Sachin</button>
+            <button onclick="appendPromptName('Nandu')" class="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200">+ Nandu</button>
+            <button onclick="appendPromptName('Bablu')" class="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200">+ Bablu</button>
+            <button onclick="appendPromptName('Rahul')" class="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200">+ Rahul</button>
+            <button onclick="appendPromptName('Aradhya')" class="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200">+ Aradhya</button>
           </div>
         </div>
       </section>
@@ -747,12 +772,15 @@
       const beam = document.getElementById('asrBeamSlider').value;
       const lang = document.getElementById('asrLanguageSelect').value;
 
+      const prompt = document.getElementById('asrPromptInput') ? document.getElementById('asrPromptInput').value.trim() : '';
+
       const formData = new FormData();
       formData.append('file', audioBlob, 'live_speech.wav');
       formData.append('provider', provider);
       formData.append('vad_filter', vad);
       formData.append('beam_size', beam);
       formData.append('language', lang);
+      if (prompt) formData.append('initial_prompt', prompt);
 
       const t0 = performance.now();
       try {
@@ -829,12 +857,15 @@
       const beam = document.getElementById('asrBeamSlider').value;
       const lang = document.getElementById('asrLanguageSelect').value;
 
+      const prompt = document.getElementById('asrPromptInput') ? document.getElementById('asrPromptInput').value.trim() : '';
+
       const formData = new FormData();
       formData.append('file', currentSelectedFile);
       formData.append('provider', provider);
       formData.append('vad_filter', vad);
       formData.append('beam_size', beam);
       formData.append('language', lang);
+      if (prompt) formData.append('initial_prompt', prompt);
 
       const t0 = performance.now();
       try {
@@ -903,13 +934,14 @@
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Synthesizing...</span>';
 
       const provider = document.getElementById('asrProviderSelect').value;
+      const prompt = document.getElementById('asrPromptInput') ? document.getElementById('asrPromptInput').value.trim() : '';
       const t0 = performance.now();
 
       try {
         const resp = await fetch('/api/test/stage2-asr', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text, provider: provider })
+          body: JSON.stringify({ text: text, provider: provider, initial_prompt: prompt })
         });
         const data = await resp.json();
         const latencyMs = Math.round(performance.now() - t0);
@@ -1009,13 +1041,16 @@
       const grid = document.getElementById('arenaGrid');
       grid.innerHTML = '<div class="col-span-4 text-center py-8 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Synthesizing audio and benchmarking models in parallel...</div>';
 
+      const prompt = document.getElementById('asrPromptInput') ? document.getElementById('asrPromptInput').value.trim() : '';
+
       try {
         const resp = await fetch('/api/asr/benchmark', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             text: text,
-            providers: ['whisper_tiny', 'whisper_small', 'google', 'mock']
+            providers: ['whisper_small', 'whisper_tiny', 'google', 'mock'],
+            initial_prompt: prompt
           })
         });
         const data = await resp.json();
@@ -1076,6 +1111,20 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i><span>Start Model Race</span>';
+      }
+    }
+
+    function appendPromptName(name) {
+      const input = document.getElementById('asrPromptInput');
+      if (input && !input.value.includes(name)) {
+        input.value = (input.value ? input.value + ', ' : '') + name;
+      }
+    }
+
+    function resetDefaultPrompt() {
+      const input = document.getElementById('asrPromptInput');
+      if (input) {
+        input.value = "Sachin, Nandu, Bablu, Rahul, Aradhya, Priya, Vikram, Ananya, Rohit, Rohan, Neha, Amit, Sneha, Aditya, Pooja, Rajesh, Suresh, Deepa, Karthik, Sanjay, Manish";
       }
     }
 
