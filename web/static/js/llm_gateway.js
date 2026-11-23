@@ -154,7 +154,7 @@ class LLMGatewayUI {
               <!-- Base URL Field (for Ollama / Local OpenAI) -->
               <div id="baseUrlFieldContainer" class="hidden">
                 <label id="baseUrlLabel" class="block font-semibold text-slate-600 mb-1">Base Endpoint URL</label>
-                <input type="text" id="configBaseUrlInput" placeholder="http://localhost:11434" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono focus:outline-hidden focus:border-indigo-500">
+                <input type="text" id="configBaseUrlInput" placeholder="http://127.0.0.1:11434" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono focus:outline-hidden focus:border-indigo-500">
                 <p class="text-[10px] text-slate-500 mt-1">Make sure the local daemon or LM Studio server is running on this port.</p>
               </div>
 
@@ -241,7 +241,7 @@ class LLMGatewayUI {
     const providerMeta = {
       gemini: { icon: 'fa-brands fa-google', color: 'text-blue-600', desc: 'Fast, high-context Google cloud model family' },
       openai: { icon: 'fa-solid fa-brain', color: 'text-emerald-600', desc: 'Standard GPT-4o / GPT-4o-mini reasoning API' },
-      ollama: { icon: 'fa-solid fa-server', color: 'text-purple-600', desc: 'Runs locally on your GPU/CPU (http://localhost:11434)' },
+      ollama: { icon: 'fa-solid fa-server', color: 'text-purple-600', desc: 'Runs locally on your GPU/CPU (http://127.0.0.1:11434)' },
       local_openai: { icon: 'fa-solid fa-desktop', color: 'text-amber-600', desc: 'LM Studio / vLLM local compatible endpoints' },
       rule_based: { icon: 'fa-solid fa-shield-halved', color: 'text-slate-600', desc: '100% offline deterministic fallback engine' }
     };
