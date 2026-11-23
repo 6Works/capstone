@@ -1,0 +1,22 @@
+/* Shared application styles */
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.stage-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stage-card.active {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 12px 25px -4px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link.active {
+  background-color: #e0e7ff;
+  color: #4338ca;
+  font-weight: 700;
+  border-right: 3px solid #4f46e5;
+}
