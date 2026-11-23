@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic AI Interviewer Co-Pilot HUD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
+</head>
+<body class="bg-white text-slate-800 min-h-screen flex flex-col font-sans antialiased overflow-hidden select-none">
+
+  <!-- Top Global Header -->
+  <header class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 z-30 shadow-xs">
+    <div class="flex items-center space-x-2.5">
+      <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-white text-base shadow-sm">
+        <i class="fa-solid fa-user-astronaut text-xs"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold text-slate-900 tracking-tight">Interviewer Augmented Co-Pilot HUD</h1>
+      </div>
+      <span class="text-xs text-slate-400">|</span>
+      <div class="flex items-center space-x-2 text-xs font-mono">
+        <span class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-300 font-bold flex items-center space-x-1">
+          <i class="fa-solid fa-volume-xmark text-[10px]"></i>
+          <span>Silent Mode (Muted)</span>
+        </span>
+        <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold">Live Stream Active</span>
+      </div>
+    </div>
+
+    <!-- Center: LLM Gateway Switcher Pill & Context HUD -->
+    <div class="flex items-center space-x-2">
+      <div id="llmPillMount" class="flex items-center"></div>
+      <div id="contextPillMount" class="flex items-center"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex items-center space-x-4 text-xs font-semibold text-slate-600">
+      <a href="/interview/profiling" class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition flex items-center space-x-1 font-bold">
+        <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i>
+        <span>Profiling Layer</span>
+      </a>
+      <a href="/interview/workspace" class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition flex items-center space-x-1 font-bold">
+        <i class="fa-solid fa-cubes text-[11px]"></i>
+        <span>Universal Workspace</span>
+      </a>
+      <a href="/interviewer/solo" class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center space-x-1">
+        <i class="fa-solid fa-user text-[11px]"></i>
+        <span>Solo Suite</span>
+      </a>
+      <a href="/" class="hover:text-indigo-600 transition">Dashboard</a>
+    </nav>
+  </header>
+
+  <!-- Main Middle Workspace (Left: Candidate Code & Stream | Right: Co-Pilot Intelligence HUD) -->
+  <div class="flex-1 flex min-h-0 relative bg-slate-50">
+    
+    <!-- Left Pane: Candidate Synchronized Code Mirror & Live Audio Waveform -->
+    <div class="flex-1 flex flex-col min-w-0 border-r border-slate-200 bg-white">
+      
+      <!-- Top Control Bar -->
+      <div class="h-11 bg-white border-b border-slate-200 px-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-desktop text-indigo-600 text-xs"></i>
+          <span class="text-xs font-bold text-slate-800">Candidate Code Sandbox (Synchronized Screen Mirror)</span>
+        </div>
+
+        <div class="flex items-center space-x-2 text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>WebRTC DataChannel 60fps</span>
+        </div>
+      </div>
+
+      <!-- Candidate Monaco Editor Mirror -->
+      <div class="flex-1 relative overflow-hidden bg-white">
+        <div id="monacoMirrorContainer" class="w-full h-full"></div>
+      </div>
+
+      <!-- Live Candidate Transcript Stream & Audio Bar -->
+      <div class="h-56 bg-white border-t-2 border-slate-200 flex flex-col shrink-0">
+        <div class="h-9 bg-slate-50 border-b border-slate-200 px-4 flex items-center justify-between text-xs font-semibold text-slate-700">
+          <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-bold">Live Candidate Speech Transcription (Stage 2 ASR)</span>
+          </div>
+          <span class="text-[10px] font-mono text-slate-500">Latency: 215ms (16 kHz PCM)</span>
+        </div>
+
+        <div class="p-3 bg-slate-50 flex-1 flex flex-col justify-between">
+          <div id="transcriptLiveText" class="p-3 bg-white rounded-xl border border-slate-200 text-xs font-mono text-slate-800 leading-relaxed shadow-2xs max-h-24 overflow-y-auto">
+            "I architected a distributed event-driven platform using Kafka for log partitioning and Redis as a distributed write-behind cache with read-replicas to maintain 99.99% availability."
+          </div>
+
+          <!-- Quick Simulation Presets for Interviewer -->
+          <div class="flex items-center space-x-2 text-[10px] text-slate-600 pt-2">
+            <span class="font-bold text-slate-400 shrink-0">Test Candidate Claims:</span>
+            <button onclick="feedCandidateClaim('I architected an event-driven platform using Kafka partitioned logs and Redis as a distributed write-behind cache with read-replicas.')" class="px-2.5 py-1 bg-white hover:bg-slate-100 rounded-lg border border-slate-200 shadow-2xs shrink-0">
+              1. Kafka & Redis (Solid Pattern)
+            </button>
+            <button onclick="feedCandidateClaim('We achieved 100k writes per second on a single SQLite instance without sharding.')" class="px-2.5 py-1 bg-white hover:bg-slate-100 rounded-lg border border-slate-200 shadow-2xs shrink-0">
+              2. Dubious Claim (SQLite 100k writes)
+            </button>
+            <button onclick="feedCandidateClaim('During a network partition, we enforced the Saga pattern with idempotent compensation events to prevent split-brain state.')" class="px-2.5 py-1 bg-white hover:bg-slate-100 rounded-lg border border-slate-200 shadow-2xs shrink-0">
+              3. Saga Pattern
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Pane: Co-Pilot Heads-Up Display (HUD) -->
+    <div class="w-96 md:w-[450px] flex flex-col shrink-0 bg-white border-l border-slate-200 shadow-xs">
+      
+      <!-- Top: Video Call Tile of AI Interviewer Co-Pilot with 2D Reactive Avatar -->
+      <div class="p-3.5 border-b border-slate-200 shrink-0 bg-white">
+        <div class="relative w-full h-52 rounded-2xl overflow-hidden border border-slate-300 bg-slate-100 shadow-sm flex flex-col">
+          <div class="absolute top-2.5 left-2.5 z-20 flex items-center space-x-1.5 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-full border border-slate-200 shadow-xs">
+            <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+            <span class="text-[11px] font-bold text-slate-800">Co-Pilot (Silent)</span>
+          </div>
+
+          <div class="absolute top-2.5 right-2.5 z-20 flex items-center space-x-1.5 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-mono shadow-xs border border-slate-700">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Real-Time HUD Active</span>
+          </div>
+
+          <div id="copilotAvatarMount" class="w-full h-full"></div>
+        </div>
+      </div>
+
+      <!-- Co-Pilot Intelligence Feed -->
+      <div class="flex-1 p-4 overflow-y-auto space-y-4 text-xs">
+        
+        <!-- Section 1: 3 Instant Suggested Follow-Up Probes -->
+        <div class="p-4 bg-indigo-50/50 rounded-2xl border-2 border-indigo-200 space-y-3 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
+                <i class="fa-solid fa-lightbulb"></i>
+              </div>
+              <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">3 Instant Probes for You to Ask</h3>
+            </div>
+            <span class="text-[10px] text-slate-400">Click to copy</span>
+          </div>
+
+          <div class="space-y-2" id="copilotProbesList">
+            <div onclick="copyProbeText(this)" class="p-3 bg-white hover:bg-indigo-100/60 rounded-xl border border-indigo-100 cursor-pointer transition flex items-center justify-between shadow-2xs">
+              <span class="font-medium text-indigo-950 text-[11px]">1. "Can you walk me through how you handled cache invalidation when data updated in Redis?"</span>
+              <i class="fa-solid fa-copy text-indigo-400 text-xs ml-2"></i>
+            </div>
+            <div onclick="copyProbeText(this)" class="p-3 bg-white hover:bg-indigo-100/60 rounded-xl border border-indigo-100 cursor-pointer transition flex items-center justify-between shadow-2xs">
+              <span class="font-medium text-indigo-950 text-[11px]">2. "What was your partition key strategy in Kafka to avoid hot consumer partitions?"</span>
+              <i class="fa-solid fa-copy text-indigo-400 text-xs ml-2"></i>
+            </div>
+            <div onclick="copyProbeText(this)" class="p-3 bg-white hover:bg-indigo-100/60 rounded-xl border border-indigo-100 cursor-pointer transition flex items-center justify-between shadow-2xs">
+              <span class="font-medium text-indigo-950 text-[11px]">3. "If network latency between availability zones surged to 200ms, how did the system respond?"</span>
+              <i class="fa-solid fa-copy text-indigo-400 text-xs ml-2"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Real-Time Fact-Check & Technical Verification -->
+        <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-1.5 shadow-2xs font-mono">
+          <div class="flex items-center justify-between text-emerald-900 font-bold text-xs">
+            <span class="flex items-center space-x-1.5">
+              <i class="fa-solid fa-shield-check text-emerald-600"></i>
+              <span>Live Claim Verification</span>
+            </span>
+            <span id="factBadge" class="text-[9px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold">Verified</span>
+          </div>
+          <p id="factNoteText" class="text-[11px] text-emerald-800 leading-relaxed font-sans pt-1">
+            Candidate mentioned Kafka partitioned logs alongside write-behind caching. This is an industry-standard architectural pattern for decoupled ingestion and write batching.
+          </p>
+        </div>
+
+        <!-- Section 3: Automated Interview Minutes & Notes -->
+        <div class="p-4 bg-slate-900 text-slate-100 rounded-2xl space-y-2 font-mono text-xs shadow-2xs">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Automated Greenhouse/Lever Minutes</span>
+            <button onclick="copyAllNotes()" class="text-[10px] text-indigo-300 hover:text-white">Copy Notes</button>
+          </div>
+          <div id="notesContainer" class="p-2.5 bg-slate-950 rounded-lg border border-slate-800 text-[10px] text-slate-300 leading-relaxed max-h-24 overflow-y-auto">
+            • Turn #1: Candidate articulated event-driven design (24 words). Demonstrated competency in Kafka and Redis distributed patterns.
+          </div>
+        </div>
+
+        <!-- Section 4: Live Competency Trajectory Radar (Real-Time Context Sync) -->
+        <div class="p-4 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+            <div class="flex items-center space-x-1.5 text-xs font-black text-slate-800">
+              <i class="fa-solid fa-chart-line text-indigo-600"></i>
+              <span>Live Competency Radar</span>
+            </div>
+            <span id="turnsCountBadge" class="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-bold">Turns: 1</span>
+          </div>
+
+          <div class="space-y-2 text-[11px]" id="radarBarsContainer">
+            <div>
+              <div class="flex justify-between text-slate-600 mb-0.5 font-medium">
+                <span>Technical Depth</span>
+                <span id="score_tech" class="font-bold text-indigo-700">85%</span>
+              </div>
+              <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div id="bar_tech" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 85%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-slate-600 mb-0.5 font-medium">
+                <span>Clarity & Communication</span>
+                <span id="score_clarity" class="font-bold text-emerald-700">88%</span>
+              </div>
+              <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div id="bar_clarity" class="bg-emerald-600 h-full rounded-full transition-all duration-500" style="width: 88%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-slate-600 mb-0.5 font-medium">
+                <span>Architecture & Systems</span>
+                <span id="score_arch" class="font-bold text-blue-700">90%</span>
+              </div>
+              <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div id="bar_arch" class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 90%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-slate-600 mb-0.5 font-medium">
+                <span>Problem Solving</span>
+                <span id="score_problem" class="font-bold text-purple-700">80%</span>
+              </div>
+              <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div id="bar_problem" class="bg-purple-600 h-full rounded-full transition-all duration-500" style="width: 80%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Claims Chip Tray -->
+          <div class="pt-1 border-t border-slate-100">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Verified Claims:</span>
+            <div id="claimsChips" class="flex flex-wrap gap-1 mt-1">
+              <span class="px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-md text-[10px] font-mono">Kafka Partitions</span>
+              <span class="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-[10px] font-mono">Redis Write-Behind</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Bottom Conference Toolbar -->
+  <footer class="h-20 bg-white border-t border-slate-200 px-6 flex items-center justify-between shrink-0 z-30 shadow-xs">
+    
+    <div class="flex items-center space-x-5">
+      <button class="flex flex-col items-center space-y-1 text-slate-600 hover:text-slate-900 transition">
+        <div class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center text-sm shadow-2xs">
+          <i class="fa-solid fa-microphone-slash"></i>
+        </div>
+        <span class="text-[10px] font-semibold text-slate-700">Muted (HUD)</span>
+      </button>
+
+      <button class="flex flex-col items-center space-y-1 text-slate-600 hover:text-slate-900 transition">
+        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-sm shadow-2xs">
+          <i class="fa-solid fa-video"></i>
+        </div>
+        <span class="text-[10px] font-semibold text-slate-700">Stop Video</span>
+      </button>
+
+      <div class="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 font-mono text-xs">
+        <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse mr-1"></span>
+        <span>Co-Pilot Monitoring Stream</span>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-6">
+      <a href="/interviewer-mode" class="px-5 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-sm transition flex items-center space-x-1.5">
+        <i class="fa-solid fa-phone-slash text-xs"></i>
+        <span>Exit Co-Pilot Session</span>
+      </a>
+    </div>
+
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/static/js/avatar.js"></script>
+  <script src="/static/js/llm_gateway.js"></script>
+  <script src="/static/js/context_hud.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+  <script>
+    // 0. Initialize Unified Context HUD
+    window.contextHUD = new InterviewContextHUD({ containerId: 'contextPillMount' });
+
+    // 1. Initialize Duolingo Avatar in Light Mode
+    const avatar = new ReactiveAvatar('copilotAvatarMount', {
+      name: 'Mira',
+      roleTitle: 'Interviewer Co-Pilot HUD',
+      theme: 'light'
+    });
+
+    // 2. Initialize Monaco Editor Mirror
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+    require(['vs/editor/editor.main'], function () {
+      monaco.editor.create(document.getElementById('monacoMirrorContainer'), {
+        value: '# Candidate Solution (Read-Only Mirror for Interviewer)\nclass ConsistentHashRouter:\n    """Distributed hashing router for dynamic sharding nodes."""\n    def __init__(self, replicas=3):\n        self.replicas = replicas\n        self.ring = {}\n\n    def add_node(self, node_id: str):\n        print(f"[Router] Added node replica: {node_id}")\n\n    def route_key(self, key: str) -> str:\n        return "node-replica-alpha"\n',
+        language: 'python',
+        theme: 'vs',
+        readOnly: true,
+        automaticLayout: true,
+        fontSize: 13,
+        minimap: { enabled: false },
+        lineNumbers: 'on'
+      });
+    });
+
+    async function feedCandidateClaim(text) {
+      document.getElementById('transcriptLiveText').innerText = `"${text}"`;
+      avatar.setState('thinking');
+
+      try {
+        const resp = await fetch('/api/roles/interviewer/turn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ candidate_text: text, mode: 'copilot' })
+        });
+        const data = await resp.json();
+        const hud = data.copilot_hud;
+
+        // Render probes
+        const probesContainer = document.getElementById('copilotProbesList');
+        probesContainer.innerHTML = '';
+        hud.suggested_probes.forEach((probe, idx) => {
+          probesContainer.innerHTML += `
+            <div onclick="copyProbeText(this)" class="p-3 bg-white hover:bg-indigo-100/60 rounded-xl border border-indigo-100 cursor-pointer transition flex items-center justify-between shadow-2xs">
+              <span class="font-medium text-indigo-950 text-[11px]">${idx+1}. "${probe}"</span>
+              <i class="fa-solid fa-copy text-indigo-400 text-xs ml-2"></i>
+            </div>
+          `;
+        });
+
+        // Fact check note
+        document.getElementById('factNoteText').innerText = hud.fact_check;
+
+        if (text.includes('SQLite')) {
+          document.getElementById('factBadge').innerText = 'Suspicious Claim';
+          document.getElementById('factBadge').className = 'text-[9px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-bold border border-rose-300';
+          avatar.setSentiment(-0.6, 'Skeptical');
+        } else {
+          document.getElementById('factBadge').innerText = 'Verified Pattern';
+          document.getElementById('factBadge').className = 'text-[9px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold border border-emerald-300';
+          avatar.setSentiment(0.8, 'Impressed');
+        }
+
+        // Add to notes
+        document.getElementById('notesContainer').innerText += `\n• ${hud.interviewer_notes}`;
+
+        // Update live Competency Radar & Claims from Context Engine
+        if (data.context) {
+          const ctx = data.context;
+          const radar = ctx.competencies_radar || {};
+          
+          if (radar.technical_depth !== undefined) {
+            const p = Math.round(radar.technical_depth * 10);
+            document.getElementById('score_tech').innerText = `${p}%`;
+            document.getElementById('bar_tech').style.width = `${p}%`;
+          }
+          if (radar.clarity !== undefined) {
+            const p = Math.round(radar.clarity * 10);
+            document.getElementById('score_clarity').innerText = `${p}%`;
+            document.getElementById('bar_clarity').style.width = `${p}%`;
+          }
+          if (radar.system_design !== undefined) {
+            const p = Math.round(radar.system_design * 10);
+            document.getElementById('score_arch').innerText = `${p}%`;
+            document.getElementById('bar_arch').style.width = `${p}%`;
+          }
+          if (radar.problem_solving !== undefined) {
+            const p = Math.round(radar.problem_solving * 10);
+            document.getElementById('score_problem').innerText = `${p}%`;
+            document.getElementById('bar_problem').style.width = `${p}%`;
+          }
+
+          if (ctx.total_turns !== undefined) {
+            document.getElementById('turnsCountBadge').innerText = `Turns: ${ctx.total_turns}`;
+          }
+
+          if (ctx.discovered_claims && ctx.discovered_claims.length > 0) {
+            const tray = document.getElementById('claimsChips');
+            tray.innerHTML = ctx.discovered_claims.map(c => `
+              <span class="px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-md text-[10px] font-mono">${c}</span>
+            `).join('');
+          }
+        }
+
+        if (window.contextHUD) window.contextHUD.fetchContext();
+
+      } catch (err) {
+        alert('Co-Pilot analysis error: ' + err.message);
+        avatar.setState('idle');
+      }
+    }
+
+    function copyProbeText(element) {
+      const text = element.innerText.trim();
+      navigator.clipboard.writeText(text);
+      element.classList.add('bg-emerald-100');
+      setTimeout(() => element.classList.remove('bg-emerald-100'), 1000);
+    }
+
+    function copyAllNotes() {
+      const text = document.getElementById('notesContainer').innerText;
+      navigator.clipboard.writeText(text);
+      alert('Interviewer minutes copied to clipboard!');
+    }
+  </script>
+  <script src="/static/js/llm_gateway.js"></script>
+</body>
+</html>

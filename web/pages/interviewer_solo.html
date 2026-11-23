@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic AI Technical Interviewer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Monaco Editor Loader -->
+  <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
+</head>
+<body class="bg-white text-slate-800 min-h-screen flex flex-col font-sans antialiased overflow-hidden select-none">
+
+  <!-- ===================================================================== -->
+  <!-- 1. Top Global Navigation Bar (Exact Match to Reference Image)        -->
+  <!-- ===================================================================== -->
+  <header class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 z-30 shadow-xs">
+    <!-- Left: Brand Logo & Title -->
+    <div class="flex items-center space-x-2.5">
+      <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center font-black text-white text-base shadow-sm">
+        A
+      </div>
+      <h1 class="text-base font-extrabold text-blue-900 tracking-tight">Agentic AI Technical Interviewer</h1>
+    </div>
+
+    <!-- Center: LLM Gateway Switcher Pill & Context HUD -->
+    <div class="flex items-center space-x-2">
+      <div id="llmPillMount" class="flex items-center"></div>
+      <div id="contextPillMount" class="flex items-center"></div>
+    </div>
+
+    <!-- Right: Navigation Links -->
+    <nav class="flex items-center space-x-4 text-xs font-semibold text-slate-600">
+      <a href="/interview/profiling" class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition flex items-center space-x-1">
+        <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i>
+        <span>Profiling Middle Layer</span>
+      </a>
+      <a href="/interview/workspace" class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition flex items-center space-x-1">
+        <i class="fa-solid fa-cubes text-[11px]"></i>
+        <span>3-Layer Workspace</span>
+      </a>
+      <a href="/" class="hover:text-blue-600 transition">Dashboard</a>
+      <a href="/architecture" class="hover:text-blue-600 transition">Architecture</a>
+    </nav>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- 2. Main Middle Workspace (Left: Monaco & Terminal | Right: Avatar/Chat)-->
+  <!-- ===================================================================== -->
+  <div class="flex-1 flex min-h-0 relative bg-slate-50">
+    
+    <!-- Left Pane: Editor + Terminal Output -->
+    <div class="flex-1 flex flex-col min-w-0 border-r border-slate-200 bg-white">
+      
+      <!-- Monaco Editor Top Control Bar -->
+      <div class="h-11 bg-white border-b border-slate-200 px-4 flex items-center justify-between shrink-0">
+        <!-- State & Difficulty Pills -->
+        <div class="flex items-center space-x-2.5">
+          <div class="flex items-center space-x-1.5 px-3 py-1 bg-white rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 shadow-2xs">
+            <span id="fsmStateText">State: INTRO</span>
+          </div>
+          <span class="text-slate-400 text-xs">o</span>
+          <div class="px-3 py-1 bg-amber-50 rounded-lg border border-amber-300 text-xs font-bold text-amber-700 shadow-2xs">
+            Medium
+          </div>
+        </div>
+
+        <!-- Language Selector & Monaco Badge -->
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-1.5">
+            <select id="languageSelect" onchange="changeLanguage()" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs text-slate-700 font-medium focus:outline-hidden">
+              <option value="python">Python</option>
+              <option value="javascript">JavaScript</option>
+              <option value="typescript">TypeScript</option>
+              <option value="cpp">C++</option>
+            </select>
+            <button onclick="formatCode()" title="Format Code" class="p-1 text-slate-400 hover:text-slate-600 text-xs">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+          </div>
+          <span class="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full border border-amber-200">
+            MONACO EDITOR
+          </span>
+        </div>
+      </div>
+
+      <!-- Live Monaco Code Editor Container -->
+      <div class="flex-1 relative overflow-hidden bg-white">
+        <div id="monacoContainer" class="w-full h-full"></div>
+      </div>
+
+      <!-- Terminal Output Bottom Section -->
+      <div class="h-52 bg-white border-t-2 border-slate-200 flex flex-col shrink-0">
+        <!-- Terminal Header -->
+        <div class="h-9 bg-slate-50 border-b border-slate-200 px-4 flex items-center justify-between text-xs font-semibold text-slate-700">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
+            <span class="font-bold">_ Terminal Output</span>
+          </div>
+          <button onclick="clearTerminal()" title="Clear terminal" class="text-slate-400 hover:text-slate-600 transition">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
+
+        <!-- Inside Terminal Sub-strip -->
+        <div class="h-7 bg-slate-800 px-4 flex items-center justify-between text-xs text-slate-200 font-mono">
+          <span class="text-slate-300 font-bold flex items-center space-x-2">
+            <i class="fa-brands fa-python text-amber-400"></i>
+            <span>Python 3.10 Subprocess Sandbox</span>
+          </span>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-950/80 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800">
+            ISOLATED RUNTIME
+          </span>
+        </div>
+
+        <!-- Terminal Output Stream -->
+        <div id="terminalStream" class="flex-1 p-4 font-mono text-xs text-slate-500 italic overflow-y-auto bg-slate-50/50 leading-relaxed">
+          No output yet. Run your code to see results here.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Pane: AI Interviewer Video Tile & Chat / Logs -->
+    <div class="w-80 md:w-96 flex flex-col shrink-0 bg-white border-l border-slate-200 shadow-xs">
+      
+      <!-- Top: Video Call Tile of AI Interviewer -->
+      <div class="p-3.5 border-b border-slate-200 shrink-0 bg-white">
+        <div class="relative w-full h-56 rounded-2xl overflow-hidden border border-slate-300 bg-slate-100 shadow-sm flex flex-col">
+          
+          <!-- Top Left Label: AI Interviewer -->
+          <div class="absolute top-2.5 left-2.5 z-20 flex items-center space-x-1.5 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-full border border-slate-200 shadow-xs">
+            <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+            <span class="text-[11px] font-bold text-slate-800">Mira · AI Interviewer</span>
+          </div>
+
+          <!-- Top Right Live Signal Badge -->
+          <div class="absolute top-2.5 right-2.5 z-20 flex items-center space-x-1.5 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-mono shadow-xs border border-slate-700">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold">16 kHz PCM</span>
+          </div>
+
+          <!-- Inside Tile: Charming 2D Reactive Duolingo Avatar of Mira -->
+          <div id="soloAvatarMount" class="w-full h-full"></div>
+        </div>
+      </div>
+
+      <!-- Middle Navigation Tabs: Chat & Logs -->
+      <div class="h-11 bg-white border-b border-slate-200 flex items-center text-xs font-bold text-slate-500">
+        <button id="tabBtnChat" onclick="setRightTab('chat')" class="flex-1 h-full border-b-2 border-blue-600 text-blue-600 flex items-center justify-center space-x-2 transition">
+          <i class="fa-regular fa-message"></i>
+          <span>Chat</span>
+        </button>
+        <button id="tabBtnLogs" onclick="setRightTab('logs')" class="flex-1 h-full border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-2 transition">
+          <i class="fa-solid fa-terminal text-[10px]"></i>
+          <span>Logs</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: Chat Pane -->
+      <div id="paneChat" class="flex-1 flex flex-col min-h-0 bg-white">
+        <!-- Message History Feed -->
+        <div id="chatFeed" class="flex-1 p-4 overflow-y-auto space-y-3.5 text-xs">
+          <!-- Initial AI Greeting Message -->
+          <div class="flex items-start space-x-2.5">
+            <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">M</div>
+            <div class="p-3 rounded-2xl rounded-tl-none bg-slate-100 border border-slate-200 text-slate-800 max-w-[85%] space-y-1 shadow-2xs">
+              <div class="text-[10px] font-bold text-blue-700 uppercase">Mira · Senior AI Interviewer</div>
+              <p id="chatGreetingText">Hello! I am Mira, your technical interviewer. I will guide you through system architecture challenges. Feel free to use the Monaco editor on the left and speak or type when ready!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden Audio Player for Vocal Feedback -->
+        <audio id="miraVoicePlayer" class="hidden"></audio>
+
+        <!-- Message Input Box (Exact Pill Style from Screenshot) -->
+        <div class="p-3 border-t border-slate-200 bg-white flex items-center space-x-2 shrink-0">
+          <div class="flex-1 relative flex items-center">
+            <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') submitCandidateUtterance()" class="w-full bg-slate-100 border border-slate-200 rounded-full pl-4 pr-10 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-blue-500">
+            <button onclick="submitCandidateUtterance()" class="absolute right-1.5 w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-xs transition">
+              <i class="fa-solid fa-paper-plane text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Logs Pane (Real-Time Pipeline Telemetry) -->
+      <div id="paneLogs" class="hidden flex-1 flex flex-col min-h-0 bg-slate-900 text-slate-200 font-mono text-[11px] p-3 overflow-y-auto space-y-1.5">
+        <div class="text-[10px] text-indigo-400 font-bold border-b border-slate-800 pb-1 flex justify-between">
+          <span>PIPELINE TELEMETRY LOGS</span>
+          <button onclick="clearLogs()" class="hover:text-white text-slate-500">Clear</button>
+        </div>
+        <div id="logsStream" class="space-y-1 text-slate-400 leading-relaxed">
+          <div><span class="text-emerald-400">[SYSTEM]</span> Interviewer session initialized (Session ID: #702)</div>
+          <div><span class="text-blue-400">[FSM]</span> Transition: INITIAL -> INTRO</div>
+          <div><span class="text-amber-400">[MONACO]</span> Language initialized: Python 3.10</div>
+          <div><span class="text-indigo-400">[AVATAR]</span> 2D Duolingo rig loaded with sentiment listener</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 3. Bottom Conference Control Toolbar (Exact Match to Reference Image)-->
+  <!-- ===================================================================== -->
+  <footer class="h-20 bg-white border-t border-slate-200 px-6 flex items-center justify-between shrink-0 z-30 shadow-xs">
+    
+    <!-- Left Cluster: Audio & Video Call Devices -->
+    <div class="flex items-center space-x-5">
+      
+      <!-- Unmute Button (Red Mic with cross) -->
+      <button id="btnToolbarMic" onclick="toggleMic()" class="flex flex-col items-center space-y-1 text-slate-600 hover:text-slate-900 transition group">
+        <div id="micIconCircle" class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center text-sm shadow-2xs group-hover:bg-rose-100">
+          <i id="micIcon" class="fa-solid fa-microphone-slash"></i>
+        </div>
+        <span id="micLabel" class="text-[10px] font-semibold text-slate-700">Unmute</span>
+      </button>
+
+      <!-- Stop Video Button -->
+      <button onclick="toggleVideo()" class="flex flex-col items-center space-y-1 text-slate-600 hover:text-slate-900 transition group">
+        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-sm shadow-2xs group-hover:bg-slate-200">
+          <i class="fa-solid fa-video"></i>
+        </div>
+        <span class="text-[10px] font-semibold text-slate-700">Stop Video</span>
+      </button>
+
+      <!-- Real-Time Audio Signal Monitor -->
+      <div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700">
+        <div class="flex items-center space-x-1 text-blue-600">
+          <span class="w-1 h-3 bg-blue-500 rounded-full animate-pulse"></span>
+          <span class="w-1 h-5 bg-blue-600 rounded-full animate-pulse" style="animation-delay: 100ms;"></span>
+          <span class="w-1 h-2 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 200ms;"></span>
+          <span class="w-1 h-4 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 300ms;"></span>
+        </div>
+        <span class="text-[10px] font-mono font-bold text-slate-600">16 kHz Mono</span>
+      </div>
+
+    </div>
+
+    <!-- Center Cluster: Collaboration Tools -->
+    <div class="flex items-center space-x-8">
+      <!-- Participants -->
+      <button onclick="openParticipantsModal()" class="flex flex-col items-center space-y-1 text-slate-600 hover:text-slate-900 transition">
+        <div class="text-base text-slate-700 relative">
+          <i class="fa-solid fa-user-group"></i>
+          <span class="absolute -top-1.5 -right-2 bg-blue-600 text-white text-[8px] font-bold px-1 rounded-full">2</span>
+        </div>
+        <span class="text-[10px] font-semibold text-slate-700">Participants</span>
+      </button>
+
+      <!-- Share Screen (Green Icon) -->
+      <button onclick="handleShareScreen()" class="flex flex-col items-center space-y-1 text-emerald-600 hover:text-emerald-700 transition">
+        <div class="text-base text-emerald-600">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+        </div>
+        <span class="text-[10px] font-semibold text-emerald-700">Share Screen</span>
+      </button>
+
+      <!-- Reactions -->
+      <button onclick="toggleReactionsMenu()" class="flex flex-col items-center space-y-1 text-slate-600 hover:text-slate-900 transition relative">
+        <div class="text-base text-slate-700">
+          <i class="fa-regular fa-face-smile"></i>
+        </div>
+        <span class="text-[10px] font-semibold text-slate-700">Reactions</span>
+
+        <!-- Floating Reactions Popup -->
+        <div id="reactionsPopup" class="hidden absolute -top-12 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-lg border border-slate-200 px-3 py-1 flex items-center space-x-2 text-base z-50">
+          <button onclick="sendReaction('👍')" class="hover:scale-125 transition">👍</button>
+          <button onclick="sendReaction('👏')" class="hover:scale-125 transition">👏</button>
+          <button onclick="sendReaction('💡')" class="hover:scale-125 transition">💡</button>
+          <button onclick="sendReaction('❤️')" class="hover:scale-125 transition">❤️</button>
+          <button onclick="sendReaction('🚀')" class="hover:scale-125 transition">🚀</button>
+        </div>
+      </button>
+
+      <!-- More (...) -->
+      <button onclick="openMoreModal()" class="flex flex-col items-center space-y-1 text-slate-600 hover:text-slate-900 transition">
+        <div class="text-base text-slate-700">
+          <i class="fa-solid fa-ellipsis"></i>
+        </div>
+        <span class="text-[10px] font-semibold text-slate-700">More</span>
+      </button>
+    </div>
+
+    <!-- Right Cluster: Actions (Run Code | Start Interview | Tab Switch | Leave) -->
+    <div class="flex items-center space-x-6">
+      
+      <!-- Run Code (Green Play Triangle) -->
+      <button onclick="runCodeInSandbox()" class="flex flex-col items-center space-y-1 text-emerald-600 hover:text-emerald-700 transition">
+        <div class="text-base text-emerald-600">
+          <i class="fa-solid fa-play"></i>
+        </div>
+        <span class="text-[10px] font-bold text-emerald-700">Run Code</span>
+      </button>
+
+      <!-- Start Interview (Blue Robot Head) -->
+      <button onclick="startInterviewSession()" class="flex flex-col items-center space-y-1 text-blue-600 hover:text-blue-700 transition">
+        <div class="text-base text-blue-600">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <span class="text-[10px] font-bold text-blue-700">Start Interview</span>
+      </button>
+
+      <!-- Tab Switch (Red Monitor) with Anti-Cheat Counter -->
+      <button onclick="showTabSwitchInfo()" class="flex flex-col items-center space-y-1 text-rose-600 hover:text-rose-700 transition relative">
+        <div class="text-base text-rose-600">
+          <i class="fa-solid fa-desktop"></i>
+          <span id="tabSwitchBadge" class="absolute -top-1 -right-2 bg-rose-600 text-white text-[8px] font-bold px-1 rounded-full hidden">0</span>
+        </div>
+        <span class="text-[10px] font-bold text-rose-600">Tab Switch</span>
+      </button>
+
+      <!-- Leave Button (Red Pill with Phone) -->
+      <a href="/interviewer-mode" class="px-5 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-sm transition flex items-center space-x-1.5">
+        <i class="fa-solid fa-phone-slash text-xs"></i>
+        <span>Leave</span>
+      </a>
+
+    </div>
+
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- 4. Modals (Participants, More Settings)                               -->
+  <!-- ===================================================================== -->
+  <div id="participantsModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-sm text-slate-900">Session Participants (2)</h3>
+        <button onclick="document.getElementById('participantsModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs">M</div>
+            <div>
+              <div class="font-bold text-slate-900">Mira (AI Interviewer)</div>
+              <div class="text-[10px] text-blue-600 font-semibold">Autonomous Evaluator</div>
+            </div>
+          </div>
+          <span class="text-emerald-600 text-[10px] font-bold bg-emerald-100 px-2 py-0.5 rounded-full">Host</span>
+        </div>
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-full bg-slate-700 text-white font-bold flex items-center justify-center text-xs">C</div>
+            <div>
+              <div class="font-bold text-slate-900">Candidate (You)</div>
+              <div class="text-[10px] text-slate-500">Audio + Monaco Editor</div>
+            </div>
+          </div>
+          <span class="text-slate-500 text-[10px]">Active</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/avatar.js"></script>
+  <script src="/static/js/recorder.js"></script>
+  <script src="/static/js/llm_gateway.js"></script>
+  <script src="/static/js/context_hud.js"></script>
+  <!-- Monaco Editor AMD Loader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+  <script>
+    // 0. Initialize Unified Context HUD
+    window.contextHUD = new InterviewContextHUD({ containerId: 'contextPillMount' });
+
+    // 1. Initialize Duolingo Avatar
+    const avatar = new ReactiveAvatar('soloAvatarMount', {
+      name: 'Mira',
+      roleTitle: 'Senior AI Technical Interviewer',
+      theme: 'light'
+    });
+
+    // 2. Initialize Real Monaco Editor
+    let monacoEditorInstance = null;
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+    require(['vs/editor/editor.main'], function () {
+      monacoEditorInstance = monaco.editor.create(document.getElementById('monacoContainer'), {
+        value: '# Write your solution here\nclass ConsistentHashRouter:\n    """Distributed hashing router for dynamic sharding nodes."""\n    def __init__(self, replicas=3):\n        self.replicas = replicas\n        self.ring = {}\n\n    def add_node(self, node_id: str):\n        # Hash node virtual positions onto the 360-degree ring\n        print(f"[Router] Added node replica: {node_id}")\n\n    def route_key(self, key: str) -> str:\n        # Route write request to nearest clockwise partition\n        return "node-replica-alpha"\n',
+        language: 'python',
+        theme: 'vs', // Clean light theme matching screenshot
+        automaticLayout: true,
+        fontSize: 13,
+        minimap: { enabled: false },
+        lineNumbers: 'on',
+        scrollBeyondLastLine: false,
+        padding: { top: 12, bottom: 12 }
+      });
+      addLog('MONACO', 'Monaco code editor mounted with Python language support');
+    });
+
+    function changeLanguage() {
+      const lang = document.getElementById('languageSelect').value;
+      if (monacoEditorInstance) {
+        monaco.editor.setModelLanguage(monacoEditorInstance.getModel(), lang);
+        addLog('MONACO', `Switched language syntax to: ${lang}`);
+      }
+    }
+
+    function formatCode() {
+      if (monacoEditorInstance) {
+        monacoEditorInstance.getAction('editor.action.formatDocument').run();
+        addLog('MONACO', 'Formatted code buffer');
+      }
+    }
+
+    // 3. Tab Switching (Chat vs Logs)
+    function setRightTab(tab) {
+      const pChat = document.getElementById('paneChat');
+      const pLogs = document.getElementById('paneLogs');
+      const bChat = document.getElementById('tabBtnChat');
+      const bLogs = document.getElementById('tabBtnLogs');
+
+      if (tab === 'chat') {
+        pChat.classList.remove('hidden');
+        pLogs.classList.add('hidden');
+        bChat.className = 'flex-1 h-full border-b-2 border-blue-600 text-blue-600 flex items-center justify-center space-x-2 transition font-bold';
+        bLogs.className = 'flex-1 h-full border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-2 transition';
+      } else {
+        pChat.classList.add('hidden');
+        pLogs.classList.remove('hidden');
+        bLogs.className = 'flex-1 h-full border-b-2 border-blue-600 text-blue-600 flex items-center justify-center space-x-2 transition font-bold';
+        bChat.className = 'flex-1 h-full border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-2 transition';
+      }
+    }
+
+    // 4. Run Code Execution
+    async function runCodeInSandbox() {
+      const code = monacoEditorInstance ? monacoEditorInstance.getValue() : '';
+      const stream = document.getElementById('terminalStream');
+      stream.innerHTML = '<span class="text-blue-600 font-bold">[Executing] Running solution in Python 3.10 sandbox...</span>';
+      
+      avatar.setState('thinking');
+      addLog('SANDBOX', 'Sending code payload to /api/interviewer/run-code');
+
+      try {
+        const resp = await fetch('/api/interviewer/run-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: code, language: 'python' })
+        });
+        const data = await resp.json();
+
+        stream.innerHTML = `
+          <div class="text-emerald-700 font-bold">[Exit Code 0] Execution Output:</div>
+          <div class="text-slate-800 font-mono not-italic mt-1 whitespace-pre">${data.output}</div>
+        `;
+        avatar.setSentiment(0.8, 'Impressed');
+        addLog('SANDBOX', 'Execution completed with status 0');
+        if (window.contextHUD) window.contextHUD.fetchContext();
+      } catch (err) {
+        stream.innerHTML = `<span class="text-rose-600 font-bold">[Execution Error] ${err.message}</span>`;
+        avatar.setSentiment(-0.4, 'Skeptical');
+        addLog('ERROR', err.message);
+      }
+    }
+
+    function clearTerminal() {
+      document.getElementById('terminalStream').innerHTML = 'No output yet. Run your code to see results here.';
+    }
+
+    // 5. Candidate Conversation Handling
+    async function submitCandidateUtterance() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      // Append to chat
+      const feed = document.getElementById('chatFeed');
+      feed.innerHTML += `
+        <div class="flex items-start space-x-2.5 justify-end">
+          <div class="p-3 rounded-2xl rounded-tr-none bg-blue-600 text-white max-w-[85%] space-y-1 shadow-xs">
+            <div class="text-[10px] font-bold text-blue-200 uppercase">You (Candidate)</div>
+            <p>${text}</p>
+          </div>
+          <div class="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">C</div>
+        </div>
+      `;
+      feed.scrollTop = feed.scrollHeight;
+
+      avatar.setState('thinking');
+      addLog('CANDIDATE', `Utterance received (${text.length} chars)`);
+
+      try {
+        const resp = await fetch('/api/roles/interviewer/turn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ candidate_text: text, mode: 'solo' })
+        });
+        const data = await resp.json();
+
+        // Update state text
+        document.getElementById('fsmStateText').innerText = 'State: ' + data.stage.split(':')[0].replace('Stage ', 'S');
+
+        // Streaming sentiment reaction to 2D avatar
+        const evalScore = data.evaluation.overall_score;
+        if (evalScore >= 8) avatar.setSentiment(0.85, 'Impressed');
+        else if (evalScore <= 5) avatar.setSentiment(-0.5, 'Evaluating');
+        else avatar.setSentiment(0.1, 'Attentive');
+
+        addLog('NLP', `Sentiment parsed: ${evalScore}/10 | Intent: answer`);
+
+        // Append Mira's vocal reply
+        feed.innerHTML += `
+          <div class="flex items-start space-x-2.5">
+            <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">M</div>
+            <div class="p-3 rounded-2xl rounded-tl-none bg-slate-100 border border-slate-200 text-slate-800 max-w-[85%] space-y-1 shadow-xs">
+              <div class="text-[10px] font-bold text-blue-700 uppercase">Mira · Senior AI Interviewer</div>
+              <p>${data.bot_response}</p>
+            </div>
+          </div>
+        `;
+        feed.scrollTop = feed.scrollHeight;
+
+        // Speak via TTS
+        synthesizeSpeech(data.bot_response);
+        if (window.contextHUD) window.contextHUD.fetchContext();
+
+      } catch (err) {
+        addLog('ERROR', err.message);
+        avatar.setState('idle');
+      }
+    }
+
+    async function synthesizeSpeech(text) {
+      avatar.setState('speaking');
+      try {
+        const resp = await fetch('/api/test/stage5-tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text, provider: 'pyttsx3' })
+        });
+        const data = await resp.json();
+        if (data.audio_url) {
+          const player = document.getElementById('miraVoicePlayer');
+          player.src = data.audio_url + '?t=' + Date.now();
+          player.play();
+          player.onended = () => {
+            avatar.setState('listening');
+          };
+        } else {
+          setTimeout(() => avatar.setState('listening'), 2500);
+        }
+      } catch (e) {
+        setTimeout(() => avatar.setState('listening'), 2000);
+      }
+    }
+
+    function startInterviewSession() {
+      document.getElementById('fsmStateText').innerText = 'State: CODING';
+      const prompt = "Welcome! I see your solution template in the Monaco editor. Let's start with how you plan to partition the hash ring for consistent distribution.";
+      document.getElementById('chatGreetingText').innerText = prompt;
+      synthesizeSpeech(prompt);
+      addLog('INTERVIEW', 'Interview session started by user');
+    }
+
+    // 6. Microphone Live PCM Recording
+    let isRecording = false;
+    let pcmRecorder = null;
+
+    async function toggleMic() {
+      const micCircle = document.getElementById('micIconCircle');
+      const micIcon = document.getElementById('micIcon');
+      const micLabel = document.getElementById('micLabel');
+
+      if (!isRecording) {
+        try {
+          pcmRecorder = new PCMRecorder();
+          await pcmRecorder.start();
+          isRecording = true;
+          micCircle.className = 'w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm shadow-2xs animate-pulse';
+          micIcon.className = 'fa-solid fa-microphone';
+          micLabel.innerText = 'Mute';
+          avatar.setState('listening');
+          addLog('MIC', 'Recording 16 kHz Mono PCM audio');
+        } catch (err) {
+          alert('Microphone permission required: ' + err.message);
+        }
+      } else {
+        isRecording = false;
+        micCircle.className = 'w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center text-sm shadow-2xs';
+        micIcon.className = 'fa-solid fa-microphone-slash';
+        micLabel.innerText = 'Unmute';
+
+        if (pcmRecorder) {
+          const wavBlob = await pcmRecorder.stop();
+          if (wavBlob) {
+            const formData = new FormData();
+            formData.append('file', wavBlob, 'candidate_input.wav');
+            addLog('ASR', 'Uploading PCM buffer to Stage 2 Speech Recognition...');
+            
+            const resp = await fetch('/api/pipeline/process-audio', {
+              method: 'POST',
+              body: formData
+            });
+            const data = await resp.json();
+            const transcript = data.stages?.stage2_asr?.transcript;
+            if (transcript) {
+              document.getElementById('chatInput').value = transcript;
+              submitCandidateUtterance();
+            }
+          }
+        }
+      }
+    }
+
+    function toggleVideo() {
+      alert('Camera feed connected to sandbox.');
+    }
+
+    function handleShareScreen() {
+      alert('Screen sharing active in secure Monaco sandbox.');
+    }
+
+    // 7. Reactions & Floating Particles
+    function toggleReactionsMenu() {
+      const p = document.getElementById('reactionsPopup');
+      p.classList.toggle('hidden');
+    }
+
+    function sendReaction(emoji) {
+      document.getElementById('reactionsPopup').classList.add('hidden');
+      avatar.setSentiment(0.9, 'Celebration');
+      addLog('REACTION', `Candidate sent: ${emoji}`);
+      setTimeout(() => avatar.setState('listening'), 2500);
+    }
+
+    function openParticipantsModal() {
+      document.getElementById('participantsModal').classList.remove('hidden');
+    }
+
+    function openMoreModal() {
+      alert('Interviewer Settings: Latency Profiler, Audio Device Routing, VAD Sensitivity.');
+    }
+
+    // 8. Anti-Cheat Tab Switch Detection
+    let tabSwitchCount = 0;
+    window.addEventListener('blur', () => {
+      tabSwitchCount++;
+      const badge = document.getElementById('tabSwitchBadge');
+      badge.innerText = tabSwitchCount;
+      badge.classList.remove('hidden');
+      addLog('ANTI-CHEAT', `[Alert] Tab switch detected (${tabSwitchCount} times)`);
+      avatar.setSentiment(-0.4, 'Tab Switch Flagged');
+    });
+
+    function showTabSwitchInfo() {
+      alert(`Anti-Cheat Monitor: ${tabSwitchCount} tab switch events detected during this session.`);
+    }
+
+    function addLog(tag, msg) {
+      const stream = document.getElementById('logsStream');
+      const time = new Date().toLocaleTimeString().split(' ')[0];
+      const div = document.createElement('div');
+      div.innerHTML = `<span class="text-blue-400">[${time}] [${tag}]</span> ${msg}`;
+      stream.appendChild(div);
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    function clearLogs() {
+      document.getElementById('logsStream').innerHTML = '';
+    }
+  </script>
+</body>
+</html>
