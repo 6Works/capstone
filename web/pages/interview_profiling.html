@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intelligent Role Profiling & Blueprint Intake Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Header -->
+  <header class="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+        <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold text-slate-900 tracking-tight">Intelligent Role Profiling & Blueprint Selection</h1>
+        <p class="text-xs text-slate-500 font-medium">Middle Layer: Dynamic JD Synthesis, Tiered Provisioning & Warm-Pool Setup</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center space-x-4 text-xs font-semibold text-slate-600">
+      <div id="llmPillMount" class="flex items-center"></div>
+      <div id="contextPillMount" class="flex items-center"></div>
+      <a href="/interviewer-mode" class="hover:text-blue-600 transition flex items-center space-x-1">
+        <i class="fa-solid fa-arrow-left text-[10px]"></i>
+        <span>Modes</span>
+      </a>
+      <a href="/" class="hover:text-blue-600 transition">Dashboard</a>
+    </div>
+  </header>
+
+  <!-- Main Body -->
+  <main class="flex-1 max-w-7xl mx-auto w-full p-8 space-y-8">
+    
+    <!-- Stage 1 Pipeline Banner -->
+    <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-6 rounded-3xl shadow-sm border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="space-y-1.5">
+        <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-blue-300">
+          <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+          <span>Stage 1: Intelligent Intake Engine</span>
+        </div>
+        <h2 class="text-xl font-black tracking-tight">Every Role Maps to the Same Plug-and-Play Engine</h2>
+        <p class="text-xs text-slate-300 max-w-2xl leading-relaxed">
+          The intake engine analyzes the target domain, job description, and seniority. Instead of a rigid hardcoded frontend route, it dynamically configures a declarative <b>Role Blueprint</b> with customized capability plugins and tiered runtime compute.
+        </p>
+      </div>
+      <div class="flex items-center space-x-3 text-xs font-mono shrink-0">
+        <div class="p-3 bg-white/10 rounded-2xl backdrop-blur-xs text-center border border-white/10">
+          <div class="text-lg font-black text-emerald-400">3</div>
+          <div class="text-[10px] text-slate-300 uppercase">Architecture Layers</div>
+        </div>
+        <div class="p-3 bg-white/10 rounded-2xl backdrop-blur-xs text-center border border-white/10">
+          <div class="text-lg font-black text-amber-400">8+</div>
+          <div class="text-[10px] text-slate-300 uppercase">Atomic Plugins</div>
+        </div>
+        <div class="p-3 bg-white/10 rounded-2xl backdrop-blur-xs text-center border border-white/10">
+          <div class="text-lg font-black text-cyan-400">&lt;2s</div>
+          <div class="text-[10px] text-slate-300 uppercase">Warmup SLA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Layer Step 1: Select or Synthesize Domain Blueprint -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left 7 Cols: Blueprint Domain Presets & Custom JD Synthesizer -->
+      <div class="lg:col-span-7 space-y-6">
+        
+        <!-- Preset Domain Cards -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-extrabold text-slate-900 text-sm uppercase tracking-wider flex items-center space-x-2">
+              <i class="fa-solid fa-shapes text-blue-600"></i>
+              <span>Step 1: Select Base Role or Synthesize via JD</span>
+            </h3>
+            <span class="text-xs text-slate-400">Click to load preset workspace tools</span>
+          </div>
+
+          <div id="blueprintPresetsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <!-- Dynamically populated from blueprint_service -->
+          </div>
+        </div>
+
+        <!-- Custom Job Description & Seniority Synthesizer -->
+        <div class="p-5 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i>
+              <h4 class="font-bold text-slate-900 text-xs">AI Dynamic Blueprint Synthesizer</h4>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold">LLMGateway Active</span>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-semibold text-slate-600">Paste Job Description / Requirements</label>
+                <button onclick="autoDetectPluginsFromJD()" class="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center space-x-1">
+                  <i class="fa-solid fa-bolt text-[10px]"></i>
+                  <span>Auto-Plug Tools from Text</span>
+                </button>
+              </div>
+              <textarea id="jdInput" rows="3" oninput="autoDetectPluginsFromJD(true)" placeholder="e.g. Looking for a Senior Fullstack Engineer with expertise in PostgreSQL, React DOM, Python microservices, and Linux terminal debugging..." class="w-full text-xs p-3 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-hidden focus:border-indigo-500 font-mono text-slate-800 leading-relaxed"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Target Seniority Level</label>
+                <select id="senioritySelect" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-hidden font-semibold text-slate-700">
+                  <option value="Junior / Associate (L3)">Junior / Associate (L3)</option>
+                  <option value="Mid-Level Engineer (L4)">Mid-Level Engineer (L4)</option>
+                  <option value="Senior Staff Engineer (L5)" selected>Senior Staff Engineer (L5)</option>
+                  <option value="Principal / Fellow (L6+)">Principal / Fellow (L6+)</option>
+                  <option value="Engagement Manager / Lead">Engagement Manager / Lead</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Candidate Resume Snippet (Optional)</label>
+                <input type="text" id="resumeInput" placeholder="e.g. 6 yrs backend experience at FinTech scale..." class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-hidden text-slate-700">
+              </div>
+            </div>
+
+            <button onclick="synthesizeCustomBlueprint()" id="btnSynthesize" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 shadow-sm">
+              <i class="fa-solid fa-sparkles"></i>
+              <span>Synthesize Tailored Blueprint with AI</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right 5 Cols: Blueprint Manifest Inspector & Provisioning Lobby -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <!-- Live Selected Blueprint Manifest Card -->
+        <div class="p-6 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-5">
+          
+          <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-3">
+              <div id="activeIconBox" class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-sm">
+                <i id="activeIcon" class="fa-solid fa-code"></i>
+              </div>
+              <div>
+                <h4 id="activeTitle" class="font-extrabold text-slate-900 text-sm">Core Software Engineer</h4>
+                <div class="flex items-center space-x-1.5 mt-0.5">
+                  <span id="activeDomainBadge" class="text-[10px] font-bold text-blue-700 uppercase">Core SDE / Algorithms</span>
+                  <span class="text-slate-300">·</span>
+                  <span id="activeSeniorityBadge" class="text-[10px] font-mono text-slate-500 font-semibold">L4 / Mid-Senior</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p id="activeTagline" class="text-xs text-slate-600 leading-relaxed">
+            Evaluates problem decomposition, algorithm optimality, and edge case resilience under stateless micro-VM execution.
+          </p>
+
+          <!-- Stage 2: Tiered Environment Provisioning Card -->
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-700 flex items-center space-x-1.5">
+                <i class="fa-solid fa-server text-indigo-600"></i>
+                <span>Tiered Compute Provisioning</span>
+              </span>
+              <span id="tierBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono">
+                Tier 1: Stateless Exec
+              </span>
+            </div>
+
+            <!-- Warm-Pool Pre-Fetching Progress Bar -->
+            <div>
+              <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 mb-1">
+                <span id="containerImageLabel">Base Image: python:3.10-slim</span>
+                <span id="warmupStatusLabel" class="text-emerald-600 font-bold">Standby Pre-warmed (0.8s)</span>
+              </div>
+              <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                <div id="warmupProgressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 100%;"></div>
+              </div>
+            </div>
+            <p id="computeDescLabel" class="text-[10px] text-slate-500 leading-normal">
+              Stateless micro-execution pool with isolated stdin/stdout capture.
+            </p>
+          </div>
+
+          <!-- Progressive Disclosure Phase Timeline -->
+          <div class="space-y-2">
+            <span class="font-bold text-slate-800 uppercase tracking-wider text-[10px]">Progressive Disclosure Phases</span>
+            <div id="phasesTimeline" class="space-y-1.5 text-xs">
+              <!-- Dynamically rendered phases -->
+            </div>
+          </div>
+
+          <!-- Pre-Interview Audio/Video Device Check -->
+          <div class="pt-3 border-t border-slate-100 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-slate-700 flex items-center space-x-1.5">
+                <i class="fa-solid fa-microphone text-blue-600"></i>
+                <span>Lobby Audio Check:</span>
+              </span>
+              <span class="text-[10px] font-mono text-emerald-600 font-bold flex items-center space-x-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Microphone Active (16 kHz PCM)</span>
+              </span>
+            </div>
+            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-blue-600 h-full rounded-full animate-pulse" style="width: 65%;"></div>
+            </div>
+          </div>
+
+          <!-- Launch Buttons Grid -->
+          <div class="space-y-2 pt-1">
+            <button onclick="launchInterviewCallSuite()" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl font-extrabold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-video text-xs"></i>
+              <span>Launch Zoom Video Call (On-Demand Tools)</span>
+            </button>
+            <button onclick="launchInterviewWorkspace()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-1.5 border border-slate-200">
+              <i class="fa-solid fa-cubes text-[11px] text-emerald-600"></i>
+              <span>Launch Fixed Rails Workspace</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- Middle Layer Step 2: Interactive Plug & Play Working Spaces Switchboard-->
+    <!-- ===================================================================== -->
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+        <div>
+          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-indigo-600">
+            <i class="fa-solid fa-plug-circle-check"></i>
+            <span>Step 2: Plug & Play Working Spaces Switchboard</span>
+          </div>
+          <h3 class="text-lg font-black text-slate-900 mt-0.5">Plug the exact workspace tools this job requires</h3>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Instead of building a separate page for every job, toggle workspace plugs to mount them directly on the single Universal Interview screen.
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-3 shrink-0">
+          <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold text-slate-600">
+            <span class="text-[11px] text-slate-400 pl-2">Layout Rails:</span>
+            <button onclick="setStagingRatio('50-50')" id="ratioBtn_50_50" class="px-2.5 py-1 rounded-lg bg-white text-slate-800 font-bold shadow-2xs">50 / 50</button>
+            <button onclick="setStagingRatio('40-60')" id="ratioBtn_40_60" class="px-2.5 py-1 rounded-lg hover:text-slate-900">40 / 60</button>
+            <button onclick="setStagingRatio('30-70')" id="ratioBtn_30_70" class="px-2.5 py-1 rounded-lg hover:text-slate-900">30 / 70</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pluggable Workspace Modules Grid & Live Screen Staging Mockup -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left 7 Cols: The 9 Pluggable Workspace Modules -->
+        <div class="lg:col-span-7 space-y-3">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
+            <span>Available Workspace Tools (Click to Plug into Left or Right Rail):</span>
+            <span id="pluggedCountBadge" class="text-indigo-600 font-mono">3 Tools Plugged</span>
+          </div>
+
+          <div id="workspacePlugsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Dynamically rendered 9 plug cards -->
+          </div>
+        </div>
+
+        <!-- Right 5 Cols: Live Universal Screen Staging Mockup -->
+        <div class="lg:col-span-5 bg-slate-900 text-white rounded-3xl p-5 shadow-inner border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-3">
+            <div class="flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="font-bold text-slate-200">Live Interview Screen Staging Preview</span>
+            </div>
+            <span class="text-[10px] font-mono text-slate-400">/interview/workspace</span>
+          </div>
+
+          <!-- Mini Shell Mockup -->
+          <div class="bg-slate-950 rounded-2xl border border-slate-800 p-3 space-y-2.5 text-[11px] font-mono">
+            <!-- Mini Shell Header -->
+            <div class="h-6 bg-slate-900 rounded-lg px-2 flex items-center justify-between text-[10px] text-slate-400">
+              <span class="font-bold text-white flex items-center space-x-1">
+                <i class="fa-solid fa-cube text-indigo-400 text-[9px]"></i>
+                <span id="stagingRoleTitle">Core Software Engineer</span>
+              </span>
+              <span class="text-emerald-400">Mira AI Active</span>
+            </div>
+
+            <!-- Mini Split Panes -->
+            <div class="h-44 flex gap-2">
+              
+              <!-- Left Dock Mockup -->
+              <div id="mockedLeftDock" class="w-1/2 bg-slate-900/90 rounded-xl border border-slate-800 p-2 flex flex-col justify-between transition-all">
+                <div>
+                  <div class="text-[9px] font-bold text-indigo-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Left Rail</span>
+                    <span id="mockedLeftCount" class="text-[8px] bg-indigo-900/60 text-indigo-300 px-1 rounded">1 tool</span>
+                  </div>
+                  <div id="mockedLeftPills" class="flex flex-wrap gap-1">
+                    <!-- e.g. PromptPanel -->
+                  </div>
+                </div>
+                <div class="text-[9px] text-slate-500 italic text-center">Dock viewport</div>
+              </div>
+
+              <!-- Right Dock Mockup -->
+              <div id="mockedRightDock" class="w-1/2 bg-slate-900/90 rounded-xl border border-slate-800 p-2 flex flex-col justify-between transition-all">
+                <div>
+                  <div class="text-[9px] font-bold text-emerald-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Right Rail</span>
+                    <span id="mockedRightCount" class="text-[8px] bg-emerald-900/60 text-emerald-300 px-1 rounded">2 tools</span>
+                  </div>
+                  <div id="mockedRightPills" class="flex flex-wrap gap-1">
+                    <!-- e.g. CodeEditor, Terminal -->
+                  </div>
+                </div>
+                <div class="text-[9px] text-slate-500 italic text-center">Interactive workspace</div>
+              </div>
+
+              <!-- Right HUD Mini Avatar -->
+              <div class="w-16 bg-slate-900 rounded-xl border border-slate-800 flex flex-col items-center justify-center text-center p-1 space-y-1 shrink-0">
+                <div class="w-7 h-7 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-[10px]">M</div>
+                <span class="text-[8px] text-slate-300 font-bold">Mira AI</span>
+              </div>
+
+            </div>
+
+            <!-- Mini Video/Audio Bar -->
+            <div class="h-6 bg-slate-900 rounded-lg px-2 flex items-center justify-between text-[9px] text-slate-500">
+              <span class="text-blue-400">🎤 16 kHz PCM Active</span>
+              <span class="text-slate-400">EventBus Telemetry Sink</span>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-[11px] text-slate-300 leading-relaxed">
+            <span class="font-bold text-amber-300">💡 Dynamic Architecture:</span> The Universal Workspace renders these exact tools seamlessly. No page rebuilds required—add legal document readers, financial grids, or shell terminals on the fly!
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="/static/js/llm_gateway.js"></script>
+  <script src="/static/js/context_hud.js"></script>
+  <script>
+    // Initialize Context HUD
+    window.contextHUD = new InterviewContextHUD({ containerId: 'contextPillMount' });
+    let blueprints = [];
+    let selectedBlueprintId = 'sde-dsa-v1';
+
+    // Catalog of all 9 atomic capability plugs
+    const WORKSPACE_PLUGS = [
+      { id: 'CodeEditor', name: 'Monaco Code IDE', icon: 'fa-code', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', desc: 'Syntax highlighting, multi-language execution in isolated subprocess' },
+      { id: 'LinuxTerminal', name: 'Linux Bash Terminal', icon: 'fa-terminal', color: 'text-slate-800', bg: 'bg-slate-100', border: 'border-slate-300', desc: 'Real subprocess console, piped commands, container triage' },
+      { id: 'LiveWebPreview', name: 'Live Web Viewport', icon: 'fa-globe', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', desc: 'Rendered DOM/HTML preview with desktop & mobile viewport toggles' },
+      { id: 'NotebookKernel', name: 'Jupyter Notebook Kernel', icon: 'fa-book-open', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200', desc: 'Interactive Python cell runner, dataframes, loss metrics' },
+      { id: 'SpreadsheetGrid', name: 'Financial Spreadsheet', icon: 'fa-table-cells', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', desc: 'Unit economics & financial modeling with reactive SUM & EBITDA formulas' },
+      { id: 'InfiniteWhiteboard', name: 'Architecture Whiteboard', icon: 'fa-diagram-project', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200', desc: 'Infinite vector canvas for microservice architecture and dataflows' },
+      { id: 'SQLWorkbench', name: 'SQL Query Workbench', icon: 'fa-database', color: 'text-cyan-600', bg: 'bg-cyan-50', border: 'border-cyan-200', desc: 'PostgreSQL query editor, schema browser, tabular data results' },
+      { id: 'CaseBriefReader', name: 'Case Brief & Problem Reader', icon: 'fa-file-lines', color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200', desc: 'Rich problem statement, system constraints, business exhibits' },
+      { id: 'StructuredNotes', name: 'Structured Scratchpad', icon: 'fa-pen-to-square', color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-200', desc: 'Candidate trade-offs, MECE frameworks, scratchpad notes' }
+    ];
+
+    let stagedLeftPlugins = ['CaseBriefReader'];
+    let stagedRightPlugins = ['CodeEditor'];
+    let stagedRatio = '50-50';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadBlueprints();
+    });
+
+    async function loadBlueprints() {
+      try {
+        const resp = await fetch('/api/blueprints');
+        blueprints = await resp.json();
+        renderPresetGrid();
+        selectBlueprint(selectedBlueprintId);
+      } catch (e) {
+        console.error('Error loading blueprints:', e);
+      }
+    }
+
+    function renderPresetGrid() {
+      const grid = document.getElementById('blueprintPresetsGrid');
+      grid.innerHTML = blueprints.map(bp => {
+        const isSelected = bp.blueprint_id === selectedBlueprintId;
+        const tierBadgeClass = bp.runtime.tier === 'tier_0_zero_compute'
+          ? 'bg-amber-100 text-amber-800 border-amber-200'
+          : (bp.runtime.tier === 'tier_1_stateless_exec'
+              ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+              : 'bg-purple-100 text-purple-800 border-purple-200');
+
+        const tierShort = bp.runtime.tier.replace('_', ' ').replace('tier', 'Tier').toUpperCase();
+
+        return `
+          <div onclick="selectBlueprint('${bp.blueprint_id}')"
+               class="p-4 rounded-2xl border transition cursor-pointer flex flex-col justify-between ${isSelected ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-500/20' : 'border-slate-200 bg-white hover:border-slate-300'} shadow-2xs">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-white shadow-2xs" style="background-color: ${bp.accent_color}">
+                  <i class="fa-solid ${bp.icon}"></i>
+                </div>
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full border ${tierBadgeClass} font-mono">${tierShort.split(' ')[0]} ${tierShort.split(' ')[1] || ''}</span>
+              </div>
+              <div>
+                <div class="font-extrabold text-slate-900 text-xs">${bp.title}</div>
+                <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">${bp.tagline}</p>
+              </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+              <span>${bp.phases.length} Phases · ${bp.all_plugins.length} Tools</span>
+              ${isSelected ? '<span class="text-blue-600 font-bold flex items-center space-x-1"><i class="fa-solid fa-check"></i><span>Active</span></span>' : '<span class="text-slate-400">Select</span>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectBlueprint(id) {
+      selectedBlueprintId = id;
+      const bp = blueprints.find(b => b.blueprint_id === id);
+      if (bp && bp.phases && bp.phases.length > 0) {
+        const layout = bp.phases[0].layout;
+        stagedLeftPlugins = [...(layout.left || [])];
+        stagedRightPlugins = [...(layout.right || [])];
+        stagedRatio = layout.ratio || '50-50';
+      }
+      renderPresetGrid();
+      renderActiveBlueprintDetails();
+      renderWorkspacePlugs();
+      updateStagingMockup();
+    }
+
+    function renderActiveBlueprintDetails() {
+      const bp = blueprints.find(b => b.blueprint_id === selectedBlueprintId);
+      if (!bp) return;
+
+      document.getElementById('activeTitle').innerText = bp.title;
+      document.getElementById('activeDomainBadge').innerText = bp.domain;
+      document.getElementById('activeSeniorityBadge').innerText = bp.seniority || 'Mid-Senior';
+      document.getElementById('activeTagline').innerText = bp.tagline;
+      document.getElementById('activeIcon').className = `fa-solid ${bp.icon}`;
+      document.getElementById('activeIconBox').style.backgroundColor = bp.accent_color;
+
+      // Tier & Provisioning
+      const tierMap = {
+        'tier_0_zero_compute': { label: 'Tier 0: Zero-Compute (Instant)', class: 'bg-amber-100 text-amber-800' },
+        'tier_1_stateless_exec': { label: 'Tier 1: Stateless Exec Pool', class: 'bg-emerald-100 text-emerald-800' },
+        'tier_2_stateful_sandbox': { label: 'Tier 2: Stateful Container Sandbox', class: 'bg-purple-100 text-purple-800' }
+      };
+      const tInfo = tierMap[bp.runtime.tier] || { label: bp.runtime.tier, class: 'bg-slate-100 text-slate-800' };
+      const tBadge = document.getElementById('tierBadge');
+      tBadge.innerText = tInfo.label;
+      tBadge.className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${tInfo.class} font-mono`;
+
+      document.getElementById('containerImageLabel').innerText = bp.runtime.base_image ? `Base Image: ${bp.runtime.base_image}` : 'Browser State (Zero Container)';
+      document.getElementById('warmupStatusLabel').innerText = `Standby Pre-warmed (${bp.runtime.warmup_sec}s)`;
+      document.getElementById('computeDescLabel').innerText = bp.runtime.compute_description;
+
+      // Phases
+      const phasesContainer = document.getElementById('phasesTimeline');
+      phasesContainer.innerHTML = bp.phases.map((ph, idx) => `
+        <div class="p-2 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-[10px]">${idx + 1}</span>
+            <span class="font-bold text-slate-800 text-xs">${ph.name}</span>
+          </div>
+          <span class="text-[10px] text-slate-500 font-mono">${ph.duration_mins} mins</span>
+        </div>
+      `).join('');
+    }
+
+    // ========================================================================
+    // Interactive Plug & Play Switchboard Functions
+    // ========================================================================
+
+    function renderWorkspacePlugs() {
+      const grid = document.getElementById('workspacePlugsGrid');
+      if (!grid) return;
+
+      grid.innerHTML = WORKSPACE_PLUGS.map(plug => {
+        const isLeft = stagedLeftPlugins.includes(plug.id);
+        const isRight = stagedRightPlugins.includes(plug.id);
+        const isPlugged = isLeft || isRight;
+
+        let statusBadge = '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-mono">Unplugged</span>';
+        if (isLeft) {
+          statusBadge = '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 font-mono flex items-center space-x-1"><i class="fa-solid fa-plug text-[9px]"></i><span>Left Slot</span></span>';
+        } else if (isRight) {
+          statusBadge = '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 font-mono flex items-center space-x-1"><i class="fa-solid fa-plug text-[9px]"></i><span>Right Slot</span></span>';
+        }
+
+        const borderClass = isPlugged ? (isLeft ? 'border-indigo-400 bg-indigo-50/20' : 'border-emerald-400 bg-emerald-50/20') : 'border-slate-200 bg-white';
+
+        return `
+          <div class="p-3.5 rounded-2xl border ${borderClass} transition flex flex-col justify-between space-y-2.5 shadow-2xs">
+            <div class="space-y-1">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <div class="w-7 h-7 rounded-lg ${plug.bg} ${plug.color} flex items-center justify-center text-xs shadow-2xs">
+                    <i class="fa-solid ${plug.icon}"></i>
+                  </div>
+                  <span class="font-bold text-slate-900 text-xs">${plug.name}</span>
+                </div>
+                ${statusBadge}
+              </div>
+              <p class="text-[10px] text-slate-500 leading-relaxed">${plug.desc}</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold">
+              <div class="flex items-center space-x-1.5">
+                <button onclick="plugModule('${plug.id}', 'left')" class="px-2 py-1 rounded-lg ${isLeft ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'} transition">
+                  ${isLeft ? '✓ In Left' : '+ Left Slot'}
+                </button>
+                <button onclick="plugModule('${plug.id}', 'right')" class="px-2 py-1 rounded-lg ${isRight ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'} transition">
+                  ${isRight ? '✓ In Right' : '+ Right Slot'}
+                </button>
+              </div>
+              ${isPlugged ? `
+                <button onclick="unplugModule('${plug.id}')" title="Unplug module" class="p-1 text-slate-400 hover:text-rose-600 transition">
+                  <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function plugModule(id, slot) {
+      // Remove from any existing slot
+      stagedLeftPlugins = stagedLeftPlugins.filter(p => p !== id);
+      stagedRightPlugins = stagedRightPlugins.filter(p => p !== id);
+
+      if (slot === 'left') {
+        stagedLeftPlugins.push(id);
+      } else {
+        stagedRightPlugins.push(id);
+      }
+
+      renderWorkspacePlugs();
+      updateStagingMockup();
+    }
+
+    function unplugModule(id) {
+      stagedLeftPlugins = stagedLeftPlugins.filter(p => p !== id);
+      stagedRightPlugins = stagedRightPlugins.filter(p => p !== id);
+      renderWorkspacePlugs();
+      updateStagingMockup();
+    }
+
+    function setStagingRatio(ratio) {
+      stagedRatio = ratio;
+      ['50-50', '40-60', '30-70'].forEach(r => {
+        const btn = document.getElementById(`ratioBtn_${r.replace('-', '_')}`);
+        if (btn) {
+          if (r === ratio) {
+            btn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-800 font-bold shadow-2xs';
+          } else {
+            btn.className = 'px-2.5 py-1 rounded-lg hover:text-slate-900';
+          }
+        }
+      });
+      updateStagingMockup();
+    }
+
+    function updateStagingMockup() {
+      const bp = blueprints.find(b => b.blueprint_id === selectedBlueprintId);
+      document.getElementById('stagingRoleTitle').innerText = bp ? bp.title : 'Custom Role Workspace';
+
+      const totalCount = stagedLeftPlugins.length + stagedRightPlugins.length;
+      document.getElementById('pluggedCountBadge').innerText = `${totalCount} Tools Plugged`;
+
+      // Mockup Left Dock
+      const leftEl = document.getElementById('mockedLeftDock');
+      const leftCount = document.getElementById('mockedLeftCount');
+      const leftPills = document.getElementById('mockedLeftPills');
+      leftCount.innerText = `${stagedLeftPlugins.length} tools`;
+      leftPills.innerHTML = stagedLeftPlugins.map(p => `
+        <span class="px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 text-[9px] font-bold flex items-center space-x-1">
+          <i class="fa-solid fa-cube text-[8px]"></i>
+          <span>${p}</span>
+        </span>
+      `).join('') || '<span class="text-slate-600 text-[9px] italic">Empty dock</span>';
+
+      // Mockup Right Dock
+      const rightEl = document.getElementById('mockedRightDock');
+      const rightCount = document.getElementById('mockedRightCount');
+      const rightPills = document.getElementById('mockedRightPills');
+      rightCount.innerText = `${stagedRightPlugins.length} tools`;
+      rightPills.innerHTML = stagedRightPlugins.map(p => `
+        <span class="px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 text-[9px] font-bold flex items-center space-x-1">
+          <i class="fa-solid fa-cube text-[8px]"></i>
+          <span>${p}</span>
+        </span>
+      `).join('') || '<span class="text-slate-600 text-[9px] italic">Empty dock</span>';
+
+      // Width ratio adjustments in mockup
+      if (stagedRatio === '40-60') {
+        leftEl.className = 'w-[40%] bg-slate-900/90 rounded-xl border border-slate-800 p-2 flex flex-col justify-between transition-all';
+        rightEl.className = 'flex-1 bg-slate-900/90 rounded-xl border border-slate-800 p-2 flex flex-col justify-between transition-all';
+      } else if (stagedRatio === '30-70') {
+        leftEl.className = 'w-[32%] bg-slate-900/90 rounded-xl border border-slate-800 p-2 flex flex-col justify-between transition-all';
+        rightEl.className = 'flex-1 bg-slate-900/90 rounded-xl border border-slate-800 p-2 flex flex-col justify-between transition-all';
+      } else {
+        leftEl.className = 'w-1/2 bg-slate-900/90 rounded-xl border border-slate-800 p-2 flex flex-col justify-between transition-all';
+        rightEl.className = 'w-1/2 bg-slate-900/90 rounded-xl border border-slate-800 p-2 flex flex-col justify-between transition-all';
+      }
+    }
+
+    // Auto-detect & auto-plug tools based on JD keyword semantics
+    function autoDetectPluginsFromJD(isTyping = false) {
+      const text = (document.getElementById('jdInput').value || '').toLowerCase();
+      if (!text || text.length < 5) return;
+
+      const detected = new Set();
+      if (text.includes('sql') || text.includes('database') || text.includes('postgres') || text.includes('mysql') || text.includes('query')) {
+        detected.add('SQLWorkbench');
+      }
+      if (text.includes('react') || text.includes('frontend') || text.includes('html') || text.includes('dom') || text.includes('web') || text.includes('preview')) {
+        detected.add('LiveWebPreview');
+      }
+      if (text.includes('terminal') || text.includes('bash') || text.includes('linux') || text.includes('docker') || text.includes('devops') || text.includes('cyber') || text.includes('incident')) {
+        detected.add('LinuxTerminal');
+      }
+      if (text.includes('dcf') || text.includes('ebitda') || text.includes('financial') || text.includes('spreadsheet') || text.includes('excel') || text.includes('margin') || text.includes('consulting')) {
+        detected.add('SpreadsheetGrid');
+      }
+      if (text.includes('architecture') || text.includes('distributed') || text.includes('whiteboard') || text.includes('system design') || text.includes('microservices') || text.includes('diagram')) {
+        detected.add('InfiniteWhiteboard');
+      }
+      if (text.includes('ml') || text.includes('data science') || text.includes('pytorch') || text.includes('tensorflow') || text.includes('pandas') || text.includes('notebook')) {
+        detected.add('NotebookKernel');
+      }
+      if (text.includes('python') || text.includes('code') || text.includes('algorithm') || text.includes('dsa') || text.includes('software') || text.includes('developer') || text.includes('sde') || text.includes('backend')) {
+        detected.add('CodeEditor');
+      }
+
+      if (detected.size > 0 && !isTyping) {
+        // Auto assign to slots
+        stagedLeftPlugins = ['CaseBriefReader'];
+        stagedRightPlugins = [];
+        detected.forEach(tool => {
+          if (tool === 'SQLWorkbench' || tool === 'InfiniteWhiteboard') {
+            stagedLeftPlugins.push(tool);
+          } else {
+            stagedRightPlugins.push(tool);
+          }
+        });
+        if (stagedRightPlugins.length === 0) stagedRightPlugins.push('CodeEditor');
+        renderWorkspacePlugs();
+        updateStagingMockup();
+      }
+    }
+
+    async function synthesizeCustomBlueprint() {
+      const jd = document.getElementById('jdInput').value.trim();
+      const seniority = document.getElementById('senioritySelect').value;
+      const resume = document.getElementById('resumeInput').value.trim();
+
+      if (!jd) {
+        alert('Please paste a job description or technical requirements.');
+        return;
+      }
+
+      const btn = document.getElementById('btnSynthesize');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Analyzing JD & Synthesizing Blueprint...</span>';
+
+      try {
+        const resp = await fetch('/api/blueprints/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jd_text: jd,
+            seniority: seniority,
+            resume_text: resume
+          })
+        });
+        const customBp = await resp.json();
+        
+        blueprints.unshift(customBp);
+        selectedBlueprintId = customBp.blueprint_id;
+        if (customBp.phases && customBp.phases.length > 0) {
+          const l = customBp.phases[0].layout;
+          stagedLeftPlugins = [...(l.left || [])];
+          stagedRightPlugins = [...(l.right || [])];
+          stagedRatio = l.ratio || '50-50';
+        }
+        renderPresetGrid();
+        renderActiveBlueprintDetails();
+        renderWorkspacePlugs();
+        updateStagingMockup();
+        alert(`Tailored Blueprint created: "${customBp.title}" with Tier: ${customBp.runtime.tier}.`);
+      } catch (err) {
+        alert('Failed to synthesize blueprint: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-sparkles"></i><span>Synthesize Tailored Blueprint with AI</span>';
+      }
+    }
+
+    async function launchInterviewCallSuite() {
+      // 1. Set active blueprint on backend
+      await fetch('/api/blueprints/select', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blueprint_id: selectedBlueprintId })
+      });
+
+      // 2. Lock in customized plugged layout
+      await fetch('/api/blueprints/customize-layout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          left_plugins: stagedLeftPlugins,
+          right_plugins: stagedRightPlugins,
+          ratio: stagedRatio
+        })
+      });
+
+      // 3. Navigate to Universal Zoom-Style Call
+      window.location.href = '/interview/call';
+    }
+
+    async function launchInterviewWorkspace() {
+      // 1. Set active blueprint on backend
+      await fetch('/api/blueprints/select', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blueprint_id: selectedBlueprintId })
+      });
+
+      // 2. Lock in customized plugged layout
+      await fetch('/api/blueprints/customize-layout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          left_plugins: stagedLeftPlugins,
+          right_plugins: stagedRightPlugins,
+          ratio: stagedRatio
+        })
+      });
+
+      // 3. Navigate to Universal Workspace
+      window.location.href = '/interview/workspace';
+    }
+  </script>
+</body>
+</html>

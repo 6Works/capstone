@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Interview Workspace · 3-Layer Plug-and-Play Shell</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Monaco Editor Loader -->
+  <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans antialiased overflow-hidden select-none">
+
+  <!-- ===================================================================== -->
+  <!-- 1. The Core Shell: Fixed Global Navigation & Phase Progress Bar       -->
+  <!-- ===================================================================== -->
+  <header class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 z-30 shadow-xs">
+    
+    <!-- Left: Role Brand & Active Blueprint Metadata -->
+    <div class="flex items-center space-x-3">
+      <div id="roleIconBox" class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow-xs font-black">
+        <i id="roleIcon" class="fa-solid fa-code"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 id="blueprintTitle" class="text-sm font-extrabold text-slate-900 tracking-tight">Core Software Engineer (Algorithms)</h1>
+          <span id="seniorityBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-mono">Senior L5</span>
+        </div>
+        <div class="flex items-center space-x-2 text-[10px] text-slate-500 font-mono">
+          <span id="runtimeTierBadge" class="text-emerald-700 font-bold flex items-center space-x-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Tier 1: Stateless Execution</span>
+          </span>
+          <span>·</span>
+          <span id="warmupBadge">Warmup: 0.8s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Phase Progression Timeline & Countdown Timer -->
+    <div class="flex items-center space-x-3 bg-slate-50 border border-slate-200 px-4 py-1.5 rounded-2xl shadow-2xs">
+      <div class="flex items-center space-x-1.5 text-xs font-bold text-slate-700">
+        <i class="fa-regular fa-clock text-blue-600"></i>
+        <span id="phaseTimer">25:00</span>
+      </div>
+      <span class="text-slate-300">|</span>
+      <div class="flex items-center space-x-2">
+        <span id="phaseNameLabel" class="text-xs font-extrabold text-slate-900">Phase 2: Live Implementation</span>
+        <span id="phaseStepBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">2 / 3</span>
+      </div>
+      <button onclick="advanceToNextPhase()" title="Advance Progressive Disclosure Phase" class="p-1 hover:bg-slate-200 rounded text-slate-600 transition text-xs font-bold flex items-center space-x-1">
+        <span>Next</span>
+        <i class="fa-solid fa-forward-step text-[10px]"></i>
+      </button>
+    </div>
+
+    <!-- Right: LLM Switcher, Context HUD, Export Artifacts & Global Links -->
+    <div class="flex items-center space-x-3 text-xs font-semibold">
+      <div id="llmPillMount" class="flex items-center"></div>
+      <div id="contextPillMount" class="flex items-center"></div>
+
+      <button onclick="togglePlugsDrawer()" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl font-bold transition flex items-center space-x-1.5 shadow-2xs">
+        <i class="fa-solid fa-plug text-[10px]"></i>
+        <span id="plugsCountBtn">Plugs (Mounted)</span>
+      </button>
+
+      <button onclick="exportAndGradeArtifacts()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition flex items-center space-x-1.5 shadow-2xs">
+        <i class="fa-solid fa-file-export text-[10px]"></i>
+        <span>Grade Artifacts</span>
+      </button>
+
+      <a href="/interview/profiling" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center space-x-1">
+        <i class="fa-solid fa-sliders text-xs"></i>
+        <span>Blueprint Intake</span>
+      </a>
+      <a href="/" class="text-slate-500 hover:text-slate-800 transition">Exit</a>
+    </div>
+
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- 2. Main Middle Workspace Layout Rails                                -->
+  <!-- ===================================================================== -->
+  <div class="flex-1 flex min-h-0 relative bg-slate-100 p-2 gap-2">
+    
+    <!-- Left Layout Dock (Mounts Atomic Capability Plugins) -->
+    <div id="leftLayoutRail" class="flex-1 flex flex-col min-w-0 bg-transparent rounded-2xl overflow-hidden transition-all duration-300">
+      <!-- Tabs header if multiple plugins -->
+      <div id="leftTabsBar" class="h-8 flex items-center space-x-1 mb-1 px-1 shrink-0"></div>
+      <div id="leftPluginMount" class="flex-1 min-h-0 relative"></div>
+    </div>
+
+    <!-- Right Layout Dock (Mounts Atomic Capability Plugins) -->
+    <div id="rightLayoutRail" class="flex-1 flex flex-col min-w-0 bg-transparent rounded-2xl overflow-hidden transition-all duration-300">
+      <!-- Tabs header if multiple plugins -->
+      <div id="rightTabsBar" class="h-8 flex items-center space-x-1 mb-1 px-1 shrink-0"></div>
+      <div id="rightPluginMount" class="flex-1 min-h-0 relative"></div>
+    </div>
+
+    <!-- Far Right: Fixed AI Interviewer HUD & Video Call Tile (Mira) -->
+    <div class="w-80 md:w-96 flex flex-col shrink-0 bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+      
+      <!-- Top Video Call Tile with 2D Reactive Duolingo Avatar -->
+      <div class="p-3 border-b border-slate-200 bg-slate-50 shrink-0">
+        <div class="relative w-full h-52 rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-xs flex flex-col">
+          
+          <!-- Top Left Label: AI Interviewer -->
+          <div class="absolute top-2.5 left-2.5 z-20 flex items-center space-x-1.5 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-full border border-slate-200 shadow-xs">
+            <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+            <span class="text-[11px] font-bold text-slate-800">Mira · AI Interviewer</span>
+          </div>
+
+          <!-- Top Right Signal Monitor -->
+          <div class="absolute top-2.5 right-2.5 z-20 flex items-center space-x-1.5 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-full text-[10px] font-mono shadow-xs border border-slate-700">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>16 kHz Mono</span>
+          </div>
+
+          <!-- Inside Tile: Charming 2D Reactive Duolingo Avatar -->
+          <div id="workspaceAvatarMount" class="w-full h-full"></div>
+        </div>
+      </div>
+
+      <!-- Live Event Bus Telemetry Stream Notification Strip -->
+      <div id="eventBusStrip" class="px-3 py-1.5 bg-indigo-50/70 border-b border-indigo-100 flex items-center justify-between text-[10px] font-mono text-indigo-800 shrink-0">
+        <span class="flex items-center space-x-1">
+          <i class="fa-solid fa-tower-broadcast text-indigo-500 animate-pulse"></i>
+          <span class="font-bold">Unified Event Bus:</span>
+        </span>
+        <span id="lastEventLabel" class="truncate max-w-[200px]">Workspace initialized</span>
+      </div>
+
+      <!-- Conversation & Probing Chat Feed -->
+      <div id="chatFeed" class="flex-1 p-3 overflow-y-auto space-y-3 bg-white text-xs">
+        <div class="flex items-start space-x-2.5">
+          <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">M</div>
+          <div class="p-3 rounded-2xl rounded-tl-none bg-slate-100 border border-slate-200 text-slate-800 max-w-[85%] space-y-1 shadow-xs">
+            <div class="text-[10px] font-bold text-blue-700 uppercase">Mira · Interview Lead</div>
+            <p id="initialGreeting">Welcome! We're beginning our session today. Review the brief on your left and let's explore your approach.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Candidate Spoken / Chat Input Bar -->
+      <div class="p-3 border-t border-slate-200 bg-slate-50 shrink-0 space-y-2">
+        <div class="flex items-center space-x-2">
+          <!-- Mic Toggle -->
+          <button id="btnWorkspaceMic" onclick="toggleWorkspaceMic()" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs shrink-0">
+            <i id="micIcon" class="fa-solid fa-microphone-slash text-xs"></i>
+          </button>
+          
+          <!-- Text Input Field -->
+          <input type="text" id="candidateInput" onkeydown="if(event.key==='Enter') submitCandidateUtterance()" placeholder="Speak or message Mira..." class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-hidden focus:border-blue-500">
+          
+          <!-- Send Button -->
+          <button onclick="submitCandidateUtterance()" class="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition shadow-2xs shrink-0">
+            <i class="fa-solid fa-arrow-up text-xs"></i>
+          </button>
+        </div>
+        <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+          <span>Click mic to stream audio via ASR</span>
+          <span id="tabSwitchCounter">Focus: Active</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 3. Artifact-Driven Rubric Evaluation Modal                            -->
+  <!-- ===================================================================== -->
+  <div id="rubricEvalModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-emerald-500 text-white flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-award"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Artifact-Driven Evaluation Report</h3>
+            <p id="modalRubricSub" class="text-xs text-slate-500">Graded against Role Blueprint Competency Rubric</p>
+          </div>
+        </div>
+        <button onclick="closeRubricModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+        
+        <!-- Score Header Box -->
+        <div class="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold text-blue-800 uppercase tracking-wider">Overall Assessment Score</span>
+            <div class="flex items-baseline space-x-2 mt-1">
+              <span id="modalCompositeScore" class="text-3xl font-black text-blue-950">8.8</span>
+              <span class="text-slate-400 font-bold text-sm">/ 10.0</span>
+            </div>
+            <p id="modalExecSummary" class="text-slate-600 text-xs mt-1">High technical depth and structured problem breakdown across all 3 phases.</p>
+          </div>
+          <div class="w-16 h-16 rounded-2xl bg-white border border-blue-200 shadow-sm flex flex-col items-center justify-center text-center p-2">
+            <span class="text-[9px] text-slate-400 font-bold uppercase">Decision</span>
+            <span class="text-xs font-black text-emerald-600">STRONG HIRE</span>
+          </div>
+        </div>
+
+        <!-- Weighted Criteria Breakdown -->
+        <div class="space-y-3">
+          <h4 class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Weighted Rubric Criteria Breakdown</h4>
+          <div id="modalCriteriaList" class="space-y-2.5">
+            <!-- Dynamically populated criteria grades -->
+          </div>
+        </div>
+
+        <!-- Exported Snapshots Inventory -->
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <h4 class="font-bold text-slate-800 text-xs flex items-center space-x-2">
+            <i class="fa-solid fa-boxes-packing text-slate-500"></i>
+            <span>Exported Artifact Bundles</span>
+          </h4>
+          <div id="modalBundlesList" class="flex flex-wrap gap-2 text-[10px] font-mono">
+          </div>
+        </div>
+
+      </div>
+
+      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button onclick="closeRubricModal()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition">
+          Done
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Plugged Workspace Switcher Modal -->
+  <div id="plugsDrawerModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-plug"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm text-slate-900">Dynamic Workspace Plugs</h3>
+            <p class="text-[11px] text-slate-500">Plug or swap tools directly into the active interview layout rails.</p>
+          </div>
+        </div>
+        <button onclick="togglePlugsDrawer()" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div id="modalPlugsList" class="space-y-2 max-h-80 overflow-y-auto pr-1 text-xs">
+        <!-- Rendered list of available plugins with [Mount to Left] and [Mount to Right] -->
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+        <span class="text-slate-500">Zero page refresh required. Seamless live docking.</span>
+        <button onclick="togglePlugsDrawer()" class="px-4 py-1.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="workspaceVoicePlayer" class="hidden"></audio>
+
+  <!-- Scripts -->
+  <script src="/static/js/avatar.js"></script>
+  <script src="/static/js/recorder.js"></script>
+  <script src="/static/js/llm_gateway.js"></script>
+  <script src="/static/js/context_hud.js"></script>
+  <script src="/static/js/plugins/plugins_registry.js"></script>
+  <!-- Monaco Editor AMD Loader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+  <script>
+    // 0. Initialize Unified Context HUD
+    window.contextHUD = new InterviewContextHUD({ containerId: 'contextPillMount' });
+
+    let activeBlueprint = null;
+    let currentPhaseIdx = 0;
+    let countdownInterval = null;
+    let phaseSecondsRemaining = 25 * 60;
+    let avatar = null;
+    let isRecording = false;
+    let pcmRecorder = null;
+
+    // 1. Initialize Monaco AMD Config
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Initialize Avatar
+      avatar = new ReactiveAvatar('workspaceAvatarMount', {
+        name: 'Mira',
+        roleTitle: 'Senior AI Interviewer',
+        theme: 'light'
+      });
+
+      // 2. Fetch Active Blueprint from Server
+      await loadActiveBlueprint();
+
+      // 3. Connect Event Bus listener to Mira AI
+      setupEventBusReaction();
+    });
+
+    async function loadActiveBlueprint() {
+      try {
+        const resp = await fetch('/api/blueprints/active');
+        const data = await resp.json();
+        activeBlueprint = data.blueprint;
+        currentPhaseIdx = data.active_phase_index || 0;
+
+        renderShellHeader();
+        mountPhasePlugins();
+        startPhaseTimer();
+      } catch (err) {
+        console.error('Failed to load blueprint:', err);
+      }
+    }
+
+    function renderShellHeader() {
+      if (!activeBlueprint) return;
+      document.getElementById('blueprintTitle').innerText = activeBlueprint.title;
+      document.getElementById('seniorityBadge').innerText = activeBlueprint.seniority || 'Mid-Senior';
+      document.getElementById('roleIcon').className = `fa-solid ${activeBlueprint.icon || 'fa-code'}`;
+      document.getElementById('roleIconBox').style.backgroundColor = activeBlueprint.accent_color || '#2563eb';
+
+      const tierLabels = {
+        'tier_0_zero_compute': 'Tier 0: Zero-Compute (Instant)',
+        'tier_1_stateless_exec': 'Tier 1: Stateless Execution Pool',
+        'tier_2_stateful_sandbox': 'Tier 2: Stateful Container Sandbox'
+      };
+      const tier = activeBlueprint.runtime.tier;
+      document.getElementById('runtimeTierBadge').innerHTML = `
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>${tierLabels[tier] || tier}</span>
+      `;
+      document.getElementById('warmupBadge').innerText = `Warmup: ${activeBlueprint.runtime.warmup_sec}s`;
+    }
+
+    function mountPhasePlugins() {
+      if (!activeBlueprint || !activeBlueprint.phases.length) return;
+      const phase = activeBlueprint.phases[currentPhaseIdx];
+      
+      document.getElementById('phaseNameLabel').innerText = phase.name;
+      document.getElementById('phaseStepBadge').innerText = `${currentPhaseIdx + 1} / ${activeBlueprint.phases.length}`;
+
+      const layout = phase.layout;
+      const leftRail = document.getElementById('leftLayoutRail');
+      const rightRail = document.getElementById('rightLayoutRail');
+
+      // Adjust ratio
+      if (layout.ratio === '30-70') {
+        leftRail.className = 'w-[32%] flex flex-col min-w-0 bg-transparent rounded-2xl overflow-hidden';
+        rightRail.className = 'flex-1 flex flex-col min-w-0 bg-transparent rounded-2xl overflow-hidden';
+      } else if (layout.ratio === '40-60') {
+        leftRail.className = 'w-[40%] flex flex-col min-w-0 bg-transparent rounded-2xl overflow-hidden';
+        rightRail.className = 'flex-1 flex flex-col min-w-0 bg-transparent rounded-2xl overflow-hidden';
+      } else {
+        leftRail.className = 'flex-1 flex flex-col min-w-0 bg-transparent rounded-2xl overflow-hidden';
+        rightRail.className = 'flex-1 flex flex-col min-w-0 bg-transparent rounded-2xl overflow-hidden';
+      }
+
+      // Mount Left Plugins
+      mountPluginList('left', layout.left);
+      // Mount Right Plugins
+      mountPluginList('right', layout.right);
+      updatePlugsCountBadge();
+    }
+
+    function updatePlugsCountBadge() {
+      if (!activeBlueprint) return;
+      const phase = activeBlueprint.phases[currentPhaseIdx];
+      const count = (phase.layout.left?.length || 0) + (phase.layout.right?.length || 0);
+      const btn = document.getElementById('plugsCountBtn');
+      if (btn) btn.innerText = `Plugs (${count} Mounted)`;
+    }
+
+    function togglePlugsDrawer() {
+      const el = document.getElementById('plugsDrawerModal');
+      el.classList.toggle('hidden');
+      if (!el.classList.contains('hidden')) {
+        renderModalPlugsList();
+      }
+    }
+
+    function renderModalPlugsList() {
+      const container = document.getElementById('modalPlugsList');
+      if (!container || !activeBlueprint) return;
+
+      const allKeys = Object.keys(window.PLUGINS_REGISTRY || {});
+      const phase = activeBlueprint.phases[currentPhaseIdx];
+      const leftP = phase.layout.left || [];
+      const rightP = phase.layout.right || [];
+
+      container.innerHTML = allKeys.map(key => {
+        const isLeft = leftP.includes(key);
+        const isRight = rightP.includes(key);
+        return `
+          <div class="p-2.5 rounded-xl border border-slate-200 flex items-center justify-between bg-slate-50">
+            <div class="flex items-center space-x-2.5">
+              <span class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shadow-2xs">
+                <i class="fa-solid fa-cube text-[10px] text-indigo-600"></i>
+              </span>
+              <div>
+                <div class="font-bold text-slate-900 text-xs">${key}</div>
+                <div class="text-[10px] text-slate-500">${isLeft ? 'Mounted on Left Rail' : (isRight ? 'Mounted on Right Rail' : 'Available to plug')}</div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-1.5 text-[10px] font-bold">
+              <button onclick="mountToolLive('${key}', 'left')" class="px-2 py-1 rounded-lg ${isLeft ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700'} transition">
+                ${isLeft ? '✓ Left Rail' : '+ Left'}
+              </button>
+              <button onclick="mountToolLive('${key}', 'right')" class="px-2 py-1 rounded-lg ${isRight ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700'} transition">
+                ${isRight ? '✓ Right Rail' : '+ Right'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function mountToolLive(pluginKey, dock) {
+      if (!activeBlueprint) return;
+      const phase = activeBlueprint.phases[currentPhaseIdx];
+      let left = phase.layout.left || [];
+      let right = phase.layout.right || [];
+
+      left = left.filter(p => p !== pluginKey);
+      right = right.filter(p => p !== pluginKey);
+
+      if (dock === 'left') {
+        left.push(pluginKey);
+      } else {
+        right.push(pluginKey);
+      }
+
+      phase.layout.left = left;
+      phase.layout.right = right;
+
+      // Update backend layout
+      await fetch('/api/blueprints/customize-layout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ left_plugins: left, right_plugins: right, ratio: phase.layout.ratio || '50-50' })
+      });
+
+      mountPhasePlugins();
+      renderModalPlugsList();
+    }
+
+    function mountPluginList(dock, pluginIds) {
+      const tabsBar = document.getElementById(`${dock}TabsBar`);
+      const mountEl = document.getElementById(`${dock}PluginMount`);
+      mountEl.innerHTML = '';
+      tabsBar.innerHTML = '';
+
+      if (!pluginIds || !pluginIds.length) return;
+
+      const activeId = pluginIds[0];
+
+      // If multiple plugins in dock, render switchable tab buttons
+      if (pluginIds.length > 1) {
+        tabsBar.innerHTML = pluginIds.map((pId, idx) => `
+          <button onclick="switchDockPlugin('${dock}', '${pId}')" id="tabBtn_${dock}_${pId}" 
+                  class="px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${idx === 0 ? 'bg-white text-slate-800 shadow-2xs border border-slate-200' : 'text-slate-500 hover:text-slate-800'}">
+            <span>${pId}</span>
+          </button>
+        `).join('');
+      }
+
+      instantiatePluginInMount(mountEl, activeId);
+    }
+
+    function switchDockPlugin(dock, pluginId) {
+      const mountEl = document.getElementById(`${dock}PluginMount`);
+      mountEl.innerHTML = '';
+      instantiatePluginInMount(mountEl, pluginId);
+
+      // Update tab styles
+      const phase = activeBlueprint.phases[currentPhaseIdx];
+      const list = phase.layout[dock] || [];
+      list.forEach(pId => {
+        const btn = document.getElementById(`tabBtn_${dock}_${pId}`);
+        if (btn) {
+          if (pId === pluginId) {
+            btn.className = 'px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-white text-slate-800 shadow-2xs border border-slate-200';
+          } else {
+            btn.className = 'px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 text-slate-500 hover:text-slate-800';
+          }
+        }
+      });
+    }
+
+    function instantiatePluginInMount(mountContainer, pluginId) {
+      const PluginClass = window.PLUGINS_REGISTRY[pluginId];
+      if (!PluginClass) {
+        mountContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Plugin ${pluginId} not found in registry.</div>`;
+        return;
+      }
+
+      const plugin = new PluginClass();
+      window.activePlugins[pluginId] = plugin;
+
+      const config = {
+        title: activeBlueprint.preset_problem.title || activeBlueprint.title,
+        description: activeBlueprint.preset_problem.description || activeBlueprint.tagline,
+        starter_code: activeBlueprint.preset_problem.starter_code || ''
+      };
+
+      plugin.mount(mountContainer, config, window.workspaceEventBus);
+    }
+
+    function startPhaseTimer() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      const phase = activeBlueprint.phases[currentPhaseIdx];
+      phaseSecondsRemaining = (phase.duration_mins || 25) * 60;
+
+      const timerEl = document.getElementById('phaseTimer');
+      const updateClock = () => {
+        const mins = Math.floor(phaseSecondsRemaining / 60);
+        const secs = phaseSecondsRemaining % 60;
+        timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        if (phaseSecondsRemaining > 0) phaseSecondsRemaining--;
+      };
+
+      updateClock();
+      countdownInterval = setInterval(updateClock, 1000);
+    }
+
+    async function advanceToNextPhase() {
+      if (currentPhaseIdx < activeBlueprint.phases.length - 1) {
+        currentPhaseIdx++;
+        await fetch('/api/blueprints/phase/advance', { method: 'POST' });
+        mountPhasePlugins();
+        startPhaseTimer();
+
+        // Mira announces phase transition
+        const phase = activeBlueprint.phases[currentPhaseIdx];
+        const speech = `We are now advancing to ${phase.name}. Notice your mounted workspace tools have updated to support this phase.`;
+        postMiraMessage(speech);
+        synthesizeVoice(speech);
+      } else {
+        alert('All progressive disclosure phases completed. Click "Grade Artifacts" to finalize review.');
+      }
+    }
+
+    // Event Bus Live Context Listener
+    function setupEventBusReaction() {
+      window.workspaceEventBus.subscribe('*', (event) => {
+        const strip = document.getElementById('lastEventLabel');
+        strip.innerText = `[${event.pluginId}] ${event.eventType}`;
+        
+        // Dynamic sentiment reaction from avatar
+        if (event.eventType === 'code_run' && event.payload.status === 'success') {
+          avatar.setSentiment(0.8, 'Execution Success');
+        } else if (event.eventType === 'formula_update') {
+          avatar.setSentiment(0.5, 'Model Updated');
+        } else if (event.eventType === 'whiteboard_node_add') {
+          avatar.setSentiment(0.6, 'Arch Node Added');
+        }
+      });
+    }
+
+    // Candidate Chat & Speech Utterances
+    async function submitCandidateUtterance() {
+      const input = document.getElementById('candidateInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      const feed = document.getElementById('chatFeed');
+      feed.innerHTML += `
+        <div class="flex items-start space-x-2.5 justify-end">
+          <div class="p-3 rounded-2xl rounded-tr-none bg-blue-600 text-white max-w-[85%] space-y-1 shadow-xs">
+            <div class="text-[10px] font-bold text-blue-200 uppercase">You (Candidate)</div>
+            <p>${text}</p>
+          </div>
+          <div class="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">C</div>
+        </div>
+      `;
+      feed.scrollTop = feed.scrollHeight;
+
+      avatar.setState('thinking');
+
+      try {
+        const resp = await fetch('/api/roles/interviewer/turn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ candidate_text: text, mode: 'solo' })
+        });
+        const data = await resp.json();
+
+        postMiraMessage(data.bot_response);
+        synthesizeVoice(data.bot_response);
+
+        if (data.evaluation) {
+          const s = data.evaluation.overall_score;
+          if (s >= 8) avatar.setSentiment(0.8, 'Impressed');
+          else if (s <= 5) avatar.setSentiment(-0.4, 'Evaluating');
+          else avatar.setSentiment(0.2, 'Attentive');
+        }
+      } catch (e) {
+        avatar.setState('idle');
+      }
+    }
+
+    function postMiraMessage(text) {
+      const feed = document.getElementById('chatFeed');
+      feed.innerHTML += `
+        <div class="flex items-start space-x-2.5">
+          <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">M</div>
+          <div class="p-3 rounded-2xl rounded-tl-none bg-slate-100 border border-slate-200 text-slate-800 max-w-[85%] space-y-1 shadow-xs">
+            <div class="text-[10px] font-bold text-blue-700 uppercase">Mira · Interview Lead</div>
+            <p>${text}</p>
+          </div>
+        </div>
+      `;
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    async function synthesizeVoice(text) {
+      avatar.setState('speaking');
+      try {
+        const resp = await fetch('/api/test/stage5-tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text, provider: 'pyttsx3' })
+        });
+        const data = await resp.json();
+        if (data.audio_url) {
+          const player = document.getElementById('workspaceVoicePlayer');
+          player.src = data.audio_url + '?t=' + Date.now();
+          player.play();
+          player.onended = () => avatar.setState('listening');
+        } else {
+          setTimeout(() => avatar.setState('listening'), 2500);
+        }
+      } catch (e) {
+        setTimeout(() => avatar.setState('listening'), 2000);
+      }
+    }
+
+    // Microphone PCM recording
+    async function toggleWorkspaceMic() {
+      const btn = document.getElementById('btnWorkspaceMic');
+      const icon = document.getElementById('micIcon');
+      if (!isRecording) {
+        try {
+          pcmRecorder = new PCMRecorder();
+          await pcmRecorder.start();
+          isRecording = true;
+          btn.className = 'w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 border border-emerald-300 flex items-center justify-center transition shadow-2xs animate-pulse';
+          icon.className = 'fa-solid fa-microphone text-xs';
+          avatar.setState('listening');
+        } catch (e) {
+          alert('Microphone error: ' + e.message);
+        }
+      } else {
+        isRecording = false;
+        btn.className = 'w-9 h-9 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs';
+        icon.className = 'fa-solid fa-microphone-slash text-xs';
+
+        if (pcmRecorder) {
+          const blob = await pcmRecorder.stop();
+          if (blob) {
+            const formData = new FormData();
+            formData.append('file', blob, 'workspace_mic.wav');
+            const resp = await fetch('/api/pipeline/process-audio', { method: 'POST', body: formData });
+            const data = await resp.json();
+            const transcript = data.stages?.stage2_asr?.transcript;
+            if (transcript) {
+              document.getElementById('candidateInput').value = transcript;
+              submitCandidateUtterance();
+            }
+          }
+        }
+      }
+    }
+
+    // Stage 4: Artifact Export & Rubric Evaluation
+    async function exportAndGradeArtifacts() {
+      // 1. Gather snapshots from all currently mounted plugins
+      const snapshots = {};
+      for (const [pId, plugin] of Object.entries(window.activePlugins)) {
+        snapshots[pId] = plugin.getStateSnapshot();
+      }
+
+      const bundle = {
+        session_id: 'session_' + Date.now(),
+        blueprint_id: activeBlueprint.blueprint_id,
+        timestamp: Date.now(),
+        plugin_snapshots: snapshots,
+        transcript: []
+      };
+
+      try {
+        const resp = await fetch('/api/blueprints/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bundle)
+        });
+        const evalReport = await resp.json();
+        renderRubricModal(evalReport);
+      } catch (err) {
+        alert('Artifact evaluation failed: ' + err.message);
+      }
+    }
+
+    function renderRubricModal(report) {
+      document.getElementById('modalCompositeScore').innerText = report.composite_score;
+      document.getElementById('modalExecSummary').innerText = report.executive_summary;
+      document.getElementById('modalRubricSub').innerText = `Graded against ${report.rubric_title}`;
+
+      const listEl = document.getElementById('modalCriteriaList');
+      listEl.innerHTML = (report.criteria_breakdown || []).map(c => `
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+          <div class="flex items-center justify-between font-bold text-slate-900">
+            <span>${c.name} (Weight: ${c.weight}x)</span>
+            <span class="text-blue-600 font-mono">${c.score} / ${c.max_score}</span>
+          </div>
+          <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-blue-600 h-full rounded-full" style="width: ${(c.score / c.max_score) * 100}%"></div>
+          </div>
+          <p class="text-[11px] text-slate-500">${c.comment}</p>
+        </div>
+      `).join('');
+
+      const bundlesEl = document.getElementById('modalBundlesList');
+      bundlesEl.innerHTML = (report.mounted_plugins || []).map(pId => `
+        <span class="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold">
+          <i class="fa-solid fa-check text-emerald-500 mr-1"></i>${pId} Bundle
+        </span>
+      `).join('');
+
+      document.getElementById('rubricEvalModal').classList.remove('hidden');
+    }
+
+    function closeRubricModal() {
+      document.getElementById('rubricEvalModal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
