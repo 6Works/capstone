@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 4: Dialogue & Memory — Conversational Voice Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex font-sans antialiased overflow-x-hidden">
+
+  <!-- Shared Sidebar Container -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
+      <div class="flex items-center space-x-3">
+        <a href="/nlp" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left"></i></a>
+        <span class="text-xs font-semibold text-slate-400">Platform</span>
+        <span class="text-xs text-slate-300">/</span>
+        <span class="text-xs font-bold text-purple-600">Stage 4: Dialogue Management & Memory</span>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <button onclick="resetSessionMemory()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-600 transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>Clear Memory</span>
+        </button>
+        <a href="/tts" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-700 text-white transition flex items-center space-x-1.5 shadow-sm">
+          <span>Next: Stage 5 (TTS)</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- Pipeline Position Banner -->
+    <div class="bg-slate-900 text-white px-8 py-5 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-1">
+            <i class="fa-solid fa-comments"></i>
+            <span>Stage 4 of 6 · State Machine & Conversational Context</span>
+          </div>
+          <h1 class="text-2xl font-black tracking-tight">Dialogue Policy, State Transitions & Memory Hierarchy</h1>
+          <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+            Maintains conversational coherence across multi-turn exchanges via a Finite State Machine (FSM), structured session memory store, and deterministic action policies.
+          </p>
+        </div>
+        
+        <!-- Mini 6-stage indicator -->
+        <div class="flex items-center space-x-1.5 bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
+          <span class="px-2 py-1 text-slate-400">1. Input</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">2. ASR</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">3. NLP</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <div class="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-bold flex items-center space-x-1 shadow-sm">
+            <i class="fa-solid fa-comments"></i>
+            <span>4. DM</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">5. TTS</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">6. Output</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
+      
+      <!-- Interactive Dialogue & Memory Lab -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-diagram-project text-purple-600 mr-2"></i>
+              Dialogue State & Memory Interactive Lab
+            </h2>
+            <p class="text-xs text-slate-500">Inject user turns to observe FSM state transitions, tool execution results, and memory accumulation.</p>
+          </div>
+          <div class="flex items-center space-x-3 text-xs">
+            <span class="text-slate-500">Active FSM State:</span>
+            <span id="activeFsmBadge" class="px-3 py-1 rounded-full font-bold bg-purple-100 text-purple-800 border border-purple-200 uppercase tracking-wide">
+              INITIAL
+            </span>
+          </div>
+        </div>
+
+        <!-- Input Turn -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2 space-y-3">
+            <label class="block text-xs font-bold text-slate-700">Submit Utterance to Dialogue Engine:</label>
+            <div class="flex space-x-2">
+              <input type="text" id="dialogueInput" value="Hello my name is Alex" placeholder="Type a message..." class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-purple-500">
+              <button onclick="sendDialogueTurn()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Send Turn</span>
+              </button>
+            </div>
+
+            <div class="flex flex-wrap gap-2 text-[11px]">
+              <span class="text-slate-400 font-semibold self-center">Simulation Path:</span>
+              <button onclick="setDialogueTurn('Hello there')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">1. "Hello there" (Greeting)</button>
+              <button onclick="setDialogueTurn('Calculate 120 divided by 4')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">2. "Calculate 120 / 4" (Tool)</button>
+              <button onclick="setDialogueTurn('What did you calculate previously?')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">3. Recall Memory</button>
+              <button onclick="setDialogueTurn('Goodbye see you')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">4. "Goodbye" (Closing)</button>
+            </div>
+
+            <!-- Dialogue Turn Response Card -->
+            <div class="p-4 bg-purple-50/50 rounded-xl border border-purple-200 text-xs space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-purple-900 uppercase tracking-wide text-[10px]">Agent Synthesized Response</span>
+                <span id="turnCountBadge" class="font-mono text-[10px] bg-purple-200 text-purple-900 px-2 py-0.5 rounded font-bold">Turn #0</span>
+              </div>
+              <div id="agentResponseText" class="text-sm font-semibold text-slate-800 bg-white p-3 rounded-lg border border-purple-100 shadow-xs">
+                No conversation turns yet. Send a message above.
+              </div>
+            </div>
+          </div>
+
+          <!-- Working Memory Store Inspector -->
+          <div class="p-4 bg-slate-900 rounded-xl text-slate-100 font-mono text-xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                <span class="text-[10px] text-purple-400 font-bold uppercase tracking-widest">Memory Store Explorer</span>
+                <span class="text-[10px] text-slate-400">Short-Term Buffer</span>
+              </div>
+              
+              <div class="space-y-2 max-h-56 overflow-y-auto" id="memoryTurnsList">
+                <div class="text-[11px] text-slate-500 italic">Memory store empty.</div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
+              <span>Slot Variables: <strong id="slotCount" class="text-purple-400">0</strong></span>
+              <span>Context Size: <strong id="contextBytes" class="text-purple-400">0 B</strong></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FSM Visual State Diagram & State Transitions -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center">
+          <i class="fa-solid fa-network-wired text-purple-600 mr-2"></i>
+          Finite State Machine (FSM) State Architecture
+        </h3>
+
+        <!-- Interactive Visual FSM Diagram -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+          
+          <div id="fsm-INITIAL" class="fsm-node p-4 rounded-xl border-2 border-purple-500 bg-purple-50 transition-all text-center">
+            <div class="w-8 h-8 mx-auto rounded-full bg-purple-200 text-purple-700 flex items-center justify-center font-bold text-xs mb-1">
+              S0
+            </div>
+            <div class="font-bold text-xs text-slate-900">INITIAL</div>
+            <div class="text-[10px] text-slate-500 mt-1">Awaiting first session input or trigger.</div>
+          </div>
+
+          <div id="fsm-IN_CONVERSATION" class="fsm-node p-4 rounded-xl border-2 border-slate-200 bg-slate-50 transition-all text-center">
+            <div class="w-8 h-8 mx-auto rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs mb-1">
+              S1
+            </div>
+            <div class="font-bold text-xs text-slate-900">IN_CONVERSATION</div>
+            <div class="text-[10px] text-slate-500 mt-1">Active multi-turn conversational exchange.</div>
+          </div>
+
+          <div id="fsm-EXECUTING_TOOL" class="fsm-node p-4 rounded-xl border-2 border-slate-200 bg-slate-50 transition-all text-center">
+            <div class="w-8 h-8 mx-auto rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs mb-1">
+              S2
+            </div>
+            <div class="font-bold text-xs text-slate-900">EXECUTING_TOOL</div>
+            <div class="text-[10px] text-slate-500 mt-1">Executing math, clock, or knowledge tool.</div>
+          </div>
+
+          <div id="fsm-CLOSING" class="fsm-node p-4 rounded-xl border-2 border-slate-200 bg-slate-50 transition-all text-center">
+            <div class="w-8 h-8 mx-auto rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs mb-1">
+              S3
+            </div>
+            <div class="font-bold text-xs text-slate-900">CLOSING</div>
+            <div class="text-[10px] text-slate-500 mt-1">User farewell; session teardown.</div>
+          </div>
+
+        </div>
+
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 font-mono text-xs text-slate-700 space-y-1">
+          <div class="font-bold text-slate-900 uppercase text-[10px]">Mathematical Transition Function:</div>
+          <div class="text-purple-700 font-bold">S_{t+1} = δ(S_t, Intent_t, Context_t)</div>
+          <p class="text-[11px] text-slate-600 font-sans">
+            Guarantees conversational integrity. If the user requests a calculation while in <code>IN_CONVERSATION</code>, state temporarily transitions to <code>EXECUTING_TOOL</code> to resolve the operand result before returning control to conversational synthesis.
+          </p>
+        </div>
+      </section>
+
+      <!-- Memory Hierarchy: Working vs Vector Memory -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-database text-purple-600 mr-2"></i>
+            Hierarchical Memory Separation
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            In compliance with the <strong>Single Responsibility Principle (SRP)</strong>, memory storage is decoupled from dialogue policy via the <code>IMemoryStore</code> interface:
+          </p>
+
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-purple-50/50 rounded-xl border border-purple-200">
+              <span class="font-bold text-purple-900">Tier 1: Short-Term Working Buffer</span>
+              <p class="text-[11px] text-slate-600 mt-0.5">
+                Sliding FIFO queue of the last $K$ turns (default $K=10$). Captures immediate conversational flow and anaphoric pronoun references ("it", "they", "that").
+              </p>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-slate-900">Tier 2: Slot & Entity Context Store</span>
+              <p class="text-[11px] text-slate-600 mt-0.5">
+                Key-value dictionary accumulating user variables throughout the session (e.g. <code>user_name</code>, <code>preferred_voice</code>, <code>last_calculation</code>).
+              </p>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900">Tier 3: Long-Term Vector Memory</span>
+                <span class="text-[10px] bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded">Future Upgrade</span>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-0.5">
+                Embedding-based persistent store (ChromaDB / Pinecone). Performs approximate nearest-neighbor (ANN) retrieval for cross-session episodic memory.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code Contract & DTO -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-code text-purple-600 mr-2"></i>
+            IDialogueService & IMemoryStore Contracts
+          </h3>
+          <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed"><code>class IDialogueService(ABC):
+    @abstractmethod
+    def process_turn(self, nlp_result: NLPResult) -> DialogueTurnResult:
+        """Evaluates policy, updates memory, and synthesizes response."""
+        pass
+
+    @abstractmethod
+    def reset(self) -> None:
+        """Clears working memory and resets FSM to INITIAL."""
+        pass
+
+class DialogueTurnResult(BaseModel):
+    user_text: str
+    bot_response: str
+    intent: str
+    state_after: str
+    tool_executed: Optional[str] = None
+    tool_result: Optional[str] = None
+    turn_index: int = 0</code></pre>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/js/sidebar.js"></script>
+  <script>
+    renderSidebar('dialogue');
+
+    function setDialogueTurn(text) {
+      document.getElementById('dialogueInput').value = text;
+      sendDialogueTurn();
+    }
+
+    async function sendDialogueTurn() {
+      const text = document.getElementById('dialogueInput').value.trim();
+      if (!text) return;
+
+      try {
+        const resp = await fetch('/api/test/stage4-dialogue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text })
+        });
+        const data = await resp.json();
+        const turn = data.turn;
+
+        // Update response text
+        const botText = turn.response_text || turn.bot_response || 'No response';
+        const turnIdx = turn.turn != null ? turn.turn : (turn.turn_index != null ? turn.turn_index : 1);
+        const activeState = turn.state || turn.state_after || 'IN_CONVERSATION';
+
+        document.getElementById('agentResponseText').innerText = botText;
+        document.getElementById('turnCountBadge').innerText = `Turn #${turnIdx}`;
+
+        // Update FSM active state
+        updateFsmUI(activeState);
+
+        // Update Memory list
+        renderMemoryTurns(data.memory_history);
+
+      } catch (err) {
+        alert('Dialogue test error: ' + err.message);
+      }
+    }
+
+    function updateFsmUI(state) {
+      document.getElementById('activeFsmBadge').innerText = state;
+      const states = ['INITIAL', 'IN_CONVERSATION', 'EXECUTING_TOOL', 'CLOSING'];
+      states.forEach(s => {
+        const node = document.getElementById('fsm-' + s);
+        if (!node) return;
+        if (s === state) {
+          node.className = 'fsm-node p-4 rounded-xl border-2 border-purple-500 bg-purple-50 shadow-md transition-all text-center';
+        } else {
+          node.className = 'fsm-node p-4 rounded-xl border-2 border-slate-200 bg-slate-50 transition-all text-center';
+        }
+      });
+    }
+
+    function renderMemoryTurns(turns) {
+      const container = document.getElementById('memoryTurnsList');
+      if (!turns || turns.length === 0) {
+        container.innerHTML = '<div class="text-[11px] text-slate-500 italic">Memory store empty.</div>';
+        document.getElementById('slotCount').innerText = '0';
+        document.getElementById('contextBytes').innerText = '0 B';
+        return;
+      }
+
+      container.innerHTML = '';
+      turns.slice().reverse().forEach((t, idx) => {
+        container.innerHTML += `
+          <div class="p-2 bg-slate-800/80 rounded border border-slate-700 text-[11px] space-y-1">
+            <div class="flex items-center justify-between text-[10px]">
+              <span class="font-bold uppercase text-blue-400">User Turn #${t.turn_index || (turns.length - idx)}</span>
+              <span class="text-slate-500 font-mono">${t.intent || 'input'}</span>
+            </div>
+            <div class="text-slate-200 font-sans">${t.user_text || t.text || ''}</div>
+            ${t.bot_response ? `
+            <div class="pt-1 border-t border-slate-700/60">
+              <div class="text-[10px] font-bold uppercase text-purple-400">Agent:</div>
+              <div class="text-slate-300 font-sans">${t.bot_response}</div>
+            </div>` : ''}
+          </div>
+        `;
+      });
+
+      document.getElementById('slotCount').innerText = turns.length;
+      document.getElementById('contextBytes').innerText = (JSON.stringify(turns).length) + ' B';
+    }
+
+    async function resetSessionMemory() {
+      try {
+        await fetch('/api/pipeline/reset', { method: 'POST' });
+        updateFsmUI('INITIAL');
+        document.getElementById('agentResponseText').innerText = 'Session and memory store reset. Ready for new dialogue.';
+        document.getElementById('turnCountBadge').innerText = 'Turn #0';
+        renderMemoryTurns([]);
+      } catch (err) {
+        alert('Reset failed: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

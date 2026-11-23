@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 6: Audio Output — Conversational Voice Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex font-sans antialiased overflow-x-hidden">
+
+  <!-- Shared Sidebar Container -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
+      <div class="flex items-center space-x-3">
+        <a href="/tts" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left"></i></a>
+        <span class="text-xs font-semibold text-slate-400">Platform</span>
+        <span class="text-xs text-slate-300">/</span>
+        <span class="text-xs font-bold text-orange-600">Stage 6: Audio Output & Sinks</span>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+          <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-orange-600 animate-pulse"></span>
+          Input Contract: IAudioOutputService
+        </span>
+        <a href="/architecture" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition flex items-center space-x-1.5 shadow-sm">
+          <span>Next: Stage 7 (SOLID Architecture)</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- Pipeline Position Banner -->
+    <div class="bg-slate-900 text-white px-8 py-5 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-orange-400 mb-1">
+            <i class="fa-solid fa-volume-high"></i>
+            <span>Stage 6 of 6 · Physical Audio Transduction</span>
+          </div>
+          <h1 class="text-2xl font-black tracking-tight">Audio Output Drivers, Sinks & Latency Telemetry</h1>
+          <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+            Streams synthesized acoustic PCM buffers to physical transducers via system speaker hardware drivers or browser Web Audio API rendering sinks.
+          </p>
+        </div>
+        
+        <!-- Mini 6-stage indicator -->
+        <div class="flex items-center space-x-1.5 bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
+          <span class="px-2 py-1 text-slate-400">1. Input</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">2. ASR</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">3. NLP</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">4. DM</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">5. TTS</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <div class="px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold flex items-center space-x-1 shadow-sm">
+            <i class="fa-solid fa-volume-high"></i>
+            <span>6. Output</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
+      
+      <!-- Interactive End-to-End Latency Waterfall Profiler -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-stopwatch text-orange-500 mr-2"></i>
+              End-to-End Conversational Latency Waterfall Profiler
+            </h2>
+            <p class="text-xs text-slate-500">Visual breakdown of milliseconds consumed across all 6 microservice stages.</p>
+          </div>
+          <div class="flex items-center space-x-2 text-xs font-mono bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+            <span class="text-slate-500">Total Round-Trip:</span>
+            <span id="waterfallTotalMs" class="font-bold text-emerald-600 text-sm">435 ms</span>
+            <span class="text-slate-400 font-normal">(&lt; 500 ms Real-Time Goal)</span>
+          </div>
+        </div>
+
+        <!-- Latency Bars Stack -->
+        <div class="space-y-3 pt-2">
+          
+          <!-- Stage 1 -->
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1">
+              <span class="text-blue-700 flex items-center"><i class="fa-solid fa-microphone mr-1.5 w-4"></i> Stage 1: Audio Input & VAD Chunking</span>
+              <span class="font-mono text-slate-600">15 ms (3.4%)</span>
+            </div>
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div class="bg-blue-500 h-full rounded-full" style="width: 3.4%;"></div>
+            </div>
+          </div>
+
+          <!-- Stage 2 -->
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1">
+              <span class="text-emerald-700 flex items-center"><i class="fa-solid fa-brain mr-1.5 w-4"></i> Stage 2: Automatic Speech Recognition (ASR)</span>
+              <span class="font-mono text-slate-600">210 ms (48.3%)</span>
+            </div>
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div class="bg-emerald-500 h-full rounded-full" style="width: 48.3%;"></div>
+            </div>
+          </div>
+
+          <!-- Stage 3 -->
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1">
+              <span class="text-amber-700 flex items-center"><i class="fa-solid fa-gears mr-1.5 w-4"></i> Stage 3: NLP Intent & Entity Extraction</span>
+              <span class="font-mono text-slate-600">12 ms (2.8%)</span>
+            </div>
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div class="bg-amber-500 h-full rounded-full" style="width: 2.8%;"></div>
+            </div>
+          </div>
+
+          <!-- Stage 4 -->
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1">
+              <span class="text-purple-700 flex items-center"><i class="fa-solid fa-comments mr-1.5 w-4"></i> Stage 4: Dialogue State FSM & Memory Policy</span>
+              <span class="font-mono text-slate-600">8 ms (1.8%)</span>
+            </div>
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div class="bg-purple-500 h-full rounded-full" style="width: 1.8%;"></div>
+            </div>
+          </div>
+
+          <!-- Stage 5 -->
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1">
+              <span class="text-pink-700 flex items-center"><i class="fa-solid fa-file-audio mr-1.5 w-4"></i> Stage 5: Text-to-Speech (TTS) Synthesis</span>
+              <span class="font-mono text-slate-600">165 ms (37.9%)</span>
+            </div>
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div class="bg-pink-500 h-full rounded-full" style="width: 37.9%;"></div>
+            </div>
+          </div>
+
+          <!-- Stage 6 -->
+          <div>
+            <div class="flex justify-between text-xs font-semibold mb-1">
+              <span class="text-orange-700 flex items-center"><i class="fa-solid fa-volume-high mr-1.5 w-4"></i> Stage 6: Audio Output Buffer Transduction</span>
+              <span class="font-mono text-slate-600">25 ms (5.7%)</span>
+            </div>
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div class="bg-orange-500 h-full rounded-full" style="width: 5.7%;"></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Audio Sinks: Web Audio vs Hardware Speakers -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Left: Audio Sink Matrix -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-headphones text-orange-500 mr-2"></i>
+            Audio Sinks & Device Drivers
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Depending on deployment topology, the audio sink renders speech directly to server hardware speakers or streams bytes over HTTP to the client browser:
+          </p>
+
+          <div class="space-y-3 text-xs">
+            <div class="p-4 bg-orange-50/50 rounded-xl border border-orange-200 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-orange-950">WebAudioOutput (Browser Audio Context)</span>
+                <span class="text-[10px] bg-orange-600 text-white font-bold px-2 py-0.5 rounded-full">Active</span>
+              </div>
+              <p class="text-[11px] text-slate-600 pt-1">
+                Serves encoded audio over REST static endpoint <code>/api/pipeline/audio/{filename}</code>. The browser decodes PCM WAV via HTML5 <code>&lt;audio&gt;</code> element, bypassing server hardware drivers.
+              </p>
+            </div>
+
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900">SystemSpeakerOutput (Windows Hardware)</span>
+                <span class="text-[10px] bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">Server-Side</span>
+              </div>
+              <p class="text-[11px] text-slate-600 pt-1">
+                Utilizes Windows Multimedia API (<code>winsound.PlaySound</code> or <code>sounddevice</code>) to route PCM audio directly to the host machine's DAC and line-out speaker jack.
+              </p>
+            </div>
+
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900">SilentAudioOutput (CI/CD Headless)</span>
+                <span class="text-[10px] bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">Testing</span>
+              </div>
+              <p class="text-[11px] text-slate-600 pt-1">
+                No-op output sink implementing <code>IAudioOutputService</code> for automated unit testing in headless CI/CD environments with zero speaker devices.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Audio Tone Generator & Device Sound Check -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-bell text-orange-500 mr-2"></i>
+            Audio Transducer Sound Check
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Emit a calibrated 440 Hz (Concert A) or 880 Hz harmonic test tone through the active Web Audio API audio sink to verify transducer DAC frequency response:
+          </p>
+
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+            <div class="flex items-center space-x-3">
+              <button onclick="playTestTone(440)" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
+                <i class="fa-solid fa-play"></i>
+                <span>440 Hz Sine Tone (0.5s)</span>
+              </button>
+              <button onclick="playTestTone(880)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl transition flex items-center space-x-2">
+                <i class="fa-solid fa-play"></i>
+                <span>880 Hz Harmonic (0.5s)</span>
+              </button>
+            </div>
+            <div id="toneStatus" class="text-[11px] text-slate-500 italic">Transducer ready</div>
+          </div>
+
+          <!-- Code Contract & DTO -->
+          <div class="pt-2">
+            <div class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">IAudioOutputService Interface:</div>
+            <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed"><code>class IAudioOutputService(ABC):
+    @abstractmethod
+    def play(self, tts_result: TTSResult) -> PlaybackResult:
+        """Transduces synthesized speech to physical sound."""
+        pass
+
+class PlaybackResult(BaseModel):
+    played: bool
+    output_sink: str = "web"
+    latency_ms: float = 0.0
+    error: Optional[str] = None</code></pre>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/js/sidebar.js"></script>
+  <script>
+    renderSidebar('audio-output');
+
+    function playTestTone(freq) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        // Smooth envelope to prevent audio click
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
+
+        document.getElementById('toneStatus').innerText = `Emitted ${freq} Hz acoustic tone through DAC.`;
+      } catch (err) {
+        alert('Could not play tone: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

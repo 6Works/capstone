@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 3: NLP & Intent — Conversational Voice Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex font-sans antialiased overflow-x-hidden">
+
+  <!-- Shared Sidebar Container -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
+      <div class="flex items-center space-x-3">
+        <a href="/asr" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left"></i></a>
+        <span class="text-xs font-semibold text-slate-400">Platform</span>
+        <span class="text-xs text-slate-300">/</span>
+        <span class="text-xs font-bold text-amber-600">Stage 3: Natural Language Processing (NLP)</span>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <div id="llmPillMount"></div>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+          <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+          Input Contract: INLPService
+        </span>
+        <a href="/dialogue" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition flex items-center space-x-1.5 shadow-sm">
+          <span>Next: Stage 4 (Dialogue)</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- Pipeline Position Banner -->
+    <div class="bg-slate-900 text-white px-8 py-5 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">
+            <i class="fa-solid fa-gears"></i>
+            <span>Stage 3 of 6 · Semantic Parsing & Intent Mapping</span>
+          </div>
+          <h1 class="text-2xl font-black tracking-tight">Intent Disambiguation, Slot Filling & Tool Calling</h1>
+          <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+            Parses textual transcript into structured semantic intent, extracts contextual slot entities, triggers external function calls, and gauges emotional polarity.
+          </p>
+        </div>
+        
+        <!-- Mini 6-stage indicator -->
+        <div class="flex items-center space-x-1.5 bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
+          <span class="px-2 py-1 text-slate-400">1. Input</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">2. ASR</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <div class="px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold flex items-center space-x-1 shadow-sm">
+            <i class="fa-solid fa-gears"></i>
+            <span>3. NLP</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">4. DM</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">5. TTS</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">6. Output</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
+      
+      <!-- Interactive NLP Workbench -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-2"></i>
+              Real-Time NLP Semantic Extraction Lab
+            </h2>
+            <p class="text-xs text-slate-500">Test live intent detection, entity slot recognition, and tool calling schemas.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-[11px] font-semibold text-slate-500">Engine:</span>
+            <span class="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">Rule-Based + Tool Calling</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block text-xs font-bold text-slate-700">Enter User Utterance to Parse:</label>
+          <div class="flex space-x-2">
+            <input type="text" id="nlpInput" value="Calculate 48 times 15" placeholder="e.g., What time is it? or Calculate 25 * 4" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500">
+            <button onclick="runNLPTest()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
+              <i class="fa-solid fa-bolt"></i>
+              <span>Parse Semantics</span>
+            </button>
+          </div>
+
+          <!-- Preset triggers -->
+          <div class="flex flex-wrap gap-2 text-[11px]">
+            <span class="text-slate-400 font-semibold self-center">Presets:</span>
+            <button onclick="setNlpPreset('Calculate 48 times 15')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">"Calculate 48 * 15"</button>
+            <button onclick="setNlpPreset('What time is it in London?')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">"What time is it?"</button>
+            <button onclick="setNlpPreset('Hello how are you doing today?')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">"Hello how are you?"</button>
+            <button onclick="setNlpPreset('Explain the SOLID design principles')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">"Explain SOLID"</button>
+            <button onclick="setNlpPreset('Goodbye and have a nice evening')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">"Goodbye"</button>
+          </div>
+        </div>
+
+        <!-- Semantic Inspection Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-3">
+          
+          <!-- Intent Card -->
+          <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/40 flex flex-col justify-between">
+            <div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Classified Intent</div>
+              <div id="nlpIntentBadge" class="text-lg font-black text-amber-950 mt-1">calculate</div>
+            </div>
+            <div class="text-[11px] text-amber-800 font-semibold mt-2">
+              Confidence: <span id="nlpConfidence" class="font-bold">1.00</span>
+            </div>
+          </div>
+
+          <!-- Entities Card -->
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Extracted Slots / Entities</div>
+              <div id="nlpEntitiesContainer" class="mt-1 flex flex-wrap gap-1">
+                <span class="text-[11px] font-mono bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-700">expression: "48 * 15"</span>
+              </div>
+            </div>
+            <div class="text-[10px] text-slate-400 mt-2">Pattern-matched slot parameters</div>
+          </div>
+
+          <!-- Tool Call Card -->
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tool / Function Call</div>
+              <div id="nlpToolBadge" class="text-sm font-bold text-indigo-700 mt-1">math_evaluator</div>
+            </div>
+            <div id="nlpToolParams" class="text-[11px] font-mono text-slate-600 mt-2 truncate">
+              args: {"expr": "48 * 15"}
+            </div>
+          </div>
+
+          <!-- Sentiment Polarity -->
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Sentiment Polarity</div>
+              <div id="nlpSentimentScore" class="text-lg font-black text-slate-800 mt-1">0.00 (Neutral)</div>
+            </div>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden mt-2">
+              <div id="sentimentBar" class="bg-amber-500 h-full w-1/2 transition-all"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full JSON DTO Viewer -->
+        <div class="pt-2">
+          <details class="bg-slate-900 rounded-xl p-4 text-xs font-mono text-slate-200">
+            <summary class="cursor-pointer text-amber-400 font-bold text-xs select-none flex items-center justify-between">
+              <span>View Raw NLPResult Data Transfer Object (JSON)</span>
+              <span class="text-[10px] text-slate-400 font-normal">Click to expand</span>
+            </summary>
+            <pre id="nlpRawJson" class="mt-3 text-[11px] text-emerald-400 overflow-x-auto p-2 bg-slate-950 rounded border border-slate-800 leading-relaxed"></pre>
+          </details>
+        </div>
+      </section>
+
+      <!-- Technical Deep Dive: Pattern Matching vs LLM Function Calling -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Left: Rule-Based Intent Resolution Matrix -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-list-check text-amber-500 mr-2"></i>
+            Deterministic Intent Resolution Matrix
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Rule-based NLU guarantees deterministic latency (&lt; 2 ms) and zero API quota costs. Regular expression and lemma grammars map patterns to canonical intents:
+          </p>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold">
+                  <th class="p-2.5">Pattern Regex / Keywords</th>
+                  <th class="p-2.5 text-amber-700">Intent Label</th>
+                  <th class="p-2.5 text-indigo-700">Triggered Tool</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-[11px]">
+                <tr>
+                  <td class="p-2.5 font-mono text-slate-600">r"(calculate|what is|times|\+|\-|\*|\/)"</td>
+                  <td class="p-2.5 font-bold text-slate-800">calculate</td>
+                  <td class="p-2.5 font-mono text-indigo-600">math_evaluator()</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-mono text-slate-600">r"(time|what time|clock|current hour)"</td>
+                  <td class="p-2.5 font-bold text-slate-800">get_time</td>
+                  <td class="p-2.5 font-mono text-indigo-600">system_clock()</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-mono text-slate-600">r"(solid|architecture|pipeline|how does)"</td>
+                  <td class="p-2.5 font-bold text-slate-800">architecture_info</td>
+                  <td class="p-2.5 font-mono text-indigo-600">knowledge_base()</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-mono text-slate-600">r"(hello|hi|hey|good morning)"</td>
+                  <td class="p-2.5 font-bold text-slate-800">greeting</td>
+                  <td class="p-2.5 text-slate-400">None (Direct FSM)</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-mono text-slate-600">r"(bye|goodbye|exit|quit|see you)"</td>
+                  <td class="p-2.5 font-bold text-slate-800">farewell</td>
+                  <td class="p-2.5 text-slate-400">None (Session Close)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Modern LLM Tool Calling Schema -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-code-merge text-amber-500 mr-2"></i>
+              Future Upgrade: LLM Tool Calling Engine
+            </h3>
+            <span class="text-[10px] font-mono bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-semibold">Gemini / Ollama</span>
+          </div>
+
+          <p class="text-xs text-slate-600">
+            For unconstrained, generative conversations, the pipeline swaps in <code>LLMNLPService</code> conforming to the exact same <code>INLPService</code> contract via OpenAI / Gemini function-calling JSON schemas:
+          </p>
+
+          <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed"><code>{
+  "name": "calculate",
+  "description": "Evaluates safe mathematical arithmetic expressions",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "expression": {
+        "type": "string",
+        "description": "Mathematical formula to evaluate (e.g. '48 * 15')"
+      }
+    },
+    "required": ["expression"]
+  }
+}</code></pre>
+
+          <div class="p-3 bg-amber-50/60 rounded-xl border border-amber-200 text-xs">
+            <span class="font-bold text-amber-900">SOLID Liskov Substitution Principle (LSP):</span>
+            <p class="text-[11px] text-slate-600 mt-0.5">
+              The Dialogue Manager downstream receives a uniform <code>NLPResult(intent, entities, tool_call)</code> regardless of whether it came from a 50-line regex module or a 70-billion-parameter LLM.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Code Contract & DTO -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center">
+          <i class="fa-solid fa-code text-amber-500 mr-2"></i>
+          INLPService Interface & Data Transfer Object
+        </h3>
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed"><code>class INLPService(ABC):
+    @abstractmethod
+    def parse(self, text: str) -> NLPResult:
+        """Parses raw text into intent, entities, sentiment, and optional tool call."""
+        pass
+
+class NLPResult(BaseModel):
+    raw_text: str
+    intent: str
+    confidence: float = 1.0
+    entities: Dict[str, Any] = Field(default_factory=dict)
+    sentiment: float = 0.0  # -1.0 to 1.0
+    tool_call: Optional[Dict[str, Any]] = None
+    provider: str = "rule_based"</code></pre>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/js/sidebar.js"></script>
+  <script>
+    renderSidebar('nlp');
+
+    function setNlpPreset(text) {
+      document.getElementById('nlpInput').value = text;
+      runNLPTest();
+    }
+
+    async function runNLPTest() {
+      const text = document.getElementById('nlpInput').value.trim();
+      if (!text) return;
+
+      try {
+        const resp = await fetch('/api/test/stage3-nlp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text })
+        });
+        const data = await resp.json();
+
+        // Update UI
+        document.getElementById('nlpIntentBadge').innerText = data.intent || 'unknown';
+        const confNum = Number(data.confidence != null ? data.confidence : 1.0);
+        document.getElementById('nlpConfidence').innerText = confNum.toFixed(2);
+        
+        // Entities
+        const entContainer = document.getElementById('nlpEntitiesContainer');
+        entContainer.innerHTML = '';
+        const entEntries = Object.entries(data.entities || {});
+        if (entEntries.length === 0) {
+          entContainer.innerHTML = '<span class="text-[11px] text-slate-400">None detected</span>';
+        } else {
+          entEntries.forEach(([k, v]) => {
+            entContainer.innerHTML += `<span class="text-[11px] font-mono bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-700"><strong>${k}:</strong> ${v}</span>`;
+          });
+        }
+
+        // Tool Call
+        const toolCall = (data.tool_calls && data.tool_calls.length > 0) ? data.tool_calls[0] : (data.tool_call || null);
+        if (toolCall) {
+          const toolName = toolCall.tool || toolCall.name || 'tool';
+          const toolParams = toolCall.args || toolCall.parameters || {};
+          document.getElementById('nlpToolBadge').innerText = toolName;
+          document.getElementById('nlpToolParams').innerText = 'args: ' + JSON.stringify(toolParams);
+        } else {
+          document.getElementById('nlpToolBadge').innerText = 'None';
+          document.getElementById('nlpToolParams').innerText = 'No tool execution needed';
+        }
+
+        // Sentiment (supports string 'positive'/'neutral'/'negative' or float number)
+        let sentimentVal = 0.0;
+        let sentimentLabel = 'Neutral';
+
+        if (typeof data.sentiment === 'number') {
+          sentimentVal = data.sentiment;
+          if (sentimentVal > 0.2) sentimentLabel = 'Positive';
+          else if (sentimentVal < -0.2) sentimentLabel = 'Negative';
+          else sentimentLabel = 'Neutral';
+        } else if (typeof data.sentiment === 'string') {
+          sentimentLabel = data.sentiment.charAt(0).toUpperCase() + data.sentiment.slice(1);
+          if (data.sentiment.toLowerCase() === 'positive') sentimentVal = 0.8;
+          else if (data.sentiment.toLowerCase() === 'negative') sentimentVal = -0.8;
+          else sentimentVal = 0.0;
+        }
+
+        document.getElementById('nlpSentimentScore').innerText = `${sentimentLabel} (${sentimentVal >= 0 ? '+' : ''}${sentimentVal.toFixed(2)})`;
+
+        const bar = document.getElementById('sentimentBar');
+        const percentage = Math.min(100, Math.max(0, (sentimentVal + 1.0) * 50));
+        bar.style.width = percentage + '%';
+        if (sentimentVal > 0.2) bar.className = 'bg-emerald-500 h-full transition-all';
+        else if (sentimentVal < -0.2) bar.className = 'bg-rose-500 h-full transition-all';
+        else bar.className = 'bg-amber-500 h-full transition-all';
+
+        // Raw JSON
+        document.getElementById('nlpRawJson').innerText = JSON.stringify(data, null, 2);
+
+      } catch (err) {
+        alert('NLP Test error: ' + err.message);
+      }
+    }
+
+    // Run initial test
+    runNLPTest();
+  </script>
+  <script src="/static/js/llm_gateway.js"></script>
+</body>
+</html>

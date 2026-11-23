@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 2: Speech Recognition (ASR) — Conversational Voice Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex font-sans antialiased overflow-x-hidden">
+
+  <!-- Shared Sidebar Container -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
+      <div class="flex items-center space-x-3">
+        <a href="/audio-input" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left"></i></a>
+        <span class="text-xs font-semibold text-slate-400">Platform</span>
+        <span class="text-xs text-slate-300">/</span>
+        <span class="text-xs font-bold text-emerald-600">Stage 2: Speech Recognition (ASR)</span>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+          <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+          Input Contract: IASRService
+        </span>
+        <a href="/nlp" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition flex items-center space-x-1.5 shadow-sm">
+          <span>Next: Stage 3 (NLP)</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- Pipeline Position Banner -->
+    <div class="bg-slate-900 text-white px-8 py-5 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1">
+            <i class="fa-solid fa-brain"></i>
+            <span>Stage 2 of 6 · Acoustic-to-Text Transduction</span>
+          </div>
+          <h1 class="text-2xl font-black tracking-tight">Automatic Speech Recognition & Transformer Decoding</h1>
+          <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+            Converts raw PCM audio wave buffers into normalized text tokens via Log-Mel spectrogram filterbanks, deep acoustic feature encoders, and language model decoders.
+          </p>
+        </div>
+        
+        <!-- Mini 6-stage indicator -->
+        <div class="flex items-center space-x-1.5 bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
+          <span class="px-2 py-1 text-slate-400">1. Input</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <div class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold flex items-center space-x-1 shadow-sm">
+            <i class="fa-solid fa-brain"></i>
+            <span>2. ASR</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">3. NLP</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">4. DM</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">5. TTS</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">6. Output</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
+      
+      <!-- Interactive ASR Test Bench -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-vial text-emerald-600 mr-2"></i>
+              ASR Transcription Test Bench
+            </h2>
+            <p class="text-xs text-slate-500">Submit a simulated audio payload to test transcript normalization and latency metrics.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <select id="asrProviderSelect" class="bg-slate-100 border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-700">
+              <option value="google">Google Web Speech (Cloud)</option>
+              <option value="whisper">Whisper Transformer (Local / PyTorch)</option>
+              <option value="mock">Mock ASR (Synthetic deterministic)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2 space-y-3">
+            <label class="block text-xs font-bold text-slate-700">Test Speech Input Query:</label>
+            <div class="flex space-x-2">
+              <input type="text" id="asrTestInput" value="What time is it right now?" placeholder="Type sample speech query..." class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500">
+              <button onclick="runASRTest()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
+                <i class="fa-solid fa-play"></i>
+                <span>Transcribe</span>
+              </button>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="flex flex-wrap gap-2 pt-1 text-[11px]">
+              <span class="text-slate-400 font-semibold self-center">Presets:</span>
+              <button onclick="setAsrPreset('What time is it?')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">"What time is it?"</button>
+              <button onclick="setAsrPreset('Calculate 25 times 40')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">"Calculate 25 times 40"</button>
+              <button onclick="setAsrPreset('Tell me about your system architecture')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">"Tell me about system"</button>
+            </div>
+          </div>
+
+          <!-- Output Box -->
+          <div class="p-4 bg-slate-900 rounded-xl text-slate-100 font-mono text-xs flex flex-col justify-between">
+            <div>
+              <div class="text-[10px] text-emerald-400 uppercase tracking-widest font-bold mb-1">ASR Transcription Result</div>
+              <div id="asrOutputText" class="text-white font-bold text-sm bg-slate-800/80 p-2.5 rounded-lg border border-slate-700 min-h-12 flex items-center">
+                Waiting for input...
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-slate-800">
+              <span>Confidence: <span id="asrConfidence" class="text-emerald-400 font-bold">--</span></span>
+              <span>Latency: <span id="asrLatency" class="text-emerald-400 font-bold">-- ms</span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Deep Dive: Mel Spectrograms & Transformer Architecture -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Left: Mel Filterbanks & Psychoacoustics -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-sliders text-emerald-600 mr-2"></i>
+            Log-Mel Spectrogram Feature Extraction
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Raw waveform samples $x[n]$ are non-stationary. To extract speech phonemes, the input is converted into time-frequency representation via Short-Time Fourier Transform (STFT):
+          </p>
+
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs space-y-2">
+            <div class="text-slate-500 font-bold uppercase text-[10px]">Mel Scale Frequency Warp:</div>
+            <div class="text-emerald-700 font-bold">m = 2595 · log10(1 + f / 700)</div>
+            <p class="text-[11px] text-slate-600 font-sans">
+              Human hearing exhibits non-linear frequency resolution (high sensitivity below 1 kHz, logarithmic spacing above). Applying 80 triangular Mel filterbanks aligns feature density with human auditory perception.
+            </p>
+          </div>
+
+          <div class="p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-200 text-xs space-y-2">
+            <div class="font-bold text-emerald-900 flex items-center">
+              <i class="fa-solid fa-layer-group mr-1.5"></i>
+              Standard Feature Window Specifications:
+            </div>
+            <ul class="list-disc list-inside space-y-1 text-slate-700 text-[11px]">
+              <li><strong>Window Size:</strong> 25 milliseconds (400 samples at 16 kHz) with Hann tapering.</li>
+              <li><strong>Hop Length:</strong> 10 milliseconds (160 samples), giving 100 frames/sec.</li>
+              <li><strong>Filterbanks:</strong> 80 mel-frequency channels.</li>
+              <li><strong>Dynamic Range Compression:</strong> Logarithmic amplitude scaling $\log(E + \epsilon)$.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right: Whisper Transformer vs Google Cloud ASR -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-scale-balanced text-emerald-600 mr-2"></i>
+            Whisper Transformer vs Google Web Speech
+          </h3>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold">
+                  <th class="p-2.5">Dimension</th>
+                  <th class="p-2.5 text-emerald-700">Whisper (OpenAI)</th>
+                  <th class="p-2.5 text-blue-700">Google Web Speech</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-[11px]">
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Architecture</td>
+                  <td class="p-2.5 text-slate-600">Seq2Seq Encoder-Decoder Transformer</td>
+                  <td class="p-2.5 text-slate-600">Cloud Hybrid HMM/CTC Acoustic Model</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Network Dependency</td>
+                  <td class="p-2.5 text-slate-600 font-semibold text-emerald-700">100% Offline / Local PyTorch</td>
+                  <td class="p-2.5 text-slate-600">Requires Internet Connectivity</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Robustness</td>
+                  <td class="p-2.5 text-slate-600">High resilience to noise, accents, idioms</td>
+                  <td class="p-2.5 text-slate-600">Optimized for search & standard speech</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Latency</td>
+                  <td class="p-2.5 text-slate-600">150 - 450 ms (GPU/int8 quant)</td>
+                  <td class="p-2.5 text-slate-600 font-semibold text-blue-700">180 - 350 ms (Cloud roundtrip)</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Multi-lingual</td>
+                  <td class="p-2.5 text-slate-600">99 languages natively tokenized</td>
+                  <td class="p-2.5 text-slate-600">Multi-lingual with locale header</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <span class="font-bold text-slate-800">SOLID Extensibility (OCP):</span>
+            <p class="text-[11px] text-slate-600 mt-0.5">
+              Both models implement <code>IASRService.transcribe()</code> returning an identical <code>ASRResult</code> DTO. The orchestrator never knows which engine performed the inference.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Word Error Rate (WER) Interactive Calculator -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-calculator text-emerald-600 mr-2"></i>
+            Word Error Rate (WER) Evaluation Lab
+          </h3>
+          <span class="font-mono text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-bold">
+            WER = (S + D + I) / N
+          </span>
+        </div>
+
+        <p class="text-xs text-slate-600">
+          WER computes the Levenshtein word-level edit distance between ground truth (Reference) and model transcription (Hypothesis).
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Ground Truth Reference (N words):</label>
+            <input type="text" id="werRef" value="the quick brown fox jumps over the lazy dog" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ASR Output Hypothesis:</label>
+            <input type="text" id="werHyp" value="the fast brown fox jumps over a lazy dog" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <button onclick="calculateWER()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+            Calculate Live WER
+          </button>
+          <div id="werResultDisplay" class="flex items-center space-x-4 text-xs font-mono">
+            <span>Substitutions (S): <strong id="werS" class="text-amber-600">0</strong></span>
+            <span>Deletions (D): <strong id="werD" class="text-rose-600">0</strong></span>
+            <span>Insertions (I): <strong id="werI" class="text-blue-600">0</strong></span>
+            <span class="text-sm font-bold text-slate-900 bg-emerald-100 px-3 py-1 rounded-lg border border-emerald-300">
+              WER: <span id="werFinal" class="text-emerald-800">0.0%</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Code Contract & DTO -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center">
+          <i class="fa-solid fa-code text-emerald-600 mr-2"></i>
+          IASRService Interface & Data Transfer Object
+        </h3>
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed"><code>class IASRService(ABC):
+    @abstractmethod
+    def transcribe(self, payload: AudioPayload) -> ASRResult:
+        """Transcribes incoming audio payload into normalized text."""
+        pass
+
+class ASRResult(BaseModel):
+    transcript: str
+    confidence: float = 1.0
+    detected_language: str = "en"
+    duration_sec: float = 0.0
+    provider: str = "google"
+    metadata: Dict[str, Any] = Field(default_factory=dict)</code></pre>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/js/sidebar.js"></script>
+  <script>
+    renderSidebar('asr');
+
+    function setAsrPreset(text) {
+      document.getElementById('asrTestInput').value = text;
+      runASRTest();
+    }
+
+    async function runASRTest() {
+      const text = document.getElementById('asrTestInput').value.trim();
+      const output = document.getElementById('asrOutputText');
+      const conf = document.getElementById('asrConfidence');
+      const lat = document.getElementById('asrLatency');
+
+      if (!text) return;
+      output.innerText = 'Transcribing...';
+
+      const t0 = performance.now();
+      try {
+        const resp = await fetch('/api/test/stage2-asr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text })
+        });
+        const data = await resp.json();
+        const duration = Math.round(performance.now() - t0);
+
+        output.innerText = `"${data.transcript}"`;
+        conf.innerText = (data.confidence * 100).toFixed(0) + '%';
+        lat.innerText = `${duration} ms (${data.provider})`;
+      } catch (err) {
+        output.innerText = 'Error: ' + err.message;
+      }
+    }
+
+    function calculateWER() {
+      const ref = document.getElementById('werRef').value.trim().toLowerCase().split(/\s+/);
+      const hyp = document.getElementById('werHyp').value.trim().toLowerCase().split(/\s+/);
+
+      const n = ref.length;
+      if (n === 0) return;
+
+      // Levenshtein distance dynamic programming matrix
+      const dp = Array(n + 1).fill(null).map(() => Array(hyp.length + 1).fill(0));
+      for (let i = 0; i <= n; i++) dp[i][0] = i;
+      for (let j = 0; j <= hyp.length; j++) dp[0][j] = j;
+
+      for (let i = 1; i <= n; i++) {
+        for (let j = 1; j <= hyp.length; j++) {
+          if (ref[i - 1] === hyp[j - 1]) {
+            dp[i][j] = dp[i - 1][j - 1];
+          } else {
+            dp[i][j] = 1 + Math.min(
+              dp[i - 1][j],     // deletion
+              dp[i][j - 1],     // insertion
+              dp[i - 1][j - 1]  // substitution
+            );
+          }
+        }
+      }
+
+      // Backtrace to count S, D, I
+      let i = n, j = hyp.length;
+      let s = 0, d = 0, ins = 0;
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && ref[i - 1] === hyp[j - 1]) {
+          i--; j--;
+        } else if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) {
+          s++; i--; j--;
+        } else if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) {
+          d++; i--;
+        } else {
+          ins++; j--;
+        }
+      }
+
+      const wer = ((s + d + ins) / n * 100).toFixed(1);
+      document.getElementById('werS').innerText = s;
+      document.getElementById('werD').innerText = d;
+      document.getElementById('werI').innerText = ins;
+      document.getElementById('werFinal').innerText = wer + '%';
+    }
+    calculateWER();
+  </script>
+</body>
+</html>

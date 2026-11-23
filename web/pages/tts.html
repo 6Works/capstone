@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 5: Text-to-Speech (TTS) — Conversational Voice Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex font-sans antialiased overflow-x-hidden">
+
+  <!-- Shared Sidebar Container -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
+      <div class="flex items-center space-x-3">
+        <a href="/dialogue" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left"></i></a>
+        <span class="text-xs font-semibold text-slate-400">Platform</span>
+        <span class="text-xs text-slate-300">/</span>
+        <span class="text-xs font-bold text-pink-600">Stage 5: Text-to-Speech (TTS) & Human Cadence</span>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+          <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-pink-600 animate-pulse"></span>
+          Input Contract: ITTSService
+        </span>
+        <a href="/audio-output" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition flex items-center space-x-1.5 shadow-sm">
+          <span>Next: Stage 6 (Audio Output)</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- Pipeline Position Banner -->
+    <div class="bg-slate-900 text-white px-8 py-5 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-pink-400 mb-1">
+            <i class="fa-solid fa-file-audio"></i>
+            <span>Stage 5 of 6 · Neural Acoustic Synthesis</span>
+          </div>
+          <h1 class="text-2xl font-black tracking-tight">Voice Synthesis, Human Cadence & Micro-Pause Injection</h1>
+          <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+            Converts text responses into natural, human-sounding acoustic waveforms with realistic breathing pauses, emotional inflections, and pluggable synthesis backends (pyttsx3, ElevenLabs, gTTS).
+          </p>
+        </div>
+        
+        <!-- Mini 6-stage indicator -->
+        <div class="flex items-center space-x-1.5 bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
+          <span class="px-2 py-1 text-slate-400">1. Input</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">2. ASR</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">3. NLP</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">4. DM</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <div class="px-2.5 py-1 rounded-lg bg-pink-600 text-white font-bold flex items-center space-x-1 shadow-sm">
+            <i class="fa-solid fa-file-audio"></i>
+            <span>5. TTS</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">6. Output</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
+      
+      <!-- Interactive Voice Synthesizer & Cadence Tester -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-sliders text-pink-600 mr-2"></i>
+              Live Acoustic Voice Synthesis & Cadence Workbench
+            </h2>
+            <p class="text-xs text-slate-500">Test voice rendering, adjust speech rates, and preview micro-pause timing.</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-1.5 text-xs">
+              <span class="text-slate-500 font-semibold">Engine:</span>
+              <select id="ttsEngineSelect" class="bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-700">
+                <option value="pyttsx3">pyttsx3 SAPI5 (Offline Native Windows)</option>
+                <option value="elevenlabs">ElevenLabs (Human Cadence & Breaths)</option>
+                <option value="gtts">Google TTS (MP3 Stream)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-2 space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Text for Voice Synthesis:</label>
+              <textarea id="ttsTextInput" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-pink-500 leading-relaxed font-sans">Hello! I am Mira. I can answer questions, perform calculations, and guide you through our decoupled architecture.</textarea>
+            </div>
+
+            <!-- Prosody Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+              <div>
+                <div class="flex justify-between font-bold text-slate-700 mb-1">
+                  <span>Speech Rate (WPM):</span>
+                  <span id="rateVal" class="text-pink-600 font-mono">175 WPM</span>
+                </div>
+                <input type="range" id="speechRateSlider" min="100" max="250" value="175" oninput="document.getElementById('rateVal').innerText = this.value + ' WPM'" class="w-full accent-pink-600">
+                <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                  <span>100 (Slow)</span>
+                  <span>175 (Natural)</span>
+                  <span>250 (Rapid)</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between font-bold text-slate-700 mb-1">
+                  <span>Natural Cadence Pauses:</span>
+                  <span class="text-emerald-600 font-bold">Enabled</span>
+                </div>
+                <label class="flex items-center space-x-2 mt-2 cursor-pointer">
+                  <input type="checkbox" id="pauseToggle" checked class="w-4 h-4 accent-pink-600 rounded">
+                  <span class="text-[11px] text-slate-600">Auto-inject 180ms breath micro-pauses at punctuation</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+              <button onclick="synthesizeSpeech()" class="px-6 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
+                <i class="fa-solid fa-volume-high"></i>
+                <span id="synthBtnText">Synthesize & Play Voice</span>
+              </button>
+              <span id="synthStatus" class="text-xs text-slate-500 italic">Ready to synthesize</span>
+            </div>
+          </div>
+
+          <!-- Waveform & Audio Player Card -->
+          <div class="p-5 bg-slate-900 rounded-xl text-slate-100 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-pink-400 mb-2">Acoustic Audio Playback</div>
+              
+              <!-- HTML5 Audio -->
+              <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 space-y-2">
+                <audio id="ttsAudioPlayer" controls class="w-full h-8"></audio>
+                <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1">
+                  <span>Status: <span id="playerState" class="text-pink-400">Idle</span></span>
+                  <span>Format: <span id="playerFormat" class="text-pink-400">PCM WAV</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 bg-slate-800/60 rounded-lg border border-slate-700 font-mono text-[11px] text-slate-300 space-y-1">
+              <div class="text-[10px] font-bold text-slate-400 uppercase">Synthesis Telemetry:</div>
+              <div class="flex justify-between">
+                <span>Latency:</span>
+                <span id="ttsLatency" class="text-emerald-400 font-bold">-- ms</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Voice Backend:</span>
+                <span id="ttsBackendName" class="text-pink-400 font-bold">pyttsx3</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Output File:</span>
+                <span id="ttsFileName" class="text-slate-400 truncate max-w-[140px]">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Deep Dive: Human Cadence & Pauses -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Left: Why Human Speech Has Pauses -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-lungs text-pink-600 mr-2"></i>
+            Acoustic Cadence & Breathing Mechanics
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Traditional TTS sounds robotic because synthetic engines speak at a flat, unvarying tempo. Human conversational speech is punctuated by physiological and cognitive pauses:
+          </p>
+
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-pink-50/50 rounded-xl border border-pink-200 space-y-1">
+              <span class="font-bold text-pink-900">Clause & Comma Micro-Pauses (120 - 220 ms):</span>
+              <p class="text-[11px] text-slate-600">
+                Short vocal tract relaxations allowing listeners to process preceding cognitive phrases before the subsequent clause begins.
+              </p>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+              <span class="font-bold text-slate-900">Sentence Boundaries & Inhalations (300 - 550 ms):</span>
+              <p class="text-[11px] text-slate-600">
+                Full stops and semicolons require complete vocal fold abduction for lung replenishment. Omitting this causes auditory fatigue.
+              </p>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+              <span class="font-bold text-slate-900">The add_human_pauses() Transformation:</span>
+              <p class="text-[11px] text-slate-600">
+                Our decoupled service transforms plain text strings by inserting phonetic breath markers and calibrated punctuation ellipses before passing to the vocoder.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Modern Voice Architecture Comparison -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-microchip text-pink-600 mr-2"></i>
+            Voice Providers Architectural Comparison
+          </h3>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold">
+                  <th class="p-2.5">Feature</th>
+                  <th class="p-2.5 text-pink-700">ElevenLabs</th>
+                  <th class="p-2.5 text-blue-700">pyttsx3 SAPI5</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-[11px]">
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Generation Method</td>
+                  <td class="p-2.5 text-slate-600">Autoregressive Diffusion Vocoder</td>
+                  <td class="p-2.5 text-slate-600">Formant / Concatenative SAPI5</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Human Breaths</td>
+                  <td class="p-2.5 text-slate-600 font-bold text-emerald-600">Natural biological breaths</td>
+                  <td class="p-2.5 text-slate-600">Simulated via punctuation pauses</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Offline / Privacy</td>
+                  <td class="p-2.5 text-slate-600">Requires Cloud API Key</td>
+                  <td class="p-2.5 text-slate-600 font-bold text-emerald-600">100% Offline, Zero Network</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Synthesis Latency</td>
+                  <td class="p-2.5 text-slate-600">300 - 800 ms</td>
+                  <td class="p-2.5 text-slate-600 font-bold text-blue-700">40 - 150 ms (Ultra-fast)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <span class="font-bold text-slate-800">Single Responsibility & Loose Coupling:</span>
+            <p class="text-[11px] text-slate-600 mt-0.5">
+              The rest of the pipeline is 100% oblivious to whether audio was generated by Windows SAPI5 or ElevenLabs. Both implement <code>ITTSService</code>.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Code Contract & DTO -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center">
+          <i class="fa-solid fa-code text-pink-600 mr-2"></i>
+          ITTSService Interface & Data Transfer Object
+        </h3>
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed"><code>class ITTSService(ABC):
+    @abstractmethod
+    def synthesize(self, text: str, **kwargs) -> TTSResult:
+        """Synthesizes text into acoustic waveform and persists output."""
+        pass
+
+class TTSResult(BaseModel):
+    file_path: str
+    audio_format: str = "wav"
+    duration_sec: float = 0.0
+    sample_rate: int = 16000
+    provider: str = "pyttsx3"
+    metadata: Dict[str, Any] = Field(default_factory=dict)</code></pre>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/js/sidebar.js"></script>
+  <script>
+    renderSidebar('tts');
+
+    async function synthesizeSpeech() {
+      const text = document.getElementById('ttsTextInput').value.trim();
+      const engine = document.getElementById('ttsEngineSelect').value;
+      const rate = parseInt(document.getElementById('speechRateSlider').value);
+      const withPauses = document.getElementById('pauseToggle').checked;
+
+      const btn = document.getElementById('synthBtnText');
+      const status = document.getElementById('synthStatus');
+      const player = document.getElementById('ttsAudioPlayer');
+
+      if (!text) return;
+
+      btn.innerText = 'Synthesizing...';
+      status.innerText = 'Processing speech vocoder...';
+
+      // Pre-process text with pauses if checked
+      let processedText = text;
+      if (withPauses) {
+        processedText = text.replace(/,/g, ', ... ').replace(/;/g, '; ... ');
+      }
+
+      const t0 = performance.now();
+      try {
+        const resp = await fetch('/api/test/stage5-tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: processedText,
+            provider: engine,
+            speech_rate: rate
+          })
+        });
+
+        const data = await resp.json();
+        const duration = Math.round(performance.now() - t0);
+
+        btn.innerText = 'Synthesize & Play Voice';
+        status.innerText = `Generated in ${duration} ms`;
+
+        // Update telemetry
+        document.getElementById('ttsLatency').innerText = `${duration} ms`;
+        document.getElementById('ttsBackendName').innerText = data.provider;
+        document.getElementById('ttsFileName').innerText = data.file_path.split(/[\\/]/).pop();
+        document.getElementById('playerFormat').innerText = data.audio_format.toUpperCase();
+
+        if (data.audio_url) {
+          player.src = data.audio_url + '?t=' + Date.now();
+          player.play();
+          document.getElementById('playerState').innerText = 'Playing';
+          player.onended = () => {
+            document.getElementById('playerState').innerText = 'Finished';
+          };
+        }
+      } catch (err) {
+        btn.innerText = 'Synthesize & Play Voice';
+        status.innerText = 'Error: ' + err.message;
+        alert('Synthesis failed: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

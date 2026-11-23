@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Dashboard — Conversational Voice Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex font-sans antialiased overflow-x-hidden">
+
+  <!-- Shared Sidebar Container -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
+      <div class="flex items-center space-x-3">
+        <span class="text-xs font-semibold text-slate-500">Platform / Live Dashboard</span>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <div class="hidden md:flex items-center space-x-2 text-[11px] font-mono bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+          <span class="text-slate-500">Active:</span>
+          <span id="headerAsrPill" class="text-emerald-700 font-semibold">ASR: Google</span>
+          <span class="text-slate-300">|</span>
+          <span id="headerNlpPill" class="text-amber-700 font-semibold">NLP: Rule</span>
+          <span class="text-slate-300">|</span>
+          <span id="headerTtsPill" class="text-pink-700 font-semibold">TTS: pyttsx3</span>
+        </div>
+
+        <div id="llmPillMount"></div>
+
+        <button onclick="resetConversation()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 transition text-slate-600 flex items-center space-x-1.5">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>Reset Session</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Dashboard Content Area -->
+    <main class="p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
+      
+      <!-- New Universal Suite Launchpad Banner -->
+      <section class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-3xl p-6 shadow-md border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1.5">
+          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-blue-300">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Universal Interview Hub</span>
+          </div>
+          <h2 class="text-xl font-black tracking-tight">Zoom-Style Video Call with On-Demand Working Tools</h2>
+          <p class="text-xs text-slate-300 max-w-2xl leading-relaxed">
+            Starts as a natural video call between candidate and Mira. Whenever needed, one click instantly opens the Code Editor, Terminal, Whiteboard, Spreadsheet, SQL Workbench, or Notebook.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
+          <a href="/interview/call" class="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md transition flex items-center space-x-2">
+            <i class="fa-solid fa-video text-xs"></i>
+            <span>Launch Zoom Call Suite</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </a>
+          <a href="/interview/profiling" class="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-xs transition flex items-center space-x-1.5 border border-white/10">
+            <i class="fa-solid fa-wand-magic-sparkles text-xs text-amber-300"></i>
+            <span>Role Profiler</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Interactive 6-Stage Flowchart -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-diagram-project mr-2 text-indigo-600"></i>
+              Pipeline Execution Flow
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Live end-to-end telemetry. Click any stage card to open its dedicated deep-dive page.</p>
+          </div>
+          <div id="totalLatencyBadge" class="text-xs font-mono bg-slate-100 text-slate-600 px-3 py-1 rounded-md hidden">
+            Total Latency: <span id="totalLatencyVal" class="font-bold text-slate-900">0.00s</span>
+          </div>
+        </div>
+
+        <!-- Microservice Providers Runtime Selector -->
+        <div class="mb-6 p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-cube text-indigo-600 text-sm"></i>
+            <span class="font-bold text-slate-800">Runtime Microservice Providers:</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-slate-500 font-semibold">ASR:</span>
+              <select id="asrSelect" onchange="changeProvider()" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-700 font-medium">
+                <option value="google">Google Web Speech</option>
+                <option value="whisper">Whisper Transformer</option>
+                <option value="mock">Mock ASR (Fast test)</option>
+              </select>
+            </div>
+            <div class="flex items-center space-x-1.5">
+              <span class="text-slate-500 font-semibold">NLP:</span>
+              <select id="nlpSelect" onchange="changeProvider()" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-700 font-medium">
+                <option value="rule_based">Rule-Based Intent</option>
+                <option value="llm">LLM + Tool Calling</option>
+              </select>
+            </div>
+            <div class="flex items-center space-x-1.5">
+              <span class="text-slate-500 font-semibold">TTS:</span>
+              <select id="ttsSelect" onchange="changeProvider()" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-700 font-medium">
+                <option value="pyttsx3">pyttsx3 (Offline SAPI5)</option>
+                <option value="elevenlabs">ElevenLabs (Human Cadence)</option>
+                <option value="gtts">Google TTS (MP3)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6-Stage Cards Grid (Direct Links to Separate Pages) -->
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-3 items-center relative">
+          
+          <!-- Stage 1 -->
+          <a href="/audio-input" id="card-stage1" class="stage-card bg-blue-50 border-2 border-blue-200 hover:border-blue-400 rounded-xl p-4 flex flex-col items-center text-center relative group">
+            <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg mb-2 shadow-inner">
+              <i class="fa-solid fa-microphone"></i>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-blue-500">Stage 1</span>
+            <h3 class="text-xs font-bold text-slate-800">Audio Input</h3>
+            <p id="badge-s1" class="text-[10px] font-mono text-blue-700 bg-blue-100/70 rounded px-1.5 py-0.5 mt-1 font-semibold truncate max-w-full">PCM Waveform</p>
+            <div class="stage-status-dot w-2 h-2 rounded-full bg-slate-300 mt-2"></div>
+          </a>
+
+          <!-- Stage 2 -->
+          <a href="/asr" id="card-stage2" class="stage-card bg-emerald-50 border-2 border-emerald-200 hover:border-emerald-400 rounded-xl p-4 flex flex-col items-center text-center relative group">
+            <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg mb-2 shadow-inner">
+              <i class="fa-solid fa-brain"></i>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-500">Stage 2</span>
+            <h3 class="text-xs font-bold text-slate-800">ASR</h3>
+            <p id="badge-s2" class="text-[10px] font-mono text-emerald-700 bg-emerald-100/70 rounded px-1.5 py-0.5 mt-1 font-semibold truncate max-w-full">Google ASR</p>
+            <div class="stage-status-dot w-2 h-2 rounded-full bg-slate-300 mt-2"></div>
+          </a>
+
+          <!-- Stage 3 -->
+          <a href="/nlp" id="card-stage3" class="stage-card bg-amber-50 border-2 border-amber-200 hover:border-amber-400 rounded-xl p-4 flex flex-col items-center text-center relative group">
+            <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg mb-2 shadow-inner">
+              <i class="fa-solid fa-gears"></i>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-500">Stage 3</span>
+            <h3 class="text-xs font-bold text-slate-800">NLP</h3>
+            <p id="badge-s3" class="text-[10px] font-mono text-amber-700 bg-amber-100/70 rounded px-1.5 py-0.5 mt-1 font-semibold truncate max-w-full">Rule NLU</p>
+            <div class="stage-status-dot w-2 h-2 rounded-full bg-slate-300 mt-2"></div>
+          </a>
+
+          <!-- Stage 4 -->
+          <a href="/dialogue" id="card-stage4" class="stage-card bg-purple-50 border-2 border-purple-200 hover:border-purple-400 rounded-xl p-4 flex flex-col items-center text-center relative group">
+            <div class="w-11 h-11 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg mb-2 shadow-inner">
+              <i class="fa-solid fa-comments"></i>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-purple-500">Stage 4</span>
+            <h3 class="text-xs font-bold text-slate-800">Dialogue Mgmt</h3>
+            <p id="badge-s4" class="text-[10px] font-mono text-purple-700 bg-purple-100/70 rounded px-1.5 py-0.5 mt-1 font-semibold truncate max-w-full">Memory & State</p>
+            <div class="stage-status-dot w-2 h-2 rounded-full bg-slate-300 mt-2"></div>
+          </a>
+
+          <!-- Stage 5 -->
+          <a href="/tts" id="card-stage5" class="stage-card bg-pink-50 border-2 border-pink-200 hover:border-pink-400 rounded-xl p-4 flex flex-col items-center text-center relative group">
+            <div class="w-11 h-11 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-lg mb-2 shadow-inner">
+              <i class="fa-solid fa-file-audio"></i>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-pink-500">Stage 5</span>
+            <h3 class="text-xs font-bold text-slate-800">TTS</h3>
+            <p id="badge-s5" class="text-[10px] font-mono text-pink-700 bg-pink-100/70 rounded px-1.5 py-0.5 mt-1 font-semibold truncate max-w-full">pyttsx3 SAPI5</p>
+            <div class="stage-status-dot w-2 h-2 rounded-full bg-slate-300 mt-2"></div>
+          </a>
+
+          <!-- Stage 6 -->
+          <a href="/audio-output" id="card-stage6" class="stage-card bg-orange-50 border-2 border-orange-200 hover:border-orange-400 rounded-xl p-4 flex flex-col items-center text-center relative group">
+            <div class="w-11 h-11 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg mb-2 shadow-inner">
+              <i class="fa-solid fa-volume-high"></i>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-orange-500">Stage 6</span>
+            <h3 class="text-xs font-bold text-slate-800">Audio Output</h3>
+            <p id="badge-s6" class="text-[10px] font-mono text-orange-700 bg-orange-100/70 rounded px-1.5 py-0.5 mt-1 font-semibold truncate max-w-full">Browser Audio</p>
+            <div class="stage-status-dot w-2 h-2 rounded-full bg-slate-300 mt-2"></div>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- Two-Column Workspace -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left: Voice & Controls -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-microphone-lines mr-2 text-indigo-600"></i>
+              Live Voice Input
+            </h3>
+            <p class="text-xs text-slate-500">Record through your browser mic. Direct 16-bit Mono PCM encoding at 16,000 Hz.</p>
+
+            <div class="flex flex-col items-center justify-center py-6 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+              <button id="micBtn" onclick="toggleRecording()" class="w-16 h-16 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center text-2xl shadow-lg transition active:scale-95 focus:outline-none">
+                <i class="fa-solid fa-microphone" id="micIcon"></i>
+              </button>
+              <span id="micLabel" class="text-xs font-semibold text-slate-600 mt-3">Click to Speak</span>
+              <div id="recordingTimer" class="text-xs font-mono text-rose-500 font-bold mt-1 hidden">Recording: <span id="timerVal">00:00</span></div>
+            </div>
+
+            <!-- Quick Test Prompts -->
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Preset Quick Queries</span>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="sendQuickQuery('Hello Mira, who are you?')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-1.5 px-3 rounded-lg transition">
+                  👋 "Who are you?"
+                </button>
+                <button onclick="sendQuickQuery('What is the current time?')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-1.5 px-3 rounded-lg transition">
+                  ⏰ "What time is it?"
+                </button>
+                <button onclick="sendQuickQuery('Can you explain your 6-stage architecture?')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-1.5 px-3 rounded-lg transition">
+                  🧠 "Explain 6 stages"
+                </button>
+                <button onclick="sendQuickQuery('Calculate 35 plus 45')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-1.5 px-3 rounded-lg transition">
+                  🔢 "Calculate 35 + 45"
+                </button>
+              </div>
+            </div>
+
+            <!-- Text Input -->
+            <div class="pt-2">
+              <div class="flex space-x-2">
+                <input type="text" id="textInput" placeholder="Or type a query..." class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button onclick="sendTextInput()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Latency Metrics Breakdown -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-3">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-chart-simple mr-2 text-indigo-600"></i>
+              Stage Latency Breakdown
+            </h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-slate-600">Stage 1: Audio Input</span>
+                <span id="m_s1" class="font-mono text-slate-800">--</span>
+              </div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-slate-600">Stage 2: Speech Recognition (ASR)</span>
+                <span id="m_s2" class="font-mono text-slate-800">--</span>
+              </div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-slate-600">Stage 3: NLP & Intent</span>
+                <span id="m_s3" class="font-mono text-slate-800">--</span>
+              </div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-slate-600">Stage 4: Dialogue Manager</span>
+                <span id="m_s4" class="font-mono text-slate-800">--</span>
+              </div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-slate-600">Stage 5: Text-to-Speech (TTS)</span>
+                <span id="m_s5" class="font-mono text-slate-800">--</span>
+              </div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span class="text-slate-600">Stage 6: Audio Output Playback</span>
+                <span id="m_s6" class="font-mono text-slate-800">--</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Transcript Feed -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col h-[580px]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center">
+                <i class="fa-solid fa-messages mr-2 text-indigo-600"></i>
+                Dialogue Transcript
+              </h3>
+              <span id="turnCounter" class="text-xs bg-slate-100 text-slate-600 font-semibold px-2.5 py-1 rounded-full">
+                Turn 0
+              </span>
+            </div>
+
+            <!-- Chat Messages Container -->
+            <div id="chatHistory" class="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">
+                  M
+                </div>
+                <div class="bg-slate-100 rounded-2xl rounded-tl-none p-3.5 max-w-[80%] text-xs text-slate-800 shadow-sm">
+                  <p>Hello! I am Mira, your voice agent. Speak through your microphone or click presets to see the decoupled pipeline in action.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Audio Player -->
+            <div id="audioPlayerContainer" class="pt-4 border-t border-slate-100 hidden">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Synthesized Voice Audio</span>
+              <audio id="agentAudioPlayer" controls class="w-full h-8"></audio>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Shared Component Scripts -->
+  <script src="/static/js/sidebar.js"></script>
+  <script src="/static/js/recorder.js"></script>
+  <script>
+    renderSidebar('dashboard');
+
+    const pcmRecorder = new PCMRecorder(16000);
+    let recordTimerInterval = null;
+    let recordStartTime = 0;
+    let msgCounter = 0;
+
+    document.getElementById('textInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') sendTextInput();
+    });
+
+    async function sendTextInput() {
+      const text = document.getElementById('textInput').value.trim();
+      if (!text) return;
+      document.getElementById('textInput').value = '';
+      appendUserMessage(text);
+      await executePipeline('/api/pipeline/process-text', { text, play_audio_on_server: false });
+    }
+
+    async function sendQuickQuery(query) {
+      appendUserMessage(query);
+      await executePipeline('/api/pipeline/process-text', { text: query, play_audio_on_server: false });
+    }
+
+    async function changeProvider() {
+      const asr = document.getElementById('asrSelect').value;
+      const nlp = document.getElementById('nlpSelect').value;
+      const tts = document.getElementById('ttsSelect').value;
+
+      try {
+        const resp = await fetch('/api/pipeline/configure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ asr_provider: asr, nlp_provider: nlp, tts_provider: tts })
+        });
+        const data = await resp.json();
+        if (data.status === 'success') {
+          document.getElementById('badge-s2').innerText = asr.toUpperCase();
+          document.getElementById('badge-s3').innerText = nlp.toUpperCase();
+          document.getElementById('badge-s5').innerText = tts.toUpperCase();
+          document.getElementById('headerAsrPill').innerText = `ASR: ${asr}`;
+          document.getElementById('headerNlpPill').innerText = `NLP: ${nlp}`;
+          document.getElementById('headerTtsPill').innerText = `TTS: ${tts}`;
+        }
+      } catch (e) {
+        console.error("Provider update failed:", e);
+      }
+    }
+
+    async function executePipeline(endpoint, bodyData) {
+      highlightActiveStage(1);
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData)
+        });
+        const data = await response.json();
+        if (!response.ok || data.status === 'error') {
+          alert('Pipeline error: ' + (data.error || 'Server error'));
+          return;
+        }
+        updateUIWithTelemetry(data);
+      } catch (err) {
+        alert('Pipeline execution failed: ' + err.message);
+      }
+    }
+
+    function updateUIWithTelemetry(data) {
+      const stages = data.stages || {};
+      animateStagesSequentially([1, 2, 3, 4, 5, 6]);
+
+      document.getElementById('m_s1').innerText = stages.stage1_audio_input?.duration_sec ? stages.stage1_audio_input.duration_sec + 's' : (stages.stage1_audio_input?.duration_est_sec ? stages.stage1_audio_input.duration_est_sec + 's' : '0.01s');
+      document.getElementById('m_s2').innerText = (stages.stage2_asr?.latency_sec ?? 0.0) + 's';
+      document.getElementById('m_s3').innerText = (stages.stage3_nlp?.latency_sec ?? 0.0) + 's';
+      document.getElementById('m_s4').innerText = (stages.stage4_dialogue_management?.latency_sec ?? 0.0) + 's';
+      document.getElementById('m_s5').innerText = (stages.stage5_tts?.latency_sec ?? 0.0) + 's';
+      document.getElementById('m_s6').innerText = (stages.stage6_audio_output?.playback_time_sec ?? 0.0) + 's';
+
+      if (stages.stage2_asr?.provider) document.getElementById('badge-s2').innerText = stages.stage2_asr.provider;
+      if (stages.stage3_nlp?.provider) document.getElementById('badge-s3').innerText = stages.stage3_nlp.provider;
+      if (stages.stage5_tts?.provider) document.getElementById('badge-s5').innerText = stages.stage5_tts.provider;
+
+      if (data.total_latency_sec) {
+        document.getElementById('totalLatencyBadge').classList.remove('hidden');
+        document.getElementById('totalLatencyVal').innerText = data.total_latency_sec + 's';
+      }
+
+      const dm = stages.stage4_dialogue_management || {};
+      if (dm.response_text) {
+        appendBotMessage(dm.response_text, dm.intent, dm.state);
+        document.getElementById('turnCounter').innerText = `Turn ${dm.turn || 1}`;
+      }
+
+      if (data.audio_url) {
+        const player = document.getElementById('agentAudioPlayer');
+        player.src = data.audio_url;
+        document.getElementById('audioPlayerContainer').classList.remove('hidden');
+        player.play().catch(e => console.log('Autoplay prevented:', e));
+      }
+    }
+
+    function animateStagesSequentially(stagesList) {
+      stagesList.forEach((st, idx) => {
+        setTimeout(() => {
+          document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('active'));
+          const card = document.getElementById(`card-stage${st}`);
+          if (card) {
+            card.classList.add('active');
+            const dot = card.querySelector('.stage-status-dot');
+            if (dot) dot.className = 'stage-status-dot w-2 h-2 rounded-full bg-emerald-500 mt-2';
+          }
+        }, idx * 160);
+      });
+    }
+
+    function highlightActiveStage(num) {
+      document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('active'));
+      const card = document.getElementById(`card-stage${num}`);
+      if (card) card.classList.add('active');
+    }
+
+    function appendVoiceMessage() {
+      msgCounter++;
+      const msgId = `voice-msg-${msgCounter}`;
+      const container = document.getElementById('chatHistory');
+      const div = document.createElement('div');
+      div.className = 'flex items-start justify-end space-x-3';
+      div.innerHTML = `
+        <div class="bg-indigo-600 rounded-2xl rounded-tr-none p-3.5 max-w-[85%] text-xs text-white shadow-sm space-y-1.5">
+          <div class="flex items-center space-x-1.5 text-indigo-200 text-[11px] font-semibold tracking-wide">
+            <span>🎤 [Spoken Voice Recording]</span>
+          </div>
+          <div id="${msgId}" class="text-sm font-medium pt-0.5 text-indigo-100 flex items-center space-x-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-indigo-300 animate-ping"></span>
+            <span class="italic text-xs">Transcribing audio (ASR)...</span>
+          </div>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-bold shadow-sm">
+          U
+        </div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      return msgId;
+    }
+
+    function appendUserMessage(text) {
+      const container = document.getElementById('chatHistory');
+      const div = document.createElement('div');
+      div.className = 'flex items-start justify-end space-x-3';
+      div.innerHTML = `
+        <div class="bg-indigo-600 rounded-2xl rounded-tr-none p-3.5 max-w-[80%] text-xs text-white shadow-sm">
+          <p>${escapeHtml(text)}</p>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-bold">
+          U
+        </div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendBotMessage(text, intent, state) {
+      const container = document.getElementById('chatHistory');
+      const div = document.createElement('div');
+      div.className = 'flex items-start space-x-3';
+      div.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">
+          A
+        </div>
+        <div class="bg-slate-100 rounded-2xl rounded-tl-none p-3.5 max-w-[80%] text-xs text-slate-800 shadow-sm space-y-1">
+          <p>${escapeHtml(text)}</p>
+          <div class="flex space-x-2 pt-1 text-[10px] text-slate-400 font-mono">
+            <span>intent: <b>${intent || 'general'}</b></span>
+            <span>•</span>
+            <span>state: <b>${state || 'active'}</b></span>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function toggleRecording() {
+      if (pcmRecorder.isRecording) {
+        document.getElementById('micBtn').className = 'w-16 h-16 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center text-2xl shadow-lg transition';
+        document.getElementById('micIcon').className = 'fa-solid fa-microphone';
+        document.getElementById('micLabel').innerText = 'Click to Speak';
+        document.getElementById('recordingTimer').classList.add('hidden');
+        clearInterval(recordTimerInterval);
+
+        const wavBlob = await pcmRecorder.stop();
+        if (!wavBlob) {
+          alert('No audio detected. Please ensure your microphone is speaking.');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', wavBlob, 'mic_recording.wav');
+
+        const voiceMsgId = appendVoiceMessage();
+        highlightActiveStage(1);
+
+        try {
+          const resp = await fetch('/api/pipeline/process-audio', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await resp.json();
+          
+          const transcriptEl = document.getElementById(voiceMsgId);
+          if (transcriptEl) {
+            const asrTranscript = data.stages?.stage2_asr?.transcript;
+            if (asrTranscript && asrTranscript.trim()) {
+              transcriptEl.className = "text-sm font-medium pt-0.5 text-white";
+              transcriptEl.innerHTML = `<span class="text-indigo-200 text-[11px] block font-mono">Recognized Text (ASR):</span> "${escapeHtml(asrTranscript)}"`;
+            } else {
+              transcriptEl.className = "text-xs pt-0.5 text-indigo-200 italic";
+              transcriptEl.innerText = '(No clear speech detected / silence)';
+            }
+          }
+
+          if (!resp.ok || data.status === 'error') {
+            alert('Audio processing error: ' + (data.error || 'Could not understand audio.'));
+            return;
+          }
+          updateUIWithTelemetry(data);
+        } catch (err) {
+          const transcriptEl = document.getElementById(voiceMsgId);
+          if (transcriptEl) {
+            transcriptEl.className = "text-xs pt-0.5 text-rose-200";
+            transcriptEl.innerText = '(Audio processing error)';
+          }
+          alert('Audio processing error: ' + err.message);
+        }
+
+      } else {
+        try {
+          await pcmRecorder.start();
+          document.getElementById('micBtn').className = 'w-16 h-16 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center text-2xl shadow-lg animate-pulse';
+          document.getElementById('micIcon').className = 'fa-solid fa-stop';
+          document.getElementById('micLabel').innerText = 'Recording... Click to Stop';
+          document.getElementById('recordingTimer').classList.remove('hidden');
+
+          recordStartTime = Date.now();
+          recordTimerInterval = setInterval(() => {
+            const elapsedSec = Math.floor((Date.now() - recordStartTime) / 1000);
+            const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+            const secs = String(elapsedSec % 60).padStart(2, '0');
+            document.getElementById('timerVal').innerText = `${mins}:${secs}`;
+          }, 500);
+        } catch (err) {
+          alert('Microphone access denied: ' + err.message);
+        }
+      }
+    }
+
+    async function resetConversation() {
+      await fetch('/api/pipeline/reset', { method: 'POST' });
+      document.getElementById('chatHistory').innerHTML = `
+        <div class="flex items-start space-x-3">
+          <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">A</div>
+          <div class="bg-slate-100 rounded-2xl rounded-tl-none p-3.5 max-w-[80%] text-xs text-slate-800 shadow-sm">
+            <p>Session and conversation memory reset. Hello! What would you like to explore?</p>
+          </div>
+        </div>
+      `;
+      document.getElementById('turnCounter').innerText = 'Turn 0';
+      document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('active'));
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+  <script src="/static/js/llm_gateway.js"></script>
+</body>
+</html>

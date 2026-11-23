@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 1: Audio Input — Conversational Voice Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex font-sans antialiased overflow-x-hidden">
+
+  <!-- Shared Sidebar Container -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
+      <div class="flex items-center space-x-3">
+        <a href="/" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left"></i></a>
+        <span class="text-xs font-semibold text-slate-400">Platform</span>
+        <span class="text-xs text-slate-300">/</span>
+        <span class="text-xs font-bold text-blue-600">Stage 1: Audio Input & Sampling</span>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+          Input Contract: IAudioInputService
+        </span>
+        <a href="/asr" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm">
+          <span>Next: Stage 2 (ASR)</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- Pipeline Position Banner -->
+    <div class="bg-slate-900 text-white px-8 py-5 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">
+            <i class="fa-solid fa-wave-square"></i>
+            <span>Stage 1 of 6 · Physical Audio Ingestion</span>
+          </div>
+          <h1 class="text-2xl font-black tracking-tight">Audio Capture, ADC & Waveform Conditioning</h1>
+          <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+            Transforms analog acoustic wave pressure variations into standardized, uncompressed 16-bit linear PCM byte buffers calibrated for speech recognition models.
+          </p>
+        </div>
+        
+        <!-- Mini 6-stage indicator -->
+        <div class="flex items-center space-x-1.5 bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
+          <div class="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold flex items-center space-x-1 shadow-sm">
+            <i class="fa-solid fa-microphone"></i>
+            <span>1. Input</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">2. ASR</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">3. NLP</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">4. DM</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">5. TTS</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          <span class="px-2 py-1 text-slate-400">6. Output</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
+      
+      <!-- Interactive Oscilloscope & Microphone Signal Lab -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-chart-line text-blue-600 mr-2"></i>
+              Real-Time Oscilloscope & Signal Ingestion Workbench
+            </h2>
+            <p class="text-xs text-slate-500">Live time-domain audio amplitude stream sampled at 16,000 Hz.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="toggleMicBtn" onclick="toggleMicrophoneOscilloscope()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
+              <i class="fa-solid fa-microphone"></i>
+              <span id="toggleMicText">Start Live Mic Stream</span>
+            </button>
+            <button onclick="triggerSyntheticAudioTest()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 transition flex items-center space-x-2">
+              <i class="fa-solid fa-play"></i>
+              <span>Test Synthetic Generator</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Waveform Canvas -->
+        <div class="relative w-full h-44 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-inner flex items-center justify-center">
+          <canvas id="scopeCanvas" class="w-full h-full block"></canvas>
+          <div id="scopePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-600 space-y-1">
+            <i class="fa-solid fa-wave-pulse text-3xl animate-pulse text-blue-500/40"></i>
+            <span class="text-xs font-mono text-slate-500">Click 'Start Live Mic Stream' to observe 16 kHz PCM waveforms</span>
+          </div>
+          <div class="absolute bottom-2 right-3 font-mono text-[10px] text-blue-400 bg-slate-900/80 px-2 py-0.5 rounded border border-blue-500/30">
+            Window: 2048 pts | Sample: Float32 [-1.0, +1.0]
+          </div>
+        </div>
+
+        <!-- VAD Energy & Metric Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+          <div class="p-3.5 bg-blue-50/60 rounded-xl border border-blue-100">
+            <div class="text-[11px] font-bold text-blue-800 uppercase tracking-wide">Sampling Frequency</div>
+            <div class="text-xl font-extrabold text-blue-950 mt-0.5">16,000 Hz</div>
+            <div class="text-[10px] text-blue-600 mt-1">Nyquist limit: 8.0 kHz cutoff</div>
+          </div>
+
+          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">PCM Bit Depth</div>
+            <div class="text-xl font-extrabold text-slate-900 mt-0.5">16-bit Signed</div>
+            <div class="text-[10px] text-slate-500 mt-1">-32,768 to +32,767 per sample</div>
+          </div>
+
+          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Channel Count</div>
+            <div class="text-xl font-extrabold text-slate-900 mt-0.5">Mono (1 Ch)</div>
+            <div class="text-[10px] text-slate-500 mt-1">Saves 50% bandwidth vs Stereo</div>
+          </div>
+
+          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Bitrate Throughput</div>
+            <div class="text-xl font-extrabold text-slate-900 mt-0.5">32.0 KB/s</div>
+            <div class="text-[10px] text-slate-500 mt-1">256 kbps uncompressed</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Technical Architecture Breakdown -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Left: Mathematics & Acoustic Principles -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-atom text-blue-600 mr-2"></i>
+            Physics of Speech Sampling & The Nyquist Theorem
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Human speech is generated by air expelled from the lungs, modulated by vocal cords (producing fundamental frequency $F_0 \approx 85 - 255 \text{ Hz}$), and filtered through the vocal tract (tongue, lips, pharynx) to create formants ($F_1, F_2, F_3$).
+          </p>
+
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs space-y-2">
+            <div class="text-slate-500 font-bold uppercase text-[10px]">Nyquist-Shannon Theorem:</div>
+            <div class="text-indigo-600 font-bold">f_sample ≥ 2 · f_max</div>
+            <p class="text-[11px] text-slate-600 font-sans">
+              For intelligibility in acoustic speech recognition (ASR), frequencies above 8,000 Hz provide diminishing returns. Therefore, a <strong>16 kHz</strong> sampling rate perfectly captures all speech spectral cues without aliasing distortion.
+            </p>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Dynamic Range & Quantization Noise</h4>
+            <div class="p-3.5 bg-blue-50/50 rounded-xl border border-blue-200 text-xs text-slate-700 space-y-1">
+              <div class="font-bold text-blue-900">Signal-to-Quantization-Noise Ratio (SQNR):</div>
+              <div class="font-mono text-blue-800">SQNR ≈ 6.02 · N + 1.76 dB ≈ 98.08 dB (for N = 16 bits)</div>
+              <p class="text-[11px] text-slate-600 pt-1">
+                A 98 dB dynamic range easily handles everything from soft whispers (30 dB SPL) to loud shouts (100 dB SPL) without digital clipping.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Contract & DTO Schema -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-code text-blue-600 mr-2"></i>
+              SOLID Contract: IAudioInputService
+            </h3>
+            <span class="text-[10px] font-mono bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">services/contracts.py</span>
+          </div>
+
+          <p class="text-xs text-slate-600">
+            Adheres to the <strong>Interface Segregation Principle (ISP)</strong>. Any input source (microphone, file upload, WebRTC stream, synthetic generator) implements this exact interface:
+          </p>
+
+          <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed"><code>class IAudioInputService(ABC):
+    @abstractmethod
+    def capture(self, **kwargs) -> AudioPayload:
+        """Captures acoustic signal and returns normalized payload."""
+        pass
+
+class AudioPayload(BaseModel):
+    file_path: Optional[str] = None
+    raw_bytes: Optional[bytes] = None
+    sample_rate: int = 16000
+    channels: int = 1
+    sample_width: int = 2  # 16-bit
+    format: str = "wav"
+    duration_sec: float = 0.0
+    source_type: str = "microphone"</code></pre>
+
+          <!-- Live Synthetic Test Result Display -->
+          <div id="testResultBox" class="hidden p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-1.5">
+            <div class="flex items-center justify-between font-bold text-emerald-800">
+              <span>Synthetic Generator Result:</span>
+              <span class="font-mono text-[10px] bg-emerald-200 px-1.5 py-0.5 rounded">HTTP 200 OK</span>
+            </div>
+            <pre id="testResultJson" class="font-mono text-[11px] text-emerald-900 overflow-x-auto p-2 bg-white rounded border border-emerald-100 max-h-36"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pluggable Microservices Architecture -->
+      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center">
+          <i class="fa-solid fa-puzzle-piece text-blue-600 mr-2"></i>
+          Audio Input Provider Matrix
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl border-2 border-blue-500 bg-blue-50/30">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-sm text-slate-900">In-Browser PCM Recorder</span>
+              <span class="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full">Active</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Uses Web Audio API <code>AudioContext</code> and <code>createScriptProcessor</code> to record raw float32 frames, downsampling to 16,000 Hz mono 16-bit PCM WAV. Zero client dependencies.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-sm text-slate-900">FileAudioInput</span>
+              <span class="text-[10px] bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">Server Backend</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Validates WAV header format, calculates audio sample duration, and ensures channel count conformances before forwarding to ASR.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-sm text-slate-900">SyntheticAudioInput</span>
+              <span class="text-[10px] bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">Unit Testing</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Synthesizes 440 Hz sinusoidal tones mathematically via NumPy/struct, enabling headless CI/CD testing without audio hardware.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/js/sidebar.js"></script>
+  <script>
+    renderSidebar('audio-input');
+
+    // Oscilloscope visualizer logic
+    let audioCtx = null;
+    let micStream = null;
+    let analyser = null;
+    let animId = null;
+    const canvas = document.getElementById('scopeCanvas');
+    const canvasCtx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    async function toggleMicrophoneOscilloscope() {
+      const btn = document.getElementById('toggleMicBtn');
+      const btnText = document.getElementById('toggleMicText');
+      const placeholder = document.getElementById('scopePlaceholder');
+
+      if (micStream) {
+        // Stop stream
+        micStream.getTracks().forEach(t => t.stop());
+        micStream = null;
+        if (animId) cancelAnimationFrame(animId);
+        btnText.innerText = 'Start Live Mic Stream';
+        btn.classList.remove('bg-rose-600', 'hover:bg-rose-700');
+        btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+        placeholder.classList.remove('hidden');
+        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(micStream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+        source.connect(analyser);
+
+        btnText.innerText = 'Stop Stream';
+        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        btn.classList.add('bg-rose-600', 'hover:bg-rose-700');
+        placeholder.classList.add('hidden');
+
+        drawWaveform();
+      } catch (err) {
+        alert('Could not access microphone: ' + err.message);
+      }
+    }
+
+    function drawWaveform() {
+      animId = requestAnimationFrame(drawWaveform);
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyser.getByteTimeDomainData(dataArray);
+
+      canvasCtx.fillStyle = 'rgb(15, 23, 42)';
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grid lines
+      canvasCtx.lineWidth = 1;
+      canvasCtx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+      canvasCtx.beginPath();
+      canvasCtx.moveTo(0, canvas.height / 2);
+      canvasCtx.lineTo(canvas.width, canvas.height / 2);
+      canvasCtx.stroke();
+
+      canvasCtx.lineWidth = 2;
+      canvasCtx.strokeStyle = '#60a5fa';
+      canvasCtx.beginPath();
+
+      const sliceWidth = canvas.width * 1.0 / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * (canvas.height / 2);
+
+        if (i === 0) canvasCtx.moveTo(x, y);
+        else canvasCtx.lineTo(x, y);
+        x += sliceWidth;
+      }
+
+      canvasCtx.lineTo(canvas.width, canvas.height / 2);
+      canvasCtx.stroke();
+    }
+
+    async function triggerSyntheticAudioTest() {
+      try {
+        const resp = await fetch('/api/test/stage1-audio-input', { method: 'POST' });
+        const data = await resp.json();
+        document.getElementById('testResultBox').classList.remove('hidden');
+        document.getElementById('testResultJson').innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        alert('Test failed: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
