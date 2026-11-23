@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Zoom Interview Suite — Agentic AI Interviewer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Monaco Editor CSS -->
+  <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
+  <style>
+    /* Custom styling for Zoom-like conference layout */
+    .video-tile {
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .active-tool-btn {
+      background-color: #3b82f6 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased overflow-hidden select-none">
+
+  <!-- ===================================================================== -->
+  <!-- 1. Top Conference Status Bar (Meeting ID, Phase, Timer, LLM Pill)     -->
+  <!-- ===================================================================== -->
+  <header class="h-12 bg-slate-900/90 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 z-30 backdrop-blur-md">
+    <!-- Left: Meeting Info & Live Indicator -->
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2 text-xs font-mono">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-slate-200 font-extrabold tracking-wide">ROOM-AI-702</span>
+      </div>
+      <span class="text-slate-600 text-xs">|</span>
+      <div class="flex items-center space-x-1.5 text-xs text-slate-400">
+        <i class="fa-solid fa-shield-halved text-emerald-400 text-[11px]"></i>
+        <span class="font-medium">Encrypted Video Session</span>
+      </div>
+      <span class="text-slate-600 text-xs">|</span>
+      <div id="roleBadgeContainer" class="flex items-center space-x-1.5 bg-blue-950/80 border border-blue-800/80 text-blue-300 px-2.5 py-0.5 rounded-full text-[11px] font-semibold">
+        <i id="roleBadgeIcon" class="fa-solid fa-code text-[10px]"></i>
+        <span id="roleBadgeTitle">Core Software Engineer (Algorithms)</span>
+      </div>
+    </div>
+
+    <!-- Center: Stage & Countdown Timer -->
+    <div class="flex items-center space-x-3 bg-slate-950/80 border border-slate-800 px-3.5 py-1 rounded-full text-xs font-mono">
+      <div class="flex items-center space-x-1.5 text-slate-300">
+        <i class="fa-regular fa-clock text-blue-400"></i>
+        <span id="callTimer" class="font-bold text-white">00:00</span>
+      </div>
+      <span class="text-slate-700">|</span>
+      <span id="fsmStageLabel" class="text-blue-400 font-bold uppercase tracking-wider text-[10px]">INTRO & RAPPORT</span>
+    </div>
+
+    <!-- Right: LLM Switcher, Mode Toggle & Navigation -->
+    <div class="flex items-center space-x-3 text-xs font-semibold">
+      <div id="llmPillMount" class="flex items-center"></div>
+      <div id="contextPillMount" class="flex items-center"></div>
+
+      <!-- Layout Mode Indicator Pill -->
+      <button onclick="toggleVideoStageMode()" id="layoutModeToggleBtn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] transition flex items-center space-x-1.5">
+        <i id="layoutModeIcon" class="fa-solid fa-table-columns text-[10px] text-blue-400"></i>
+        <span id="layoutModeText">Full Video Mode</span>
+      </button>
+
+      <a href="/interview/profiling" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-[11px] flex items-center space-x-1">
+        <i class="fa-solid fa-sliders text-[10px]"></i>
+        <span>Profiling</span>
+      </a>
+
+      <a href="/" class="text-slate-400 hover:text-white transition text-xs">Exit</a>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- 2. Main Collaborative Stage (Dynamic Split: Video Tiles & Workspace) -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 flex min-h-0 relative p-3 gap-3 bg-slate-950">
+
+    <!-- Primary Video Tiles Grid (Zoom-Like Speaker / Gallery Stage) -->
+    <div id="videoStageArea" class="video-tile flex-1 flex flex-col md:flex-row gap-3 min-w-0 transition-all duration-300">
+      
+      <!-- Video Tile 1: Mira · Senior AI Interviewer -->
+      <div id="miraVideoTile" class="video-tile flex-1 bg-slate-900 rounded-3xl border border-slate-800/90 shadow-xl overflow-hidden relative flex flex-col">
+        <!-- Top Info Strip in Tile -->
+        <div class="absolute top-3 left-3 z-20 flex items-center space-x-2">
+          <div class="flex items-center space-x-1.5 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-slate-700 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            <span class="text-xs font-bold text-white">Mira · Senior AI Interviewer</span>
+          </div>
+          <span class="bg-blue-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-2xs">Host</span>
+        </div>
+
+        <div class="absolute top-3 right-3 z-20 flex items-center space-x-1.5 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-mono text-emerald-400 border border-slate-700 shadow-sm">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>16 kHz PCM</span>
+        </div>
+
+        <!-- 2D Reactive Duolingo Avatar Mount -->
+        <div id="miraAvatarMount" class="w-full h-full flex items-center justify-center bg-gradient-to-b from-slate-900 via-indigo-950/40 to-slate-900"></div>
+
+        <!-- Bottom Nameplate & Waveform Strip -->
+        <div class="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
+          <div class="bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-700 flex items-center space-x-2">
+            <i class="fa-solid fa-microphone text-blue-400 text-xs"></i>
+            <span id="miraSpeakingState" class="text-[11px] font-mono text-slate-300 font-semibold">Attentive</span>
+          </div>
+          <div class="bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-700 flex items-center space-x-1.5 text-xs text-blue-400">
+            <span class="w-1 h-3 bg-blue-500 rounded-full animate-pulse"></span>
+            <span class="w-1 h-5 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 100ms;"></span>
+            <span class="w-1 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 200ms;"></span>
+            <span class="w-1 h-4 bg-blue-300 rounded-full animate-pulse" style="animation-delay: 300ms;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Tile 2: Candidate (You) -->
+      <div id="candidateVideoTile" class="video-tile flex-1 bg-slate-900 rounded-3xl border border-slate-800/90 shadow-xl overflow-hidden relative flex flex-col items-center justify-center">
+        <!-- Top Info Strip in Tile -->
+        <div class="absolute top-3 left-3 z-20 flex items-center space-x-2">
+          <div class="flex items-center space-x-1.5 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-slate-700 shadow-sm">
+            <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+            <span class="text-xs font-bold text-white">Candidate (You)</span>
+          </div>
+        </div>
+
+        <div class="absolute top-3 right-3 z-20 flex items-center space-x-1.5 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-mono text-slate-300 border border-slate-700 shadow-sm">
+          <i class="fa-solid fa-shield-check text-blue-400 text-[10px]"></i>
+          <span>Secure Sandbox</span>
+        </div>
+
+        <!-- Live Candidate Webcam Video Element -->
+        <video id="candidateWebcam" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
+
+        <!-- Fallback Candidate Avatar Placeholder (when camera is off) -->
+        <div id="candidateAvatarPlaceholder" class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-slate-900 via-slate-800/40 to-slate-900 space-y-3">
+          <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-600 to-blue-600 text-white font-black text-3xl flex items-center justify-center shadow-lg border-2 border-indigo-400">
+            C
+          </div>
+          <div class="text-center">
+            <div class="text-sm font-bold text-slate-200">Candidate Workspace</div>
+            <p class="text-xs text-slate-500">Camera is muted. Audio & Workspace active.</p>
+          </div>
+        </div>
+
+        <!-- Bottom Audio & Candidate Controls Strip -->
+        <div class="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
+          <div class="bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-700 flex items-center space-x-2">
+            <i id="candidateMicStatusIcon" class="fa-solid fa-microphone-slash text-rose-400 text-xs"></i>
+            <span id="candidateMicStatusText" class="text-[11px] font-mono text-slate-300">Mic Muted</span>
+          </div>
+          <div class="bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-xl border border-slate-700 flex items-center space-x-1 text-slate-400 text-[10px] font-mono">
+            <span>HD 1080p</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dynamic Workspace Center Stage (Reveals smoothly when any tool is clicked) -->
+    <div id="dynamicWorkspaceStage" class="hidden flex-1 flex-col min-w-0 bg-white text-slate-800 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden transition-all duration-300">
+      
+      <!-- Workspace Top Control Strip -->
+      <div class="h-11 bg-slate-50 border-b border-slate-200 px-4 flex items-center justify-between shrink-0">
+        <!-- Switchable Tabs for Open Plugs -->
+        <div id="workspaceTabsHeader" class="flex items-center space-x-1.5 overflow-x-auto py-1">
+          <!-- Dynamically populated tool tabs -->
+        </div>
+
+        <!-- Right: Action Buttons inside Active Workspace -->
+        <div class="flex items-center space-x-2">
+          <button onclick="minimizeWorkspaceToVideo()" title="Minimize Workspace (Return to Full Video Call)" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+            <i class="fa-solid fa-minimize text-[10px]"></i>
+            <span>Video Call View</span>
+          </button>
+          <button onclick="closeCurrentWorkspaceTool()" title="Close Active Tool" class="p-1.5 text-slate-400 hover:text-slate-700 rounded transition">
+            <i class="fa-solid fa-xmark text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mount Container for the Active Plugin -->
+      <div id="activeWorkspacePluginMount" class="flex-1 min-h-0 relative bg-white overflow-hidden">
+        <!-- Active plugin renders here -->
+      </div>
+
+    </div>
+
+    <!-- Floating Chat & Telemetry Slide-Over Pane -->
+    <aside id="chatSlideOver" class="hidden w-80 md:w-96 flex flex-col bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl shrink-0 z-30 transition-all duration-300">
+      <div class="h-11 bg-slate-950 border-b border-slate-800 px-4 flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-xs font-bold text-slate-200">
+          <i class="fa-regular fa-comments text-blue-400"></i>
+          <span>Interview Transcript & Audio Logs</span>
+        </div>
+        <button onclick="toggleChatPane()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Message History Feed -->
+      <div id="chatFeed" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs custom-scrollbar">
+        <!-- Initial Mira Welcome -->
+        <div class="flex items-start space-x-2.5">
+          <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">M</div>
+          <div class="p-3 rounded-2xl rounded-tl-none bg-slate-800 border border-slate-700 text-slate-200 max-w-[85%] space-y-1 shadow-xs">
+            <div class="text-[10px] font-bold text-blue-400 uppercase">Mira · AI Interviewer</div>
+            <p id="chatGreetingText">Welcome to your interview session! We'll start with a few introductory questions. Whenever you need the code editor, terminal, or whiteboard, simply click the tool buttons in the bottom bar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text Utterance Input Bar -->
+      <div class="p-3 bg-slate-950 border-t border-slate-800 flex items-center space-x-2">
+        <input type="text" id="chatInput" placeholder="Type a message or speak via mic..." onkeydown="if(event.key==='Enter') submitCandidateUtterance()" class="flex-1 bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-hidden focus:border-blue-500">
+        <button onclick="submitCandidateUtterance()" class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition shadow-xs shrink-0">
+          <i class="fa-solid fa-paper-plane text-xs"></i>
+        </button>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- 3. Bottom Zoom Conference Control Dock ("Click and it opens")          -->
+  <!-- ===================================================================== -->
+  <footer class="h-20 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between shrink-0 z-40 select-none">
+    
+    <!-- Left Cluster: Audio & Video Device Toggles -->
+    <div class="flex items-center space-x-4">
+      
+      <!-- Microphone Mute / Unmute Button -->
+      <button id="btnToolbarMic" onclick="toggleMic()" class="flex flex-col items-center space-y-1 text-slate-300 hover:text-white transition group">
+        <div id="micIconCircle" class="w-9 h-9 rounded-full bg-rose-950/80 text-rose-400 border border-rose-800/80 flex items-center justify-center text-sm shadow-xs group-hover:bg-rose-900">
+          <i id="micIcon" class="fa-solid fa-microphone-slash"></i>
+        </div>
+        <span id="micLabel" class="text-[10px] font-semibold text-slate-400 group-hover:text-slate-200">Unmute</span>
+      </button>
+
+      <!-- Camera Start / Stop Button -->
+      <button onclick="toggleWebcam()" class="flex flex-col items-center space-y-1 text-slate-300 hover:text-white transition group">
+        <div id="videoIconCircle" class="w-9 h-9 rounded-full bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-center text-sm shadow-xs group-hover:bg-slate-700">
+          <i id="videoIcon" class="fa-solid fa-video-slash"></i>
+        </div>
+        <span id="videoLabel" class="text-[10px] font-semibold text-slate-400 group-hover:text-slate-200">Start Video</span>
+      </button>
+
+      <!-- Audio Level Waveform Monitor -->
+      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 text-xs">
+        <div class="flex items-center space-x-1 text-blue-500">
+          <span class="w-1 h-3 bg-blue-500 rounded-full animate-pulse"></span>
+          <span class="w-1 h-5 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 150ms;"></span>
+          <span class="w-1 h-2 bg-blue-600 rounded-full animate-pulse" style="animation-delay: 300ms;"></span>
+        </div>
+        <span class="text-[10px] font-mono">16 kHz</span>
+      </div>
+
+    </div>
+
+    <!-- Center Cluster: The Pluggable Working Spaces ("Click and that feature opens") -->
+    <div class="flex items-center space-x-2 md:space-x-3 overflow-x-auto py-1">
+      
+      <!-- 1. Code Editor Plug -->
+      <button onclick="openWorkspaceTool('CodeEditor')" id="btnTool_CodeEditor" title="Monaco Code IDE with isolated Python / JS sandbox" class="flex flex-col items-center space-y-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+        <div class="w-8 h-8 rounded-lg bg-blue-950/80 border border-blue-800 text-blue-400 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-code"></i>
+        </div>
+        <span class="text-[10px] font-bold">Code</span>
+      </button>
+
+      <!-- 2. Linux Terminal Plug -->
+      <button onclick="openWorkspaceTool('LinuxTerminal')" id="btnTool_LinuxTerminal" title="Interactive Bash Terminal & Subprocess runner" class="flex flex-col items-center space-y-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+        <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-terminal"></i>
+        </div>
+        <span class="text-[10px] font-bold">Terminal</span>
+      </button>
+
+      <!-- 3. Architecture Whiteboard Plug -->
+      <button onclick="openWorkspaceTool('InfiniteWhiteboard')" id="btnTool_InfiniteWhiteboard" title="Infinite System Architecture Canvas" class="flex flex-col items-center space-y-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+        <div class="w-8 h-8 rounded-lg bg-purple-950/80 border border-purple-800 text-purple-400 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-diagram-project"></i>
+        </div>
+        <span class="text-[10px] font-bold">Whiteboard</span>
+      </button>
+
+      <!-- 4. Financial Spreadsheet Plug -->
+      <button onclick="openWorkspaceTool('SpreadsheetGrid')" id="btnTool_SpreadsheetGrid" title="Reactive Financial Modeler with SUM & EBITDA formulas" class="flex flex-col items-center space-y-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+        <div class="w-8 h-8 rounded-lg bg-amber-950/80 border border-amber-800 text-amber-400 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-table-cells"></i>
+        </div>
+        <span class="text-[10px] font-bold">Spreadsheet</span>
+      </button>
+
+      <!-- 5. SQL Workbench Plug -->
+      <button onclick="openWorkspaceTool('SQLWorkbench')" id="btnTool_SQLWorkbench" title="PostgreSQL Query Runner & Schema Explorer" class="flex flex-col items-center space-y-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+        <div class="w-8 h-8 rounded-lg bg-cyan-950/80 border border-cyan-800 text-cyan-400 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-database"></i>
+        </div>
+        <span class="text-[10px] font-bold">SQL</span>
+      </button>
+
+      <!-- 6. Jupyter Notebook Plug -->
+      <button onclick="openWorkspaceTool('NotebookKernel')" id="btnTool_NotebookKernel" title="Interactive Jupyter Python Cells & Dataframes" class="flex flex-col items-center space-y-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+        <div class="w-8 h-8 rounded-lg bg-orange-950/80 border border-orange-800 text-orange-400 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-book-open"></i>
+        </div>
+        <span class="text-[10px] font-bold">Notebook</span>
+      </button>
+
+      <!-- 7. Live Web Viewport Plug -->
+      <button onclick="openWorkspaceTool('LiveWebPreview')" id="btnTool_LiveWebPreview" title="Rendered DOM / Web Browser Viewport" class="flex flex-col items-center space-y-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+        <div class="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-800 text-emerald-400 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-globe"></i>
+        </div>
+        <span class="text-[10px] font-bold">Browser</span>
+      </button>
+
+      <!-- 8. Problem Statement & Brief Plug -->
+      <button onclick="openWorkspaceTool('CaseBriefReader')" id="btnTool_CaseBriefReader" title="Challenge Specifications & Exhibits" class="flex flex-col items-center space-y-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+        <div class="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800 text-indigo-400 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-file-lines"></i>
+        </div>
+        <span class="text-[10px] font-bold">Brief</span>
+      </button>
+
+      <!-- 9. Scratchpad Notes Plug -->
+      <button onclick="openWorkspaceTool('StructuredNotes')" id="btnTool_StructuredNotes" title="Candidate Scratchpad & MECE Notes" class="flex flex-col items-center space-y-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+        <div class="w-8 h-8 rounded-lg bg-rose-950/80 border border-rose-800 text-rose-400 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <span class="text-[10px] font-bold">Notes</span>
+      </button>
+
+    </div>
+
+    <!-- Right Cluster: Collaboration Actions & Leave Meeting -->
+    <div class="flex items-center space-x-4">
+      
+      <!-- Toggle Chat Transcript -->
+      <button onclick="toggleChatPane()" id="btnToggleChat" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-white transition relative">
+        <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-regular fa-comment-dots"></i>
+          <span id="unreadChatBadge" class="absolute -top-1 -right-1 bg-blue-600 text-white text-[8px] font-bold px-1 rounded-full hidden">1</span>
+        </div>
+        <span class="text-[10px] font-bold">Chat</span>
+      </button>
+
+      <!-- Grade & Export Artifacts -->
+      <button onclick="gradeSessionArtifacts()" class="flex flex-col items-center space-y-1 text-indigo-400 hover:text-indigo-300 transition">
+        <div class="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800 flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-chart-simple"></i>
+        </div>
+        <span class="text-[10px] font-bold">Rubric</span>
+      </button>
+
+      <!-- Leave Conference Call (Red Pill Button) -->
+      <a href="/interviewer-mode" class="px-5 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-md transition flex items-center space-x-1.5">
+        <i class="fa-solid fa-phone-slash text-xs"></i>
+        <span>Leave</span>
+      </a>
+
+    </div>
+
+  </footer>
+
+  <!-- Hidden Voice Player for Mira's vocal output -->
+  <audio id="miraVocalPlayer" class="hidden"></audio>
+
+  <!-- ===================================================================== -->
+  <!-- 4. Rubric & Evaluation Modal                                          -->
+  <!-- ===================================================================== -->
+  <div id="evaluationModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white text-slate-900 rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+            <i class="fa-solid fa-clipboard-check"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm text-slate-900">Session Artifact & Rubric Evaluation</h3>
+            <p class="text-[11px] text-slate-500">Graded against active declarative Role Blueprint criteria</p>
+          </div>
+        </div>
+        <button onclick="document.getElementById('evaluationModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+        <div>
+          <div class="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Composite Overall Score</div>
+          <div id="modalCompositeScore" class="text-2xl font-black text-indigo-700 mt-0.5">8.8 / 10.0</div>
+        </div>
+        <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">Strong Recommendation</span>
+      </div>
+
+      <div id="modalCriteriaList" class="space-y-2 text-xs max-h-60 overflow-y-auto pr-1">
+        <!-- Dynamically rendered criteria -->
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 flex justify-end">
+        <button onclick="document.getElementById('evaluationModal').classList.add('hidden')" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs transition">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/avatar.js"></script>
+  <script src="/static/js/recorder.js"></script>
+  <script src="/static/js/llm_gateway.js"></script>
+  <script src="/static/js/context_hud.js"></script>
+  <script src="/static/js/plugins/plugins_registry.js"></script>
+  <!-- Monaco Editor AMD Loader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+  <script>
+    // State management
+    let activeBlueprint = null;
+    let miraAvatar = null;
+    let pcmRecorder = null;
+    let isRecordingMic = false;
+    let isWebcamActive = false;
+    let webcamMediaStream = null;
+    let activeOpenTools = [];
+    let currentVisibleTool = null;
+    let isWorkspaceSplitMode = false;
+
+    // Call duration timer
+    let callSeconds = 0;
+    setInterval(() => {
+      callSeconds++;
+      const mins = Math.floor(callSeconds / 60);
+      const secs = callSeconds % 60;
+      document.getElementById('callTimer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }, 1000);
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Initialize Mira Duolingo Reactive Vector Rig
+      miraAvatar = new ReactiveAvatar('miraAvatarMount', {
+        name: 'Mira',
+        roleTitle: 'Senior AI Interviewer',
+        theme: 'dark'
+      });
+
+      // 2. Fetch Active Blueprint from Backend
+      await loadActiveBlueprint();
+    });
+
+    async function loadActiveBlueprint() {
+      try {
+        const resp = await fetch('/api/blueprints/active');
+        const data = await resp.json();
+        activeBlueprint = data.blueprint;
+
+        if (activeBlueprint) {
+          document.getElementById('roleBadgeTitle').innerText = activeBlueprint.title;
+          document.getElementById('roleBadgeIcon').className = `fa-solid ${activeBlueprint.icon || 'fa-code'} text-[10px]`;
+        }
+      } catch (err) {
+        console.error('Error fetching active blueprint:', err);
+      }
+    }
+
+    // ========================================================================
+    // 1. Zoom Call Stage & Layout Transitions ("Just click and that feature opens")
+    // ========================================================================
+
+    function openWorkspaceTool(toolId) {
+      if (!window.PLUGINS_REGISTRY[toolId]) {
+        alert(`Tool ${toolId} is being prepared.`);
+        return;
+      }
+
+      // Add to open tools if not present
+      if (!activeOpenTools.includes(toolId)) {
+        activeOpenTools.push(toolId);
+      }
+      currentVisibleTool = toolId;
+
+      // Switch to Workspace Split View
+      switchToWorkspaceView();
+      renderWorkspaceTabs();
+      mountActiveWorkspacePlugin(toolId);
+      highlightActiveToolButton(toolId);
+    }
+
+    function switchToWorkspaceView() {
+      isWorkspaceSplitMode = true;
+      const videoStage = document.getElementById('videoStageArea');
+      const wsStage = document.getElementById('dynamicWorkspaceStage');
+
+      // Shrink video stage to a clean right/top conference rail
+      videoStage.className = 'w-72 md:w-80 flex flex-col gap-2 min-w-0 transition-all duration-300 shrink-0';
+      wsStage.classList.remove('hidden');
+      wsStage.classList.add('flex');
+
+      document.getElementById('layoutModeText').innerText = 'Workspace View';
+      document.getElementById('layoutModeIcon').className = 'fa-solid fa-video text-[10px] text-emerald-400';
+    }
+
+    function minimizeWorkspaceToVideo() {
+      isWorkspaceSplitMode = false;
+      const videoStage = document.getElementById('videoStageArea');
+      const wsStage = document.getElementById('dynamicWorkspaceStage');
+
+      // Expand video stage to full screen
+      videoStage.className = 'flex-1 flex flex-col md:flex-row gap-3 min-w-0 transition-all duration-300';
+      wsStage.classList.add('hidden');
+      wsStage.classList.remove('flex');
+
+      document.getElementById('layoutModeText').innerText = 'Full Video Mode';
+      document.getElementById('layoutModeIcon').className = 'fa-solid fa-table-columns text-[10px] text-blue-400';
+      highlightActiveToolButton(null);
+    }
+
+    function toggleVideoStageMode() {
+      if (isWorkspaceSplitMode) {
+        minimizeWorkspaceToVideo();
+      } else {
+        if (activeOpenTools.length > 0) {
+          openWorkspaceTool(currentVisibleTool || activeOpenTools[0]);
+        } else {
+          openWorkspaceTool('CodeEditor');
+        }
+      }
+    }
+
+    function renderWorkspaceTabs() {
+      const container = document.getElementById('workspaceTabsHeader');
+      container.innerHTML = activeOpenTools.map(tId => {
+        const isActive = tId === currentVisibleTool;
+        return `
+          <button onclick="switchWorkspaceTab('${tId}')" class="px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${isActive ? 'bg-blue-600 text-white shadow-2xs' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}">
+            <i class="fa-solid fa-cube text-[9px]"></i>
+            <span>${tId}</span>
+            <span onclick="event.stopPropagation(); closeToolTab('${tId}')" class="ml-1 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-[9px]"></i></span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function switchWorkspaceTab(toolId) {
+      currentVisibleTool = toolId;
+      renderWorkspaceTabs();
+      mountActiveWorkspacePlugin(toolId);
+      highlightActiveToolButton(toolId);
+    }
+
+    function closeToolTab(toolId) {
+      activeOpenTools = activeOpenTools.filter(t => t !== toolId);
+      if (activeOpenTools.length > 0) {
+        switchWorkspaceTab(activeOpenTools[activeOpenTools.length - 1]);
+      } else {
+        minimizeWorkspaceToVideo();
+      }
+    }
+
+    function closeCurrentWorkspaceTool() {
+      if (currentVisibleTool) closeToolTab(currentVisibleTool);
+    }
+
+    function mountActiveWorkspacePlugin(toolId) {
+      const mount = document.getElementById('activeWorkspacePluginMount');
+      mount.innerHTML = '';
+
+      const PluginClass = window.PLUGINS_REGISTRY[toolId];
+      if (!PluginClass) return;
+
+      const plugin = new PluginClass();
+      window.activePlugins = window.activePlugins || {};
+      window.activePlugins[toolId] = plugin;
+
+      const config = {
+        title: activeBlueprint?.preset_problem?.title || 'Interactive Challenge',
+        description: activeBlueprint?.preset_problem?.description || 'Collaborative workspace connected to Mira AI.',
+        starterCode: activeBlueprint?.preset_problem?.starter_code || '# Write solution here\n'
+      };
+
+      plugin.mount(mount, config, window.EventBus);
+    }
+
+    function highlightActiveToolButton(activeId) {
+      const toolIds = ['CodeEditor', 'LinuxTerminal', 'InfiniteWhiteboard', 'SpreadsheetGrid', 'SQLWorkbench', 'NotebookKernel', 'LiveWebPreview', 'CaseBriefReader', 'StructuredNotes'];
+      toolIds.forEach(id => {
+        const btn = document.getElementById(`btnTool_${id}`);
+        if (btn) {
+          if (id === activeId) {
+            btn.classList.add('active-tool-btn');
+          } else {
+            btn.classList.remove('active-tool-btn');
+          }
+        }
+      });
+    }
+
+    // ========================================================================
+    // 2. Microphone & Camera Video Devices
+    // ========================================================================
+
+    async function toggleMic() {
+      const circle = document.getElementById('micIconCircle');
+      const icon = document.getElementById('micIcon');
+      const label = document.getElementById('micLabel');
+      const candIcon = document.getElementById('candidateMicStatusIcon');
+      const candText = document.getElementById('candidateMicStatusText');
+
+      if (!isRecordingMic) {
+        try {
+          pcmRecorder = new PCMRecorder();
+          await pcmRecorder.start();
+          isRecordingMic = true;
+          circle.className = 'w-9 h-9 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800 flex items-center justify-center text-sm shadow-xs animate-pulse';
+          icon.className = 'fa-solid fa-microphone';
+          label.innerText = 'Mute';
+          candIcon.className = 'fa-solid fa-microphone text-emerald-400 text-xs';
+          candText.innerText = 'Mic Active';
+          miraAvatar.setState('listening');
+        } catch (err) {
+          alert('Microphone access required: ' + err.message);
+        }
+      } else {
+        isRecordingMic = false;
+        circle.className = 'w-9 h-9 rounded-full bg-rose-950/80 text-rose-400 border border-rose-800 flex items-center justify-center text-sm shadow-xs';
+        icon.className = 'fa-solid fa-microphone-slash';
+        label.innerText = 'Unmute';
+        candIcon.className = 'fa-solid fa-microphone-slash text-rose-400 text-xs';
+        candText.innerText = 'Mic Muted';
+
+        if (pcmRecorder) {
+          const wavBlob = await pcmRecorder.stop();
+          if (wavBlob) {
+            const formData = new FormData();
+            formData.append('file', wavBlob, 'candidate_utterance.wav');
+            const resp = await fetch('/api/pipeline/process-audio', {
+              method: 'POST',
+              body: formData
+            });
+            const data = await resp.json();
+            const transcript = data.stages?.stage2_asr?.transcript;
+            if (transcript) {
+              document.getElementById('chatInput').value = transcript;
+              submitCandidateUtterance();
+            }
+          }
+        }
+      }
+    }
+
+    async function toggleWebcam() {
+      const videoEl = document.getElementById('candidateWebcam');
+      const placeholder = document.getElementById('candidateAvatarPlaceholder');
+      const circle = document.getElementById('videoIconCircle');
+      const icon = document.getElementById('videoIcon');
+      const label = document.getElementById('videoLabel');
+
+      if (!isWebcamActive) {
+        try {
+          webcamMediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          videoEl.srcObject = webcamMediaStream;
+          videoEl.classList.remove('hidden');
+          placeholder.classList.add('hidden');
+          isWebcamActive = true;
+          circle.className = 'w-9 h-9 rounded-full bg-blue-950/80 text-blue-400 border border-blue-800 flex items-center justify-center text-sm shadow-xs';
+          icon.className = 'fa-solid fa-video';
+          label.innerText = 'Stop Video';
+        } catch (err) {
+          alert('Camera feed simulation active (or camera permission denied).');
+        }
+      } else {
+        if (webcamMediaStream) {
+          webcamMediaStream.getTracks().forEach(t => t.stop());
+        }
+        videoEl.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        isWebcamActive = false;
+        circle.className = 'w-9 h-9 rounded-full bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-center text-sm shadow-xs';
+        icon.className = 'fa-solid fa-video-slash';
+        label.innerText = 'Start Video';
+      }
+    }
+
+    // ========================================================================
+    // 3. Candidate Conversation & Mira Voice Synthesis
+    // ========================================================================
+
+    async function submitCandidateUtterance() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      // Append candidate utterance to feed
+      const feed = document.getElementById('chatFeed');
+      feed.innerHTML += `
+        <div class="flex items-start space-x-2.5 justify-end">
+          <div class="p-3 rounded-2xl rounded-tr-none bg-blue-600 text-white max-w-[85%] space-y-1 shadow-xs">
+            <div class="text-[10px] font-bold text-blue-200 uppercase">You (Candidate)</div>
+            <p>${text}</p>
+          </div>
+          <div class="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">C</div>
+        </div>
+      `;
+      feed.scrollTop = feed.scrollHeight;
+
+      miraAvatar.setState('thinking');
+      document.getElementById('miraSpeakingState').innerText = 'Analyzing utterance...';
+
+      try {
+        const resp = await fetch('/api/roles/interviewer/turn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ candidate_text: text, mode: 'solo' })
+        });
+        const data = await resp.json();
+
+        // Update FSM stage label
+        if (data.stage) {
+          document.getElementById('fsmStageLabel').innerText = data.stage.split(':')[0].toUpperCase();
+        }
+
+        // Live sentiment reaction
+        const score = data.evaluation?.overall_score || 7.0;
+        if (score >= 8) miraAvatar.setSentiment(0.85, 'Impressed');
+        else if (score <= 5) miraAvatar.setSentiment(-0.4, 'Evaluating');
+        else miraAvatar.setSentiment(0.15, 'Attentive');
+
+        // Check if Mira invites opening a tool
+        const botText = data.bot_response;
+        feed.innerHTML += `
+          <div class="flex items-start space-x-2.5">
+            <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">M</div>
+            <div class="p-3 rounded-2xl rounded-tl-none bg-slate-800 border border-slate-700 text-slate-200 max-w-[85%] space-y-1 shadow-xs">
+              <div class="text-[10px] font-bold text-blue-400 uppercase">Mira · Senior AI Interviewer</div>
+              <p>${botText}</p>
+            </div>
+          </div>
+        `;
+        feed.scrollTop = feed.scrollHeight;
+
+        // Auto-open tools if mentioned in context
+        const lower = botText.toLowerCase();
+        if (lower.includes('code editor') || lower.includes('write your solution') || lower.includes('implement')) {
+          if (!isWorkspaceSplitMode) openWorkspaceTool('CodeEditor');
+        } else if (lower.includes('whiteboard') || lower.includes('draw') || lower.includes('architecture diagram')) {
+          if (!isWorkspaceSplitMode) openWorkspaceTool('InfiniteWhiteboard');
+        } else if (lower.includes('terminal') || lower.includes('command line')) {
+          if (!isWorkspaceSplitMode) openWorkspaceTool('LinuxTerminal');
+        }
+
+        // Synthesize Voice
+        playMiraSpeech(botText);
+
+      } catch (err) {
+        console.error('Turn error:', err);
+        miraAvatar.setState('idle');
+      }
+    }
+
+    async function playMiraSpeech(text) {
+      miraAvatar.setState('speaking');
+      document.getElementById('miraSpeakingState').innerText = 'Speaking...';
+
+      try {
+        const resp = await fetch('/api/test/stage5-tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text, provider: 'pyttsx3' })
+        });
+        const data = await resp.json();
+        if (data.audio_url) {
+          const player = document.getElementById('miraVocalPlayer');
+          player.src = data.audio_url + '?t=' + Date.now();
+          player.play();
+          player.onended = () => {
+            miraAvatar.setState('listening');
+            document.getElementById('miraSpeakingState').innerText = 'Listening';
+          };
+        } else {
+          setTimeout(() => {
+            miraAvatar.setState('listening');
+            document.getElementById('miraSpeakingState').innerText = 'Listening';
+          }, 3000);
+        }
+      } catch (e) {
+        setTimeout(() => {
+          miraAvatar.setState('listening');
+          document.getElementById('miraSpeakingState').innerText = 'Listening';
+        }, 2000);
+      }
+    }
+
+    function toggleChatPane() {
+      const pane = document.getElementById('chatSlideOver');
+      pane.classList.toggle('hidden');
+    }
+
+    // ========================================================================
+    // 4. Rubric Artifact Grading
+    // ========================================================================
+
+    async function gradeSessionArtifacts() {
+      const snapshots = {};
+      for (const [k, v] of Object.entries(window.activePlugins || {})) {
+        if (v && v.getStateSnapshot) {
+          snapshots[k] = v.getStateSnapshot();
+        }
+      }
+
+      try {
+        const resp = await fetch('/api/blueprints/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: 'room-ai-702',
+            blueprint_id: activeBlueprint?.blueprint_id || 'sde-dsa-v1',
+            timestamp: Date.now() / 1000,
+            plugin_snapshots: snapshots
+          })
+        });
+        const report = await resp.json();
+        
+        document.getElementById('modalCompositeScore').innerText = `${report.composite_score} / 10.0`;
+        const list = document.getElementById('modalCriteriaList');
+        list.innerHTML = (report.criteria_breakdown || []).map(c => `
+          <div class="p-2.5 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between">
+            <div>
+              <div class="font-bold text-slate-800">${c.name}</div>
+              <div class="text-[10px] text-slate-500">${c.comments}</div>
+            </div>
+            <span class="font-bold font-mono text-indigo-700 bg-white px-2 py-1 rounded-lg border border-slate-200">${c.score} / 10</span>
+          </div>
+        `).join('');
+
+        document.getElementById('evaluationModal').classList.remove('hidden');
+      } catch (err) {
+        alert('Evaluation report generated with baseline rubric.');
+      }
+    }
+  </script>
+</body>
+</html>
