@@ -88,13 +88,15 @@ class WhisperTransformerASR(IASRService):
         device: str = "cpu",
         compute_type: str = "int8",
         language: str = "en",
-        vad_filter: bool = True
+        vad_filter: bool = True,
+        beam_size: int = 5
     ):
         self.model_size = model_size
         self.device = device
         self.compute_type = compute_type
         self.language = language
         self.vad_filter = vad_filter
+        self.beam_size = beam_size
         self.model = None
         self._is_initialized = False
 
@@ -154,21 +156,35 @@ class WhisperTransformerASR(IASRService):
                     segments, info = self.model.transcribe(
                         payload.file_path,
                         language=lang_param,
-                        beam_size=5,
+                        beam_size=self.beam_size,
                         vad_filter=self.vad_filter
                     )
                     
                     text_parts = []
                     probs = []
+                    segments_list = []
                     for seg in segments:
-                        if seg.text.strip():
-                            text_parts.append(seg.text.strip())
+                        txt = seg.text.strip()
+                        if txt:
+                            text_parts.append(txt)
                             if hasattr(seg, "avg_logprob") and seg.avg_logprob is not None:
                                 probs.append(math.exp(seg.avg_logprob))
+                            segments_list.append({
+                                "start": round(seg.start, 2),
+                                "end": round(seg.end, 2),
+                                "text": txt
+                            })
 
                     full_transcript = " ".join(text_parts).strip()
                     avg_confidence = round(sum(probs) / len(probs), 2) if probs else 0.95
                     elapsed = round(time.time() - start_time, 3)
+
+                    meta = {
+                        "segments": segments_list,
+                        "beam_size": self.beam_size,
+                        "vad_filter": self.vad_filter,
+                        "language_probability": round(float(getattr(info, "language_probability", 1.0)), 3)
+                    }
 
                     return ASRResult(
                         transcript=full_transcript,
@@ -176,7 +192,8 @@ class WhisperTransformerASR(IASRService):
                         language=info.language or self.language,
                         latency_sec=elapsed,
                         provider=f"whisper_{self.model_size}_{self.compute_type}",
-                        status="success" if full_transcript else "unintelligible"
+                        status="success" if full_transcript else "unintelligible",
+                        metadata=meta
                     )
                 else:
                     # Fallback to standard OpenAI Whisper

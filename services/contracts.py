@@ -34,6 +34,7 @@ class ASRResult(BaseModel):
     provider: str = Field(description="Name of the ASR engine (google_speech, whisper, etc.)")
     status: str = Field(default="success", description="success, unintelligible, error")
     error: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Detailed metrics, segments, and audio info")
 
 
 class NLPResult(BaseModel):

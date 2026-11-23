@@ -307,6 +307,136 @@ def test_stage2_asr(req: ASRTestRequest):
     return res.model_dump()
 
 
+@app.post("/api/asr/transcribe-file")
+async def transcribe_audio_file(
+    file: UploadFile = File(...),
+    provider: str = Form("whisper"),
+    vad_filter: bool = Form(True),
+    beam_size: int = Form(5),
+    language: str = Form("en")
+):
+    """
+    Direct Stage 2 ASR Execution on uploaded audio (mic recording or file).
+    Returns real transcription, latency, confidence, word segments, and audio metadata.
+    """
+    import time
+    from services.contracts import AudioPayload
+    from services.asr import GoogleWebSpeechASR, WhisperTransformerASR, MockASR
+
+    ext = os.path.splitext(file.filename)[1] or ".wav"
+    temp_wav_path = os.path.join("storage/temp_audio", f"asr_live_{os.getpid()}_{int(time.time()*1000)}{ext}")
+
+    try:
+        content = await file.read()
+        with open(temp_wav_path, "wb") as f:
+            f.write(content)
+
+        file_size_bytes = len(content)
+        if file_size_bytes < 44:
+            raise HTTPException(status_code=400, detail="Audio file too small or empty")
+
+        if provider in ["whisper", "whisper_tiny"]:
+            asr_svc = WhisperTransformerASR(
+                model_size="tiny.en",
+                compute_type="int8",
+                language=language,
+                vad_filter=vad_filter,
+                beam_size=beam_size
+            )
+        elif provider == "whisper_small":
+            asr_svc = WhisperTransformerASR(
+                model_size="small.en",
+                compute_type="int8",
+                language=language,
+                vad_filter=vad_filter,
+                beam_size=beam_size
+            )
+        elif provider == "google":
+            asr_svc = GoogleWebSpeechASR(language="en-US" if language == "en" else language)
+        else:
+            asr_svc = MockASR(fixed_transcript="Sample recognized audio transcription")
+
+        payload = AudioPayload(
+            file_path=temp_wav_path,
+            source_type="live_test",
+            format=ext.lstrip(".")
+        )
+        res = asr_svc.transcribe(payload)
+        data = res.model_dump()
+        data["file_size_bytes"] = file_size_bytes
+        data["file_name"] = file.filename
+        return data
+
+    finally:
+        if os.path.exists(temp_wav_path):
+            try:
+                os.remove(temp_wav_path)
+            except Exception:
+                pass
+
+
+class ASRBenchmarkRequest(BaseModel):
+    text: Optional[str] = "The quick brown fox jumps over the lazy dog"
+    providers: Optional[List[str]] = ["whisper_tiny", "whisper_small", "google", "mock"]
+
+
+@app.post("/api/asr/benchmark")
+def benchmark_asr_models(req: ASRBenchmarkRequest):
+    """
+    Benchmarking Arena for Stage 2 ASR.
+    Races multiple models on the exact same synthesized audio and computes comparative metrics.
+    """
+    import time
+    from services.contracts import AudioPayload
+    from services.asr import GoogleWebSpeechASR, WhisperTransformerASR, MockASR
+    import pyttsx3
+
+    temp_wav = os.path.join(tempfile.gettempdir(), f"asr_bench_race_{os.getpid()}_{int(time.time()*1000)}.wav")
+    try:
+        engine = pyttsx3.init()
+        engine.save_to_file(req.text or "The quick brown fox jumps over the lazy dog", temp_wav)
+        engine.runAndWait()
+
+        results = []
+        providers_to_test = req.providers or ["whisper_tiny", "whisper_small", "google", "mock"]
+
+        for pid in providers_to_test:
+            if pid in ["whisper_tiny", "whisper"]:
+                svc = WhisperTransformerASR(model_size="tiny.en", compute_type="int8")
+                label = "Whisper Tiny.en (INT8)"
+            elif pid == "whisper_small":
+                svc = WhisperTransformerASR(model_size="small.en", compute_type="int8")
+                label = "Whisper Small.en (INT8)"
+            elif pid == "google":
+                svc = GoogleWebSpeechASR(language="en-US")
+                label = "Google Web Speech (Cloud)"
+            else:
+                svc = MockASR(fixed_transcript=req.text or "Sample")
+                label = "Mock ASR (Synthetic)"
+
+            payload = AudioPayload(file_path=temp_wav, source_type="benchmark", format="wav")
+            res = svc.transcribe(payload)
+            item = res.model_dump()
+            item["display_name"] = label
+            item["word_count"] = len(res.transcript.split()) if res.transcript else 0
+            item["char_count"] = len(res.transcript)
+            results.append(item)
+
+        results.sort(key=lambda x: x["latency_sec"])
+        return {
+            "reference_text": req.text,
+            "results": results,
+            "fastest": results[0]["display_name"] if results else None
+        }
+
+    finally:
+        if os.path.exists(temp_wav):
+            try:
+                os.remove(temp_wav)
+            except Exception:
+                pass
+
+
 @app.post("/api/test/stage3-nlp")
 def test_stage3_nlp(req: NLPTestRequest):
     res = pipeline.nlp.parse(req.text)
@@ -704,6 +834,7 @@ def serve_stage1_audio_input():
     return FileResponse("web/pages/audio_input.html")
 
 @app.get("/asr")
+@app.get("/asr/")
 def serve_stage2_asr():
     return FileResponse("web/pages/asr.html")
 
