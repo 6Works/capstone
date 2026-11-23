@@ -52,10 +52,38 @@ class TestStage2ASRService:
         assert res.transcript == "testing whisper upgrade"
         assert res.provider == "mock_asr"
 
-    def test_whisper_transformer_stub(self):
-        """Verifies Whisper Transformer provider interface and fallback capability."""
-        asr = WhisperTransformerASR(model_size="base")
-        assert asr.model_size == "base"
+    def test_whisper_transformer_contract(self):
+        """Verifies Whisper Transformer provider interface, INT8 quantization, and configuration."""
+        asr = WhisperTransformerASR(model_size="tiny.en", compute_type="int8")
+        assert asr.model_size == "tiny.en"
+        assert asr.compute_type == "int8"
+        assert asr.device == "cpu"
+
+    def test_whisper_transcription_live(self):
+        """Verifies faster-whisper CTranslate2 transcription on acoustic audio."""
+        import tempfile, pyttsx3
+        temp_wav = os.path.join(tempfile.gettempdir(), "test_whisper_transcribe.wav")
+        try:
+            engine = pyttsx3.init()
+            engine.save_to_file("Hello Mira what is the time", temp_wav)
+            engine.runAndWait()
+
+            asr = WhisperTransformerASR(model_size="tiny.en", compute_type="int8")
+            payload = AudioPayload(file_path=temp_wav, source_type="test", format="wav")
+            res = asr.transcribe(payload)
+
+            assert isinstance(res, ASRResult)
+            assert res.status == "success"
+            assert "hello" in res.transcript.lower() or "mira" in res.transcript.lower() or "time" in res.transcript.lower()
+            assert res.confidence > 0.0
+            assert "whisper_tiny.en" in res.provider
+            assert res.latency_sec < 5.0
+        finally:
+            if os.path.exists(temp_wav):
+                try:
+                    os.remove(temp_wav)
+                except Exception:
+                    pass
 
 
 class TestStage3NLPService:
