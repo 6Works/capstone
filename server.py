@@ -40,7 +40,7 @@ app.mount("/static", StaticFiles(directory="web/static"), name="static")
 
 # Active configuration state
 active_config = {
-    "asr_provider": "google",
+    "asr_provider": "whisper",
     "tts_provider": "pyttsx3",
     "nlp_provider": "llm",
     "dialogue_provider": "llm",
@@ -90,8 +90,9 @@ def get_available_providers():
         },
         "available_providers": {
             "asr": [
+                {"id": "whisper", "name": "faster-whisper Tiny.en INT8 (Offline ultra-fast ~200ms)", "status": "active"},
+                {"id": "whisper_small", "name": "faster-whisper Small.en INT8 (Offline high-accuracy)", "status": "active"},
                 {"id": "google", "name": "Google Web Speech (Fast cloud free)", "status": "active"},
-                {"id": "whisper", "name": "Whisper Transformer (Local / HuggingFace)", "status": "ready"},
                 {"id": "mock", "name": "Mock ASR (Synthetic deterministic)", "status": "testing"}
             ],
             "nlp": [
@@ -257,15 +258,52 @@ def test_stage1_audio():
     return payload.model_dump()
 
 
+class ASRTestRequest(BaseModel):
+    text: Optional[str] = "What time is it right now?"
+    provider: Optional[str] = "whisper"
+
+
 @app.post("/api/test/stage2-asr")
-def test_stage2_asr(req: NLPTestRequest):
-    # Simulated transcription testbench
+def test_stage2_asr(req: ASRTestRequest):
+    """Executes live ASR testbench using specified provider (faster-whisper or Google)."""
+    import time
     from services.contracts import AudioPayload
-    payload = AudioPayload(source_type="test", format="wav", duration_sec=1.2)
-    res = pipeline.asr.transcribe(payload)
-    if not res.transcript:
-        res.transcript = req.text
-        res.provider += " (testbench)"
+    from services.asr import GoogleWebSpeechASR, WhisperTransformerASR, MockASR
+
+    target_provider = req.provider or active_config.get("asr_provider", "whisper")
+    if target_provider in ["whisper", "whisper_tiny"]:
+        asr_svc = WhisperTransformerASR(model_size="tiny.en", compute_type="int8")
+    elif target_provider == "whisper_small":
+        asr_svc = WhisperTransformerASR(model_size="small.en", compute_type="int8")
+    elif target_provider == "google":
+        asr_svc = GoogleWebSpeechASR(language="en-US")
+    else:
+        asr_svc = MockASR(fixed_transcript=req.text or "Mock Speech")
+
+    # Synthesize live acoustic waveform with pyttsx3 to exercise end-to-end Whisper inference
+    temp_wav = os.path.join(tempfile.gettempdir(), f"asr_bench_{os.getpid()}_{int(time.time()*1000)}.wav")
+    try:
+        import pyttsx3
+        engine = pyttsx3.init()
+        engine.save_to_file(req.text or "Hello Mira", temp_wav)
+        engine.runAndWait()
+
+        payload = AudioPayload(file_path=temp_wav, source_type="test", format="wav", duration_sec=1.5)
+        res = asr_svc.transcribe(payload)
+    except Exception as e:
+        # Fallback if audio device synthesis is locked
+        payload = AudioPayload(source_type="test", format="wav", duration_sec=1.2)
+        res = asr_svc.transcribe(payload)
+        if not res.transcript:
+            res.transcript = req.text
+            res.provider += " (testbench)"
+    finally:
+        if os.path.exists(temp_wav):
+            try:
+                os.remove(temp_wav)
+            except Exception:
+                pass
+
     return res.model_dump()
 
 
