@@ -46,8 +46,10 @@ class PipelineFactory:
             audio_input = MicrophoneAudioInput()
 
         # 2. Resolve ASR
-        if asr_provider == "whisper":
-            asr: IASRService = WhisperTransformerASR(model_size="base")
+        if asr_provider in ["whisper", "whisper_tiny"]:
+            asr: IASRService = WhisperTransformerASR(model_size="tiny.en", compute_type="int8")
+        elif asr_provider == "whisper_small":
+            asr = WhisperTransformerASR(model_size="small.en", compute_type="int8")
         elif asr_provider == "mock":
             asr = MockASR()
         else:

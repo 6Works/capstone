@@ -6,6 +6,7 @@ Implements IASRService following Open/Closed Principle.
 
 import os
 import time
+import math
 import speech_recognition as sr
 from typing import Optional
 from ..contracts import IASRService, AudioPayload, ASRResult
@@ -70,29 +71,62 @@ class GoogleWebSpeechASR(IASRService):
             )
 
 
+# Module-level model cache to avoid re-loading weights on each turn
+_WHISPER_CACHE = {}
+
+
 class WhisperTransformerASR(IASRService):
     """
-    Modular Whisper Transformer ASR Service.
-    Engineered for plugging in HuggingFace Transformers, OpenAI Whisper, or faster-whisper.
+    High-Performance Offline Whisper Transformer ASR Service powered by faster-whisper (CTranslate2).
+    Supports INT8 CPU quantization, Silero Voice Activity Detection (VAD), and ultra-low latency inference.
+    Adheres strictly to SOLID: Open for extension with any CTranslate2/Whisper model size, closed for modification.
     """
 
-    def __init__(self, model_size: str = "base", device: str = "cpu", language: str = "en"):
+    def __init__(
+        self,
+        model_size: str = "tiny.en",
+        device: str = "cpu",
+        compute_type: str = "int8",
+        language: str = "en",
+        vad_filter: bool = True
+    ):
         self.model_size = model_size
         self.device = device
+        self.compute_type = compute_type
         self.language = language
+        self.vad_filter = vad_filter
         self.model = None
         self._is_initialized = False
 
     def _lazy_init(self):
-        """Lazy load Whisper model weights only when invoked."""
-        if not self._is_initialized:
+        """Lazy load and cache Whisper model weights into memory."""
+        cache_key = f"{self.model_size}_{self.device}_{self.compute_type}"
+        global _WHISPER_CACHE
+
+        if cache_key in _WHISPER_CACHE:
+            self.model = _WHISPER_CACHE[cache_key]
+            self._is_initialized = True
+            return
+
+        try:
+            from faster_whisper import WhisperModel
+            model = WhisperModel(
+                self.model_size,
+                device=self.device,
+                compute_type=self.compute_type
+            )
+            _WHISPER_CACHE[cache_key] = model
+            self.model = model
+            self._is_initialized = True
+        except Exception as e:
+            # Pluggable fallback to openai-whisper if present
             try:
-                # Pluggable: check if faster_whisper or whisper is installed
                 import whisper
-                self.model = whisper.load_model(self.model_size, device=self.device)
+                model = whisper.load_model(self.model_size.split(".")[0], device=self.device)
+                _WHISPER_CACHE[cache_key] = model
+                self.model = model
                 self._is_initialized = True
-            except ImportError:
-                # Graceful fallback: ready-to-load stub
+            except Exception:
                 self.model = None
                 self._is_initialized = True
 
@@ -100,24 +134,69 @@ class WhisperTransformerASR(IASRService):
         start_time = time.time()
         self._lazy_init()
 
-        if self.model is not None and payload.file_path:
-            # Full local Whisper Transformer inference
-            result = self.model.transcribe(payload.file_path, language=self.language)
-            elapsed = round(time.time() - start_time, 3)
+        if not payload.file_path or not os.path.exists(payload.file_path):
             return ASRResult(
-                transcript=result.get("text", "").strip(),
-                confidence=0.95,
+                transcript="",
+                confidence=0.0,
                 language=self.language,
-                latency_sec=elapsed,
-                provider=f"whisper_transformer_{self.model_size}",
-                status="success"
+                latency_sec=0.0,
+                provider=f"whisper_{self.model_size}",
+                status="error",
+                error="Audio file path does not exist"
             )
 
-        # Fallback to Google ASR if whisper weights are not downloaded
-        print("[Whisper ASR] Falling back to standard ASR provider...")
+        if self.model is not None:
+            try:
+                import faster_whisper
+                if isinstance(self.model, faster_whisper.WhisperModel):
+                    # faster-whisper CTranslate2 inference with optional VAD
+                    lang_param = None if self.model_size.endswith(".en") else self.language
+                    segments, info = self.model.transcribe(
+                        payload.file_path,
+                        language=lang_param,
+                        beam_size=5,
+                        vad_filter=self.vad_filter
+                    )
+                    
+                    text_parts = []
+                    probs = []
+                    for seg in segments:
+                        if seg.text.strip():
+                            text_parts.append(seg.text.strip())
+                            if hasattr(seg, "avg_logprob") and seg.avg_logprob is not None:
+                                probs.append(math.exp(seg.avg_logprob))
+
+                    full_transcript = " ".join(text_parts).strip()
+                    avg_confidence = round(sum(probs) / len(probs), 2) if probs else 0.95
+                    elapsed = round(time.time() - start_time, 3)
+
+                    return ASRResult(
+                        transcript=full_transcript,
+                        confidence=avg_confidence,
+                        language=info.language or self.language,
+                        latency_sec=elapsed,
+                        provider=f"whisper_{self.model_size}_{self.compute_type}",
+                        status="success" if full_transcript else "unintelligible"
+                    )
+                else:
+                    # Fallback to standard OpenAI Whisper
+                    result = self.model.transcribe(payload.file_path, language=self.language)
+                    elapsed = round(time.time() - start_time, 3)
+                    return ASRResult(
+                        transcript=result.get("text", "").strip(),
+                        confidence=0.92,
+                        language=self.language,
+                        latency_sec=elapsed,
+                        provider=f"whisper_{self.model_size}",
+                        status="success"
+                    )
+            except Exception as e:
+                print(f"[Whisper ASR] Transcription error: {e}. Falling back...")
+
+        # Graceful fallback to Google Web Speech ASR
         fallback = GoogleWebSpeechASR(language="en-US")
         res = fallback.transcribe(payload)
-        res.provider = f"whisper_transformer_{self.model_size} (fallback)"
+        res.provider = f"whisper_{self.model_size} (fallback)"
         return res
 
 
