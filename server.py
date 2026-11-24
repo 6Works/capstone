@@ -489,14 +489,23 @@ def test_stage5_tts(req: TTSTestRequest):
 
     res = service.synthesize(req.text)
     audio_url = None
+    spectrogram_data = None
     if res.file_path and os.path.exists(res.file_path):
         filename = os.path.basename(res.file_path)
         dest = os.path.join("storage/temp_audio", filename)
         shutil.copyfile(res.file_path, dest)
         audio_url = f"/api/pipeline/audio/{filename}"
 
+        # Module 1: Automatically compute 80-band Mel-Spectrogram & F0 Contour
+        try:
+            from services.tts import AcousticAnalyzer
+            spectrogram_data = AcousticAnalyzer.analyze_wav(dest)
+        except Exception as spec_err:
+            print(f"[AcousticAnalyzer] Spectrogram extraction skipped: {spec_err}")
+
     data = res.model_dump()
     data["audio_url"] = audio_url
+    data["spectrogram"] = spectrogram_data
     return data
 
 
@@ -638,6 +647,110 @@ def benchmark_tts_engines(req: TextNormalizeRequest):
         "status": "success",
         "benchmark_text": req.text,
         "engines": results
+    }
+
+
+class VoiceMorphRequest(BaseModel):
+    profile_id_a: str = "mira_neural"
+    profile_id_b: str = "alex_interviewer"
+    alpha: float = 0.5
+    name: Optional[str] = None
+
+
+class FormantSynthRequest(BaseModel):
+    vowel: str = "a"
+    f0: float = 130.0
+    duration: float = 0.8
+
+
+class SpectrogramRequest(BaseModel):
+    filename: str
+
+
+@app.post("/api/tts/morph-voices")
+def morph_voices(req: VoiceMorphRequest):
+    """
+    Module 5: Acoustic Latent Space Interpolation.
+    Blends two speaker embedding vectors: z_blend = (1-a)*z_A + a*z_B.
+    """
+    from services.tts import voice_cloner
+    morphed = voice_cloner.morph_profiles(
+        profile_id_a=req.profile_id_a,
+        profile_id_b=req.profile_id_b,
+        alpha=req.alpha,
+        custom_name=req.name
+    )
+    return {
+        "status": "success",
+        "message": f"Successfully morphed voices with alpha={req.alpha:.2f}",
+        "profile": morphed.to_dict()
+    }
+
+
+@app.post("/api/tts/spectrogram")
+def get_audio_spectrogram(req: SpectrogramRequest):
+    """
+    Module 1: Returns 80-band Mel-Spectrogram & F0 pitch contour for any audio file.
+    """
+    from services.tts import AcousticAnalyzer
+    path = os.path.join("storage/temp_audio", os.path.basename(req.filename))
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Audio file not found in storage")
+
+    data = AcousticAnalyzer.analyze_wav(path)
+    return data
+
+
+@app.post("/api/tts/formant-synth")
+def synthesize_formant_vowel(req: FormantSynthRequest):
+    """
+    Module 3: Klatt Cascade Formant Synthesizer Simulator.
+    Generates rule-based formant acoustic speech (vocal tract resonators).
+    """
+    from services.tts import FormantSynthesizer, AcousticAnalyzer
+    wav_path = FormantSynthesizer.synthesize_vowel(
+        vowel_key=req.vowel,
+        f0=req.f0,
+        duration=req.duration
+    )
+    filename = os.path.basename(wav_path)
+    dest = os.path.join("storage/temp_audio", filename)
+    shutil.copyfile(wav_path, dest)
+    audio_url = f"/api/pipeline/audio/{filename}"
+
+    # Extract spectrogram of synthesized formant
+    spec = AcousticAnalyzer.analyze_wav(dest)
+
+    return {
+        "status": "success",
+        "vowel": req.vowel,
+        "f0_hz": req.f0,
+        "audio_url": audio_url,
+        "spectrogram": spec
+    }
+
+
+@app.get("/api/tts/homographs")
+def list_supported_homographs():
+    """
+    Module 2: Lists homographs and context-sensitive pronunciation rules.
+    """
+    from services.tts import HomographDisambiguator
+    return {
+        "status": "success",
+        "homographs": HomographDisambiguator.list_homographs()
+    }
+
+
+@app.get("/api/tts/formant-vowels")
+def list_formant_vowels():
+    """
+    Module 3: Lists vowel formant targets (F1, F2, F3) for educational simulation.
+    """
+    from services.tts import FormantSynthesizer
+    return {
+        "status": "success",
+        "vowels": FormantSynthesizer.list_vowels()
     }
 
 
