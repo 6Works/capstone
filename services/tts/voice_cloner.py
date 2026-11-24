@@ -330,6 +330,65 @@ class VoiceCloner:
             json.dump(profile.to_dict(), f, indent=2)
         return out_path
 
+    def morph_profiles(
+        self,
+        profile_id_a: str,
+        profile_id_b: str,
+        alpha: float = 0.5,
+        custom_name: Optional[str] = None
+    ) -> SpeakerProfile:
+        """
+        Interpolates in latent acoustic space between two speaker profiles.
+        Based on Module 5 (Speaker Embeddings & Latent Space Interpolation).
+        alpha = 0.0 -> 100% Profile A; alpha = 1.0 -> 100% Profile B.
+        """
+        prof_a = self.get_profile(profile_id_a) or self.profiles["mira_neural"]
+        prof_b = self.get_profile(profile_id_b) or self.profiles["alex_interviewer"]
+        alpha = max(0.0, min(1.0, float(alpha)))
+
+        # 1. Linear interpolation of scalar acoustic parameters
+        f0 = (1.0 - alpha) * prof_a.fundamental_freq_f0 + alpha * prof_b.fundamental_freq_f0
+        f0_std = (1.0 - alpha) * prof_a.pitch_variability_std + alpha * prof_b.pitch_variability_std
+        centroid = (1.0 - alpha) * prof_a.spectral_centroid + alpha * prof_b.spectral_centroid
+        flatness = (1.0 - alpha) * prof_a.spectral_flatness + alpha * prof_b.spectral_flatness
+        shift = (1.0 - alpha) * prof_a.pitch_shift_semitones + alpha * prof_b.pitch_shift_semitones
+        length = (1.0 - alpha) * prof_a.length_scale + alpha * prof_b.length_scale
+        noise = (1.0 - alpha) * prof_a.noise_scale + alpha * prof_b.noise_scale
+        noise_w = (1.0 - alpha) * prof_a.noise_w_scale + alpha * prof_b.noise_w_scale
+
+        # 2. Spherical normalized interpolation of 128-D embedding vectors
+        va = np.array(prof_a.embedding_vector, dtype=np.float32)
+        vb = np.array(prof_b.embedding_vector, dtype=np.float32)
+        v_blend = (1.0 - alpha) * va + alpha * vb
+        norm = np.linalg.norm(v_blend)
+        if norm > 0:
+            v_blend = v_blend / norm
+
+        gender = "female" if f0 > 180.0 else ("male" if f0 < 145.0 else "neutral")
+        pct_b = int(alpha * 100)
+        pct_a = 100 - pct_b
+        name = custom_name or f"Morph: {prof_a.name.split()[0]} ({pct_a}%) + {prof_b.name.split()[0]} ({pct_b}%)"
+        morph_id = f"morph_{prof_a.profile_id[:4]}_{prof_b.profile_id[:4]}_{int(alpha*100)}"
+
+        morphed_profile = SpeakerProfile(
+            profile_id=morph_id,
+            name=name,
+            description=f"Acoustic latent morph between {prof_a.name} and {prof_b.name} (alpha={alpha:.2f})",
+            gender_estimate=gender,
+            fundamental_freq_f0=round(float(f0), 1),
+            pitch_variability_std=round(float(f0_std), 1),
+            spectral_centroid=round(float(centroid), 1),
+            spectral_flatness=round(float(flatness), 4),
+            pitch_shift_semitones=round(float(shift), 2),
+            length_scale=round(float(length), 2),
+            noise_scale=round(float(noise), 3),
+            noise_w_scale=round(float(noise_w), 3),
+            embedding_vector=[float(x) for x in v_blend]
+        )
+
+        self.save_cloned_profile(morphed_profile)
+        return morphed_profile
+
     @classmethod
     def apply_acoustic_timbre_conditioning(cls, wav_path: str, profile: SpeakerProfile, output_path: str) -> str:
         """

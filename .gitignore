@@ -15,6 +15,8 @@ env/
 # Audio / Storage
 storage/temp_audio/*
 !storage/temp_audio/.gitkeep
+storage/cloned_voices/*
+!storage/cloned_voices/.gitkeep
 
 # Node
 node_modules/
