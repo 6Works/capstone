@@ -3,10 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stage 5: Text-to-Speech (TTS) — Conversational Voice Agent</title>
+  <title>Stage 5: Neural TTS & Voice Cloning Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .tab-btn.active {
+      background-color: #f43f5e;
+      color: #ffffff;
+      box-shadow: 0 4px 6px -1px rgba(244, 63, 94, 0.25);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex font-sans antialiased overflow-x-hidden">
 
@@ -22,13 +37,13 @@
         <a href="/dialogue" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left"></i></a>
         <span class="text-xs font-semibold text-slate-400">Platform</span>
         <span class="text-xs text-slate-300">/</span>
-        <span class="text-xs font-bold text-pink-600">Stage 5: Text-to-Speech (TTS) & Human Cadence</span>
+        <span class="text-xs font-bold text-rose-600">Stage 5: Neural TTS & Zero-Shot Voice Cloning</span>
       </div>
       
       <div class="flex items-center space-x-3">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
-          <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-pink-600 animate-pulse"></span>
-          Input Contract: ITTSService
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+          <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-600 animate-pulse"></span>
+          VITS Acoustic Model + HiFi Vocoder
         </span>
         <a href="/audio-output" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition flex items-center space-x-1.5 shadow-sm">
           <span>Next: Stage 6 (Audio Output)</span>
@@ -41,246 +56,600 @@
     <div class="bg-slate-900 text-white px-8 py-5 border-b border-slate-800">
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-pink-400 mb-1">
-            <i class="fa-solid fa-file-audio"></i>
-            <span>Stage 5 of 6 · Neural Acoustic Synthesis</span>
+          <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-rose-400 mb-1">
+            <i class="fa-solid fa-waveform-lines"></i>
+            <span>Stage 5 of 6 · The Sound of AI Architecture</span>
           </div>
-          <h1 class="text-2xl font-black tracking-tight">Voice Synthesis, Human Cadence & Micro-Pause Injection</h1>
+          <h1 class="text-2xl font-black tracking-tight">Neural Text-to-Speech & Zero-Shot Voice Cloning Studio</h1>
           <p class="text-sm text-slate-400 mt-1 max-w-2xl">
-            Converts text responses into natural, human-sounding acoustic waveforms with realistic breathing pauses, emotional inflections, and pluggable synthesis backends (pyttsx3, ElevenLabs, gTTS).
+            Text Normalization (NSW), G2P Phonemization, 128-D Speaker Embeddings, and End-to-End VITS Neural Synthesis with Local ONNX Inference.
           </p>
         </div>
         
-        <!-- Mini 6-stage indicator -->
-        <div class="flex items-center space-x-1.5 bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-xs">
-          <span class="px-2 py-1 text-slate-400">1. Input</span>
-          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
-          <span class="px-2 py-1 text-slate-400">2. ASR</span>
-          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
-          <span class="px-2 py-1 text-slate-400">3. NLP</span>
-          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
-          <span class="px-2 py-1 text-slate-400">4. DM</span>
-          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
-          <div class="px-2.5 py-1 rounded-lg bg-pink-600 text-white font-bold flex items-center space-x-1 shadow-sm">
-            <i class="fa-solid fa-file-audio"></i>
-            <span>5. TTS</span>
-          </div>
-          <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
-          <span class="px-2 py-1 text-slate-400">6. Output</span>
+        <!-- Tab Switcher Header -->
+        <div class="flex items-center space-x-1 bg-slate-800/90 p-1.5 rounded-xl border border-slate-700 text-xs font-bold">
+          <button onclick="switchTab('synthesis')" id="tabBtn-synthesis" class="tab-btn active px-3.5 py-2 rounded-lg transition flex items-center space-x-2">
+            <i class="fa-solid fa-microphone-lines"></i>
+            <span>Synthesis Studio</span>
+          </button>
+          <button onclick="switchTab('cloning')" id="tabBtn-cloning" class="tab-btn text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition flex items-center space-x-2">
+            <i class="fa-solid fa-clone"></i>
+            <span>Voice Cloning Lab</span>
+          </button>
+          <button onclick="switchTab('visualizer')" id="tabBtn-visualizer" class="tab-btn text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition flex items-center space-x-2">
+            <i class="fa-solid fa-diagram-project"></i>
+            <span>Pipeline Architecture</span>
+          </button>
+          <button onclick="switchTab('benchmark')" id="tabBtn-benchmark" class="tab-btn text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition flex items-center space-x-2">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Engine Arena</span>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Main Content Area -->
+    <!-- Main Content Tabs -->
     <main class="p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
       
-      <!-- Interactive Voice Synthesizer & Cadence Tester -->
-      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-        <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-slate-100 gap-3">
-          <div>
-            <h2 class="text-lg font-bold text-slate-900 flex items-center">
-              <i class="fa-solid fa-sliders text-pink-600 mr-2"></i>
-              Live Acoustic Voice Synthesis & Cadence Workbench
-            </h2>
-            <p class="text-xs text-slate-500">Test voice rendering, adjust speech rates, and preview micro-pause timing.</p>
-          </div>
-          <div class="flex items-center space-x-3">
-            <div class="flex items-center space-x-1.5 text-xs">
-              <span class="text-slate-500 font-semibold">Engine:</span>
-              <select id="ttsEngineSelect" class="bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-700">
-                <option value="pyttsx3">pyttsx3 SAPI5 (Offline Native Windows)</option>
-                <option value="elevenlabs">ElevenLabs (Human Cadence & Breaths)</option>
-                <option value="gtts">Google TTS (MP3 Stream)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="md:col-span-2 space-y-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Text for Voice Synthesis:</label>
-              <textarea id="ttsTextInput" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-pink-500 leading-relaxed font-sans">Hello! I am Mira. I can answer questions, perform calculations, and guide you through our decoupled architecture.</textarea>
-            </div>
-
-            <!-- Prosody Controls -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-              <div>
-                <div class="flex justify-between font-bold text-slate-700 mb-1">
-                  <span>Speech Rate (WPM):</span>
-                  <span id="rateVal" class="text-pink-600 font-mono">175 WPM</span>
-                </div>
-                <input type="range" id="speechRateSlider" min="100" max="250" value="175" oninput="document.getElementById('rateVal').innerText = this.value + ' WPM'" class="w-full accent-pink-600">
-                <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
-                  <span>100 (Slow)</span>
-                  <span>175 (Natural)</span>
-                  <span>250 (Rapid)</span>
-                </div>
-              </div>
-
-              <div>
-                <div class="flex justify-between font-bold text-slate-700 mb-1">
-                  <span>Natural Cadence Pauses:</span>
-                  <span class="text-emerald-600 font-bold">Enabled</span>
-                </div>
-                <label class="flex items-center space-x-2 mt-2 cursor-pointer">
-                  <input type="checkbox" id="pauseToggle" checked class="w-4 h-4 accent-pink-600 rounded">
-                  <span class="text-[11px] text-slate-600">Auto-inject 180ms breath micro-pauses at punctuation</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="flex items-center space-x-3">
-              <button onclick="synthesizeSpeech()" class="px-6 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
-                <i class="fa-solid fa-volume-high"></i>
-                <span id="synthBtnText">Synthesize & Play Voice</span>
-              </button>
-              <span id="synthStatus" class="text-xs text-slate-500 italic">Ready to synthesize</span>
-            </div>
-          </div>
-
-          <!-- Waveform & Audio Player Card -->
-          <div class="p-5 bg-slate-900 rounded-xl text-slate-100 flex flex-col justify-between space-y-4">
-            <div>
-              <div class="text-[10px] font-bold uppercase tracking-widest text-pink-400 mb-2">Acoustic Audio Playback</div>
-              
-              <!-- HTML5 Audio -->
-              <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 space-y-2">
-                <audio id="ttsAudioPlayer" controls class="w-full h-8"></audio>
-                <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1">
-                  <span>Status: <span id="playerState" class="text-pink-400">Idle</span></span>
-                  <span>Format: <span id="playerFormat" class="text-pink-400">PCM WAV</span></span>
-                </div>
-              </div>
-            </div>
-
-            <div class="p-3 bg-slate-800/60 rounded-lg border border-slate-700 font-mono text-[11px] text-slate-300 space-y-1">
-              <div class="text-[10px] font-bold text-slate-400 uppercase">Synthesis Telemetry:</div>
-              <div class="flex justify-between">
-                <span>Latency:</span>
-                <span id="ttsLatency" class="text-emerald-400 font-bold">-- ms</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Voice Backend:</span>
-                <span id="ttsBackendName" class="text-pink-400 font-bold">pyttsx3</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Output File:</span>
-                <span id="ttsFileName" class="text-slate-400 truncate max-w-[140px]">--</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Deep Dive: Human Cadence & Pauses -->
-      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- ==================================================================== -->
+      <!-- TAB 1: NEURAL SYNTHESIS & PROSODY STUDIO -->
+      <!-- ==================================================================== -->
+      <div id="tabContent-synthesis" class="space-y-6">
         
-        <!-- Left: Why Human Speech Has Pauses -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-          <h3 class="text-base font-bold text-slate-900 flex items-center">
-            <i class="fa-solid fa-lungs text-pink-600 mr-2"></i>
-            Acoustic Cadence & Breathing Mechanics
-          </h3>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            Traditional TTS sounds robotic because synthetic engines speak at a flat, unvarying tempo. Human conversational speech is punctuated by physiological and cognitive pauses:
-          </p>
+        <!-- Top Controls: Persona & Synthesis Settings -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-100 gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 flex items-center">
+                <i class="fa-solid fa-sliders text-rose-600 mr-2"></i>
+                Neural Voice Synthesis & Cadence Workbench
+              </h2>
+              <p class="text-xs text-slate-500">Synthesize text with VITS neural acoustic modeling conditioned on speaker timbre.</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+              <!-- Engine Selector -->
+              <div class="flex items-center space-x-2 text-xs">
+                <span class="text-slate-500 font-semibold">Engine:</span>
+                <select id="ttsEngineSelect" onchange="onEngineChange()" class="bg-slate-100 border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700">
+                  <option value="neural_vits" selected>Neural VITS (Zero-Shot Local ONNX)</option>
+                  <option value="pyttsx3">pyttsx3 SAPI5 (Windows Offline)</option>
+                  <option value="elevenlabs">ElevenLabs (Human Cadence & Breaths)</option>
+                  <option value="gtts">Google TTS (Cloud Stream)</option>
+                </select>
+              </div>
 
-          <div class="space-y-3 text-xs">
-            <div class="p-3 bg-pink-50/50 rounded-xl border border-pink-200 space-y-1">
-              <span class="font-bold text-pink-900">Clause & Comma Micro-Pauses (120 - 220 ms):</span>
-              <p class="text-[11px] text-slate-600">
-                Short vocal tract relaxations allowing listeners to process preceding cognitive phrases before the subsequent clause begins.
-              </p>
+              <!-- Speaker Profile Selector -->
+              <div id="voiceProfileContainer" class="flex items-center space-x-2 text-xs">
+                <span class="text-slate-500 font-semibold">Vocal Profile:</span>
+                <select id="voiceProfileSelect" class="bg-rose-50 border border-rose-300 rounded-lg px-3 py-1.5 text-xs font-bold text-rose-800">
+                  <option value="mira_neural">Mira (Warm Conversational - 218Hz)</option>
+                  <option value="alex_interviewer">Alex (Technical Interviewer - 124Hz)</option>
+                  <option value="sarah_executive">Sarah (Executive Recruiter - 238Hz)</option>
+                  <option value="david_architect">David (Systems Architect - 98Hz)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Input Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-4">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="text-xs font-bold text-slate-700">Prompt for Neural Synthesis:</label>
+                  <div class="flex items-center space-x-2">
+                    <span class="text-[11px] text-slate-400">Course Presets:</span>
+                    <button onclick="setSamplePrompt('nsw')" class="text-[11px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">NSW & Currency</button>
+                    <button onclick="setSamplePrompt('tech')" class="text-[11px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">Tech Architecture</button>
+                    <button onclick="setSamplePrompt('greeting')" class="text-[11px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">Interviewer</button>
+                  </div>
+                </div>
+                <textarea id="ttsTextInput" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-rose-500 leading-relaxed font-sans">Hello! In 2026, our decoupled voice architecture processes $4.50 transactions and 99.5% of ASR requests under 150ms.</textarea>
+              </div>
+
+              <!-- Prosody & Cadence Parameters -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                <div>
+                  <div class="flex justify-between font-bold text-slate-700 mb-1">
+                    <span>Speech Rate:</span>
+                    <span id="rateVal" class="text-rose-600 font-mono">175 WPM</span>
+                  </div>
+                  <input type="range" id="speechRateSlider" min="110" max="240" value="175" oninput="document.getElementById('rateVal').innerText = this.value + ' WPM'" class="w-full accent-rose-600">
+                  <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                    <span>Slow</span>
+                    <span>Natural</span>
+                    <span>Rapid</span>
+                  </div>
+                </div>
+
+                <div class="flex flex-col justify-center">
+                  <label class="flex items-center space-x-2 cursor-pointer font-bold text-slate-700">
+                    <input type="checkbox" id="pauseToggle" checked class="w-4 h-4 accent-rose-600 rounded">
+                    <span>Micro-Pause Breaths</span>
+                  </label>
+                  <span class="text-[10px] text-slate-500 mt-1">180ms physiological pauses at clauses & periods</span>
+                </div>
+
+                <div class="flex flex-col justify-center">
+                  <label class="flex items-center space-x-2 cursor-pointer font-bold text-slate-700">
+                    <input type="checkbox" id="normToggle" checked class="w-4 h-4 accent-rose-600 rounded">
+                    <span>Text Normalization (NSW)</span>
+                  </label>
+                  <span class="text-[10px] text-slate-500 mt-1">Expands numbers, currencies & technical acronyms</span>
+                </div>
+              </div>
+
+              <!-- Action Bar -->
+              <div class="flex items-center space-x-3">
+                <button onclick="synthesizeSpeech()" id="synthBtn" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
+                  <i class="fa-solid fa-volume-high"></i>
+                  <span id="synthBtnText">Synthesize & Audition</span>
+                </button>
+                <button onclick="inspectFrontEnd()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center space-x-1.5">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <span>Inspect G2P Phonetics</span>
+                </button>
+                <span id="synthStatus" class="text-xs text-slate-500 italic">Ready</span>
+              </div>
             </div>
 
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-              <span class="font-bold text-slate-900">Sentence Boundaries & Inhalations (300 - 550 ms):</span>
-              <p class="text-[11px] text-slate-600">
-                Full stops and semicolons require complete vocal fold abduction for lung replenishment. Omitting this causes auditory fatigue.
-              </p>
-            </div>
+            <!-- Waveform & Acoustic Playback Card -->
+            <div class="p-5 bg-slate-900 rounded-xl text-slate-100 flex flex-col justify-between space-y-4">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-bold uppercase tracking-widest text-rose-400">Acoustic Playback</span>
+                  <span id="playerBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-rose-950 border border-rose-800 text-rose-300 font-mono">16000 Hz</span>
+                </div>
+                
+                <canvas id="waveformCanvas" width="300" height="60" class="w-full h-14 bg-slate-950 rounded-lg border border-slate-800 mb-3"></canvas>
 
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-              <span class="font-bold text-slate-900">The add_human_pauses() Transformation:</span>
-              <p class="text-[11px] text-slate-600">
-                Our decoupled service transforms plain text strings by inserting phonetic breath markers and calibrated punctuation ellipses before passing to the vocoder.
-              </p>
+                <!-- HTML5 Audio -->
+                <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700 space-y-2">
+                  <audio id="ttsAudioPlayer" controls class="w-full h-8"></audio>
+                  <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-0.5">
+                    <span>State: <span id="playerState" class="text-rose-400 font-bold">Idle</span></span>
+                    <span>Format: <span id="playerFormat" class="text-rose-400 font-bold">PCM WAV</span></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Acoustic Telemetry -->
+              <div class="p-3 bg-slate-800/60 rounded-lg border border-slate-700 font-mono text-[11px] text-slate-300 space-y-1">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Synthesis Telemetry:</div>
+                <div class="flex justify-between">
+                  <span>Latency:</span>
+                  <span id="ttsLatency" class="text-emerald-400 font-bold">-- ms</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Voice Provider:</span>
+                  <span id="ttsBackendName" class="text-rose-400 font-bold">neural_vits</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Fundamental F0:</span>
+                  <span id="ttsF0" class="text-sky-400">-- Hz</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Spectral Centroid:</span>
+                  <span id="ttsCentroid" class="text-amber-400">-- Hz</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Right: Modern Voice Architecture Comparison -->
+        <!-- Text Front-End & G2P Phoneme Inspector Panel -->
+        <div id="frontEndInspectorCard" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-language text-rose-600 mr-2"></i>
+              Chapter 3 Front-End Inspector: Text Normalization (NSW) & G2P Phonemes
+            </h3>
+            <span class="text-xs text-slate-400">Phonemic transcription for acoustic models</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="font-bold text-slate-700 flex items-center justify-between">
+                <span>Normalized Spoken Orthography:</span>
+                <span id="normChangesBadge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">NSW Expanded</span>
+              </div>
+              <p id="normalizedOutput" class="text-slate-800 font-medium font-sans leading-relaxed">
+                Hello! In twenty twenty-six, our decoupled voice architecture processes four dollars and fifty cents transactions and ninety-nine point five percent of A S R requests under one hundred and fifty milliseconds.
+              </p>
+            </div>
+
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="font-bold text-slate-700 flex items-center justify-between">
+                <span>International Phonetic Alphabet (IPA):</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold">Phonemes</span>
+              </div>
+              <p id="ipaOutput" class="text-rose-900 font-mono font-medium leading-relaxed">
+                həˈloʊ ! ɪn ˈtwɛnti ˈtwɛnti-sɪks , aʊər diːˈkʌpəld vɔɪs ˈɑːrkɪtɛktʃər ...
+              </p>
+            </div>
+          </div>
+
+          <!-- Phoneme Token Breakdown Stream -->
+          <div>
+            <div class="text-[11px] font-bold text-slate-600 uppercase mb-2">Phonetic Token Sequence:</div>
+            <div id="phonemeChipsContainer" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scroll p-2 bg-slate-50 rounded-xl border border-slate-200">
+              <!-- Dynamically populated chips -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================================================================== -->
+      <!-- TAB 2: ZERO-SHOT VOICE CLONING LAB -->
+      <!-- ==================================================================== -->
+      <div id="tabContent-cloning" class="hidden space-y-6">
+        
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="pb-3 border-b border-slate-100">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-clone text-rose-600 mr-2"></i>
+              Zero-Shot Voice Cloning Laboratory
+            </h2>
+            <p class="text-xs text-slate-500">Record 5 seconds of reference audio or upload a WAV file to extract speaker embeddings and clone vocal identity.</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Left: Audio Capture & Profile Input -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Cloned Voice Name:</label>
+                <input type="text" id="cloneVoiceName" value="Interview Candidate Voice" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800 font-semibold focus:outline-hidden focus:ring-2 focus:ring-rose-500">
+              </div>
+
+              <!-- Dual Input: Mic Record or File Upload -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                
+                <!-- Mic Recorder Card -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 flex flex-col justify-between">
+                  <div>
+                    <span class="text-xs font-bold text-slate-800 flex items-center">
+                      <i class="fa-solid fa-microphone text-rose-600 mr-1.5"></i>
+                      Microphone Sample (5s)
+                    </span>
+                    <p class="text-[11px] text-slate-500 mt-1">Speak naturally for 5 seconds to capture pitch contour and timbre.</p>
+                  </div>
+                  
+                  <div class="space-y-2">
+                    <button onclick="toggleCloningRecord()" id="cloneRecBtn" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-lg transition flex items-center justify-center space-x-1.5">
+                      <i class="fa-solid fa-circle"></i>
+                      <span id="cloneRecBtnText">Record 5s Sample</span>
+                    </button>
+                    <div id="cloneRecTimer" class="text-[11px] text-center font-mono text-slate-400">0.0s / 5.0s</div>
+                  </div>
+                </div>
+
+                <!-- File Upload Card -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 flex flex-col justify-between">
+                  <div>
+                    <span class="text-xs font-bold text-slate-800 flex items-center">
+                      <i class="fa-solid fa-upload text-blue-600 mr-1.5"></i>
+                      Upload Reference Audio
+                    </span>
+                    <p class="text-[11px] text-slate-500 mt-1">Upload an existing clean WAV or MP3 recording of target speaker.</p>
+                  </div>
+
+                  <div>
+                    <input type="file" id="cloneAudioFileInput" accept="audio/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                  </div>
+                </div>
+
+              </div>
+
+              <button onclick="submitVoiceCloning()" id="processCloneBtn" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-brain"></i>
+                <span id="processCloneBtnText">Extract Acoustic Embeddings & Clone Voice</span>
+              </button>
+              
+              <div id="cloneStatusMsg" class="text-xs text-center text-slate-500">Awaiting audio input...</div>
+            </div>
+
+            <!-- Right: Extracted Acoustic Identity & 128-D Embedding -->
+            <div class="p-5 bg-slate-900 rounded-xl text-slate-100 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span class="text-[11px] font-bold uppercase tracking-widest text-rose-400">Extracted Acoustic Profile</span>
+                <span id="cloneGenderBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">Neutral</span>
+              </div>
+
+              <!-- Acoustic Features Grid -->
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="p-2.5 bg-slate-800/80 rounded-lg border border-slate-700">
+                  <div class="text-[10px] text-slate-400">Fundamental F0:</div>
+                  <div id="profileF0" class="text-lg font-bold text-sky-400 font-mono">-- Hz</div>
+                  <div class="text-[10px] text-slate-500">Vocal fold vibration rate</div>
+                </div>
+
+                <div class="p-2.5 bg-slate-800/80 rounded-lg border border-slate-700">
+                  <div class="text-[10px] text-slate-400">Spectral Centroid:</div>
+                  <div id="profileCentroid" class="text-lg font-bold text-amber-400 font-mono">-- Hz</div>
+                  <div class="text-[10px] text-slate-500">Brightness / Timbre</div>
+                </div>
+
+                <div class="p-2.5 bg-slate-800/80 rounded-lg border border-slate-700">
+                  <div class="text-[10px] text-slate-400">Pitch Shift Offset:</div>
+                  <div id="profileShift" class="text-lg font-bold text-rose-400 font-mono">-- st</div>
+                  <div class="text-[10px] text-slate-500">Relative to base model</div>
+                </div>
+
+                <div class="p-2.5 bg-slate-800/80 rounded-lg border border-slate-700">
+                  <div class="text-[10px] text-slate-400">Duration Scale:</div>
+                  <div id="profileCadence" class="text-lg font-bold text-emerald-400 font-mono">-- x</div>
+                  <div class="text-[10px] text-slate-500">Cadence tempo multiplier</div>
+                </div>
+              </div>
+
+              <!-- 128-D Embedding Preview Canvas -->
+              <div>
+                <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+                  <span>128-Dimensional Latent Embedding Vector (z_spk):</span>
+                  <span class="font-mono text-rose-400">||z|| = 1.0</span>
+                </div>
+                <canvas id="embeddingCanvas" width="300" height="40" class="w-full h-10 bg-slate-950 rounded-lg border border-slate-800"></canvas>
+              </div>
+
+              <!-- Instant Audition Button -->
+              <div class="pt-2">
+                <button onclick="auditionClonedVoice()" id="auditionCloneBtn" disabled class="w-full py-2.5 bg-rose-600/50 cursor-not-allowed text-white font-bold text-xs rounded-lg transition flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-play"></i>
+                  <span>Audition Synthesis in Cloned Voice</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Saved Profiles Table -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-          <h3 class="text-base font-bold text-slate-900 flex items-center">
-            <i class="fa-solid fa-microchip text-pink-600 mr-2"></i>
-            Voice Providers Architectural Comparison
-          </h3>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="text-base font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-address-book text-rose-600 mr-2"></i>
+              Registered Voice Profiles & Acoustic Archetypes
+            </h3>
+            <button onclick="refreshProfilesList()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold"><i class="fa-solid fa-arrows-rotate mr-1"></i> Refresh</button>
+          </div>
 
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse">
               <thead>
                 <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold">
-                  <th class="p-2.5">Feature</th>
-                  <th class="p-2.5 text-pink-700">ElevenLabs</th>
-                  <th class="p-2.5 text-blue-700">pyttsx3 SAPI5</th>
+                  <th class="p-3">Profile ID</th>
+                  <th class="p-3">Voice Name</th>
+                  <th class="p-3">Gender / Timbre</th>
+                  <th class="p-3">F0 (Pitch)</th>
+                  <th class="p-3">Centroid</th>
+                  <th class="p-3">Pitch Shift</th>
+                  <th class="p-3">Action</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100 text-[11px]">
+              <tbody id="profilesTableBody" class="divide-y divide-slate-100 text-[11px]">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================================================================== -->
+      <!-- TAB 3: 2-STAGE NEURAL PIPELINE VISUALIZER -->
+      <!-- ==================================================================== -->
+      <div id="tabContent-visualizer" class="hidden space-y-6">
+        
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="pb-3 border-b border-slate-100">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-diagram-project text-rose-600 mr-2"></i>
+              Neural TTS & Voice Cloning Course Architecture
+            </h2>
+            <p class="text-xs text-slate-500">Interactive walkthrough of the 4-tier neural pipeline taught in 'The Sound of AI' curriculum.</p>
+          </div>
+
+          <!-- Flowchart Stages -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            
+            <!-- Stage 1: Text Front-End -->
+            <div class="p-4 bg-rose-50 rounded-xl border border-rose-200 space-y-2">
+              <div class="flex items-center space-x-2 text-rose-700 font-bold text-xs uppercase">
+                <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px]">1</span>
+                <span>Text Front-End</span>
+              </div>
+              <p class="text-[11px] text-slate-600 font-medium">
+                Converts unstructured orthography into standardized linguistic tokens.
+              </p>
+              <ul class="text-[10px] text-slate-500 space-y-1 pt-1 list-disc list-inside">
+                <li>NSW Normalization ($4.50 -> words)</li>
+                <li>G2P Phonemization (IPA / CMU)</li>
+                <li>Lexical Stress Marking</li>
+              </ul>
+            </div>
+
+            <!-- Stage 2: Speaker Encoder -->
+            <div class="p-4 bg-sky-50 rounded-xl border border-sky-200 space-y-2">
+              <div class="flex items-center space-x-2 text-sky-700 font-bold text-xs uppercase">
+                <span class="w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px]">2</span>
+                <span>Speaker Encoder</span>
+              </div>
+              <p class="text-[11px] text-slate-600 font-medium">
+                Extracts vocal identity from 3-5 seconds of target speaker audio.
+              </p>
+              <ul class="text-[10px] text-slate-500 space-y-1 pt-1 list-disc list-inside">
+                <li>Pitch Contour (F0 estimation)</li>
+                <li>Spectral Centroid (Timbre)</li>
+                <li>128-D Acoustic Latent Embedding</li>
+              </ul>
+            </div>
+
+            <!-- Stage 3: Acoustic Model -->
+            <div class="p-4 bg-purple-50 rounded-xl border border-purple-200 space-y-2">
+              <div class="flex items-center space-x-2 text-purple-700 font-bold text-xs uppercase">
+                <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">3</span>
+                <span>Acoustic Modeling</span>
+              </div>
+              <p class="text-[11px] text-slate-600 font-medium">
+                Maps phoneme tokens + speaker embedding into intermediate representation.
+              </p>
+              <ul class="text-[10px] text-slate-500 space-y-1 pt-1 list-disc list-inside">
+                <li>VITS Normalizing Flow Prior</li>
+                <li>Duration & Pitch Predictor</li>
+                <li>Stochastic Latent Alignment</li>
+              </ul>
+            </div>
+
+            <!-- Stage 4: Neural Vocoder -->
+            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 space-y-2">
+              <div class="flex items-center space-x-2 text-emerald-700 font-bold text-xs uppercase">
+                <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">4</span>
+                <span>Neural Vocoder</span>
+              </div>
+              <p class="text-[11px] text-slate-600 font-medium">
+                Reconstructs high-fidelity continuous time-domain speech waveforms.
+              </p>
+              <ul class="text-[10px] text-slate-500 space-y-1 pt-1 list-disc list-inside">
+                <li>HiFi-GAN Transposed Convolutions</li>
+                <li>Multi-Receptive Field Fusion</li>
+                <li>16 kHz Continuous Audio Waveform</li>
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- Psychoacoustics & Speech Physics Deep Dive -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div class="p-5 bg-slate-900 rounded-xl text-slate-100 space-y-3">
+              <h4 class="text-xs font-bold uppercase tracking-widest text-rose-400 flex items-center">
+                <i class="fa-solid fa-lungs mr-2"></i>
+                Vocal Tract Physics (Chapter 2)
+              </h4>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Human speech generation relies on the source-filter model:
+              </p>
+              <div class="space-y-2 text-xs">
+                <div class="p-2.5 bg-slate-800 rounded-lg border border-slate-700">
+                  <span class="font-bold text-sky-400">1. Vocal Fold Excitation (Source):</span>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Airflow vibrates vocal folds at fundamental frequency F0, producing harmonic comb spectrum.</p>
+                </div>
+                <div class="p-2.5 bg-slate-800 rounded-lg border border-slate-700">
+                  <span class="font-bold text-amber-400">2. Vocal Tract Resonances (Filter):</span>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Pharynx, oral and nasal cavities shape formant bands (F1, F2, F3) creating distinctive vowels and timbre.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-5 bg-slate-900 rounded-xl text-slate-100 space-y-3">
+              <h4 class="text-xs font-bold uppercase tracking-widest text-rose-400 flex items-center">
+                <i class="fa-solid fa-ear-listen mr-2"></i>
+                Psychoacoustic Perception (Chapter 2)
+              </h4>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Human auditory perception compresses frequency resolution logarithmically:
+              </p>
+              <div class="space-y-2 text-xs">
+                <div class="p-2.5 bg-slate-800 rounded-lg border border-slate-700">
+                  <span class="font-bold text-purple-400">Mel-Scale Filterbanks:</span>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Triangular overlapping filters mimicking the cochlea's non-linear critical bands, prioritizing 300Hz-3kHz.</p>
+                </div>
+                <div class="p-2.5 bg-slate-800 rounded-lg border border-slate-700">
+                  <span class="font-bold text-emerald-400">Acoustic Cadence & Breaths:</span>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Conversational speech requires 150-250ms breathing pauses at clause boundaries to avoid auditory fatigue.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================================================================== -->
+      <!-- TAB 4: MULTI-ENGINE BENCHMARK ARENA -->
+      <!-- ==================================================================== -->
+      <div id="tabContent-benchmark" class="hidden space-y-6">
+        
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 flex items-center">
+                <i class="fa-solid fa-bolt text-rose-600 mr-2"></i>
+                Multi-Engine TTS Benchmark Arena
+              </h2>
+              <p class="text-xs text-slate-500">Live head-to-head performance comparison across local neural, OS native, and cloud engines.</p>
+            </div>
+            
+            <button onclick="runBenchmarkRace()" id="benchBtn" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
+              <i class="fa-solid fa-play"></i>
+              <span id="benchBtnText">Run Live Benchmark Race</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold">
+                  <th class="p-3">Engine Architecture</th>
+                  <th class="p-3">Latency (ms)</th>
+                  <th class="p-3">Sampling Rate</th>
+                  <th class="p-3">Format</th>
+                  <th class="p-3">Voice Cadence</th>
+                  <th class="p-3">Offline / Privacy</th>
+                  <th class="p-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="benchmarkTableBody" class="divide-y divide-slate-100 text-[11px]">
                 <tr>
-                  <td class="p-2.5 font-bold text-slate-800">Generation Method</td>
-                  <td class="p-2.5 text-slate-600">Autoregressive Diffusion Vocoder</td>
-                  <td class="p-2.5 text-slate-600">Formant / Concatenative SAPI5</td>
+                  <td class="p-3 font-bold text-slate-800">
+                    <div class="flex items-center space-x-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+                      <span>Neural VITS (Zero-Shot ONNX)</span>
+                    </div>
+                  </td>
+                  <td id="lat-vits" class="p-3 font-mono text-emerald-600 font-bold">-- ms</td>
+                  <td class="p-3 text-slate-600 font-mono">16000 Hz</td>
+                  <td class="p-3 font-mono">WAV</td>
+                  <td class="p-3 font-semibold text-rose-600">Adaptive Prosody</td>
+                  <td class="p-3 text-emerald-600 font-bold">100% Offline</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">Ready</span></td>
                 </tr>
                 <tr>
-                  <td class="p-2.5 font-bold text-slate-800">Human Breaths</td>
-                  <td class="p-2.5 text-slate-600 font-bold text-emerald-600">Natural biological breaths</td>
-                  <td class="p-2.5 text-slate-600">Simulated via punctuation pauses</td>
+                  <td class="p-3 font-bold text-slate-800">
+                    <div class="flex items-center space-x-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                      <span>pyttsx3 Windows SAPI5</span>
+                    </div>
+                  </td>
+                  <td id="lat-pyttsx3" class="p-3 font-mono text-blue-600 font-bold">-- ms</td>
+                  <td class="p-3 text-slate-600 font-mono">22050 Hz</td>
+                  <td class="p-3 font-mono">WAV</td>
+                  <td class="p-3 text-slate-500">Flat Formant</td>
+                  <td class="p-3 text-emerald-600 font-bold">100% Offline</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">Ready</span></td>
                 </tr>
                 <tr>
-                  <td class="p-2.5 font-bold text-slate-800">Offline / Privacy</td>
-                  <td class="p-2.5 text-slate-600">Requires Cloud API Key</td>
-                  <td class="p-2.5 text-slate-600 font-bold text-emerald-600">100% Offline, Zero Network</td>
-                </tr>
-                <tr>
-                  <td class="p-2.5 font-bold text-slate-800">Synthesis Latency</td>
-                  <td class="p-2.5 text-slate-600">300 - 800 ms</td>
-                  <td class="p-2.5 text-slate-600 font-bold text-blue-700">40 - 150 ms (Ultra-fast)</td>
+                  <td class="p-3 font-bold text-slate-800">
+                    <div class="flex items-center space-x-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+                      <span>ElevenLabs Cadence Model</span>
+                    </div>
+                  </td>
+                  <td id="lat-elevenlabs" class="p-3 font-mono text-purple-600 font-bold">-- ms</td>
+                  <td class="p-3 text-slate-600 font-mono">44100 Hz</td>
+                  <td class="p-3 font-mono">MP3 / WAV</td>
+                  <td class="p-3 font-semibold text-purple-600">Breaths & Pauses</td>
+                  <td class="p-3 text-amber-600 font-medium">Hybrid Offline</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">Ready</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
-
-          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-            <span class="font-bold text-slate-800">Single Responsibility & Loose Coupling:</span>
-            <p class="text-[11px] text-slate-600 mt-0.5">
-              The rest of the pipeline is 100% oblivious to whether audio was generated by Windows SAPI5 or ElevenLabs. Both implement <code>ITTSService</code>.
-            </p>
-          </div>
         </div>
 
-      </section>
-
-      <!-- Code Contract & DTO -->
-      <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-        <h3 class="text-base font-bold text-slate-900 flex items-center">
-          <i class="fa-solid fa-code text-pink-600 mr-2"></i>
-          ITTSService Interface & Data Transfer Object
-        </h3>
-        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed"><code>class ITTSService(ABC):
-    @abstractmethod
-    def synthesize(self, text: str, **kwargs) -> TTSResult:
-        """Synthesizes text into acoustic waveform and persists output."""
-        pass
-
-class TTSResult(BaseModel):
-    file_path: str
-    audio_format: str = "wav"
-    duration_sec: float = 0.0
-    sample_rate: int = 16000
-    provider: str = "pyttsx3"
-    metadata: Dict[str, Any] = Field(default_factory=dict)</code></pre>
-      </section>
+      </div>
 
     </main>
   </div>
@@ -289,11 +658,97 @@ class TTSResult(BaseModel):
   <script>
     renderSidebar('tts');
 
+    // Tab Switcher
+    function switchTab(tabId) {
+      const tabs = ['synthesis', 'cloning', 'visualizer', 'benchmark'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tabBtn-${t}`);
+        const content = document.getElementById(`tabContent-${t}`);
+        if (t === tabId) {
+          btn.classList.add('active');
+          btn.classList.remove('text-slate-300');
+          content.classList.remove('hidden');
+        } else {
+          btn.classList.remove('active');
+          btn.classList.add('text-slate-300');
+          content.classList.add('hidden');
+        }
+      });
+      if (tabId === 'cloning') {
+        refreshProfilesList();
+      }
+    }
+
+    function onEngineChange() {
+      const engine = document.getElementById('ttsEngineSelect').value;
+      const profileContainer = document.getElementById('voiceProfileContainer');
+      if (engine === 'neural_vits') {
+        profileContainer.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        profileContainer.classList.add('opacity-40', 'pointer-events-none');
+      }
+    }
+
+    function setSamplePrompt(type) {
+      const input = document.getElementById('ttsTextInput');
+      if (type === 'nsw') {
+        input.value = "In 2026, the company invested $4.50 per user, yielding a 99.5% success rate for the ASR and TTS APIs.";
+      } else if (type === 'tech') {
+        input.value = "Our neural VITS vocoder converts phonemes into 16kHz audio using HiFi-GAN transposed convolutions on CPU.";
+      } else if (type === 'greeting') {
+        input.value = "Hello! I am your AI interviewer. Let's discuss your experience with distributed systems and event streams.";
+      }
+      inspectFrontEnd();
+    }
+
+    // Inspect Text Normalization & G2P Phonetics
+    async function inspectFrontEnd() {
+      const text = document.getElementById('ttsTextInput').value.trim();
+      if (!text) return;
+
+      try {
+        const resp = await fetch('/api/tts/normalize-text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        const data = await resp.json();
+        
+        document.getElementById('normalizedOutput').innerText = data.normalized_text;
+        document.getElementById('ipaOutput').innerText = data.phonetics.ipa_string;
+
+        const badge = document.getElementById('normChangesBadge');
+        if (data.changes_detected) {
+          badge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold";
+          badge.innerText = "NSW Expanded";
+        } else {
+          badge.className = "text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-semibold";
+          badge.innerText = "No NSW Needed";
+        }
+
+        // Render phoneme chips
+        const container = document.getElementById('phonemeChipsContainer');
+        container.innerHTML = '';
+        data.phonetics.tokens.forEach(tok => {
+          const chip = document.createElement('div');
+          chip.className = "px-2 py-1 rounded-md bg-white border border-slate-300 text-slate-800 text-[11px] font-mono flex items-center space-x-1 shadow-2xs";
+          chip.innerHTML = `<span class="font-bold text-slate-900">${tok.word}</span><span class="text-rose-600 text-[10px]">/${tok.ipa || tok.word}/</span>`;
+          container.appendChild(chip);
+        });
+
+      } catch (err) {
+        console.error("G2P inspection failed:", err);
+      }
+    }
+
+    // Live Voice Synthesis
     async function synthesizeSpeech() {
       const text = document.getElementById('ttsTextInput').value.trim();
       const engine = document.getElementById('ttsEngineSelect').value;
+      const profileId = document.getElementById('voiceProfileSelect').value;
       const rate = parseInt(document.getElementById('speechRateSlider').value);
       const withPauses = document.getElementById('pauseToggle').checked;
+      const withNorm = document.getElementById('normToggle').checked;
 
       const btn = document.getElementById('synthBtnText');
       const status = document.getElementById('synthStatus');
@@ -302,13 +757,7 @@ class TTSResult(BaseModel):
       if (!text) return;
 
       btn.innerText = 'Synthesizing...';
-      status.innerText = 'Processing speech vocoder...';
-
-      // Pre-process text with pauses if checked
-      let processedText = text;
-      if (withPauses) {
-        processedText = text.replace(/,/g, ', ... ').replace(/;/g, '; ... ');
-      }
+      status.innerText = 'Neural vocoder processing...';
 
       const t0 = performance.now();
       try {
@@ -316,38 +765,303 @@ class TTSResult(BaseModel):
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            text: processedText,
+            text: text,
             provider: engine,
-            speech_rate: rate
+            profile_id: profileId,
+            speech_rate: rate,
+            with_pauses: withPauses,
+            with_normalization: withNorm
           })
         });
 
         const data = await resp.json();
         const duration = Math.round(performance.now() - t0);
 
-        btn.innerText = 'Synthesize & Play Voice';
+        btn.innerText = 'Synthesize & Audition';
         status.innerText = `Generated in ${duration} ms`;
 
-        // Update telemetry
+        // Telemetry update
         document.getElementById('ttsLatency').innerText = `${duration} ms`;
         document.getElementById('ttsBackendName').innerText = data.provider;
-        document.getElementById('ttsFileName').innerText = data.file_path.split(/[\\/]/).pop();
-        document.getElementById('playerFormat').innerText = data.audio_format.toUpperCase();
+        document.getElementById('playerFormat').innerText = (data.audio_format || 'wav').toUpperCase();
+
+        if (data.metadata) {
+          if (data.metadata.f0_hz) {
+            document.getElementById('ttsF0').innerText = `${data.metadata.f0_hz} Hz`;
+          }
+          if (data.metadata.spectral_centroid) {
+            document.getElementById('ttsCentroid').innerText = `${Math.round(data.metadata.spectral_centroid)} Hz`;
+          }
+        }
 
         if (data.audio_url) {
           player.src = data.audio_url + '?t=' + Date.now();
           player.play();
           document.getElementById('playerState').innerText = 'Playing';
+          drawSimulatedWaveform();
           player.onended = () => {
             document.getElementById('playerState').innerText = 'Finished';
           };
         }
       } catch (err) {
-        btn.innerText = 'Synthesize & Play Voice';
+        btn.innerText = 'Synthesize & Audition';
         status.innerText = 'Error: ' + err.message;
         alert('Synthesis failed: ' + err.message);
       }
     }
+
+    // Waveform Drawer
+    function drawSimulatedWaveform() {
+      const canvas = document.getElementById('waveformCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#f43f5e';
+      const bars = 45;
+      const barWidth = canvas.width / bars;
+
+      for (let i = 0; i < bars; i++) {
+        const h = Math.sin(i * 0.3) * 18 + Math.random() * 20 + 8;
+        const x = i * barWidth;
+        const y = (canvas.height - h) / 2;
+        ctx.fillRect(x + 1, y, barWidth - 2, h);
+      }
+    }
+
+    // Microphone Recording for Voice Cloning
+    let cloneMediaRecorder = null;
+    let cloneAudioChunks = [];
+    let cloneTimerInterval = null;
+    let recordedBlob = null;
+
+    async function toggleCloningRecord() {
+      const btn = document.getElementById('cloneRecBtnText');
+      const timerEl = document.getElementById('cloneRecTimer');
+
+      if (cloneMediaRecorder && cloneMediaRecorder.state === 'recording') {
+        cloneMediaRecorder.stop();
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        cloneAudioChunks = [];
+        cloneMediaRecorder = new MediaRecorder(stream);
+
+        cloneMediaRecorder.ondataavailable = e => {
+          if (e.data.size > 0) cloneAudioChunks.push(e.data);
+        };
+
+        cloneMediaRecorder.onstop = () => {
+          recordedBlob = new Blob(cloneAudioChunks, { type: 'audio/wav' });
+          clearInterval(cloneTimerInterval);
+          btn.innerText = 'Record 5s Sample';
+          document.getElementById('cloneStatusMsg').innerText = '5-second sample captured! Ready to extract embeddings.';
+          document.getElementById('processCloneBtn').classList.add('bg-rose-600', 'hover:bg-rose-700');
+          document.getElementById('processCloneBtn').classList.remove('bg-slate-900', 'hover:bg-slate-800');
+        };
+
+        cloneMediaRecorder.start();
+        btn.innerText = 'Recording... (Speak)';
+        let elapsed = 0.0;
+        timerEl.innerText = '0.0s / 5.0s';
+
+        cloneTimerInterval = setInterval(() => {
+          elapsed += 0.2;
+          timerEl.innerText = `${elapsed.toFixed(1)}s / 5.0s`;
+          if (elapsed >= 5.0) {
+            cloneMediaRecorder.stop();
+          }
+        }, 200);
+
+      } catch (err) {
+        alert('Microphone access denied: ' + err.message);
+      }
+    }
+
+    // Submit Voice Cloning
+    async function submitVoiceCloning() {
+      const name = document.getElementById('cloneVoiceName').value.trim() || 'Custom Cloned Voice';
+      const fileInput = document.getElementById('cloneAudioFileInput');
+      const btnText = document.getElementById('processCloneBtnText');
+      const statusEl = document.getElementById('cloneStatusMsg');
+
+      let audioFile = null;
+      if (fileInput.files && fileInput.files[0]) {
+        audioFile = fileInput.files[0];
+      } else if (recordedBlob) {
+        audioFile = new File([recordedBlob], 'voice_sample.wav', { type: 'audio/wav' });
+      }
+
+      if (!audioFile) {
+        alert('Please record a 5-second sample or select an audio file first!');
+        return;
+      }
+
+      btnText.innerText = 'Extracting Acoustic Profile & Embeddings...';
+      statusEl.innerText = 'Computing Short-Time Autocorrelation F0 and 128-D Mel Projections...';
+
+      const formData = new FormData();
+      formData.append('file', audioFile);
+      formData.append('name', name);
+
+      try {
+        const resp = await fetch('/api/tts/clone-voice', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await resp.json();
+        btnText.innerText = 'Extract Acoustic Embeddings & Clone Voice';
+
+        if (data.status === 'success') {
+          statusEl.innerText = `Voice '${name}' successfully cloned!`;
+          renderExtractedProfile(data.profile);
+          refreshProfilesList();
+
+          const audBtn = document.getElementById('auditionCloneBtn');
+          audBtn.disabled = false;
+          audBtn.classList.remove('bg-rose-600/50', 'cursor-not-allowed');
+          audBtn.classList.add('bg-rose-600', 'hover:bg-rose-700');
+          audBtn.dataset.profileId = data.profile.profile_id;
+        } else {
+          statusEl.innerText = 'Cloning error: ' + (data.detail || 'Failed to extract profile');
+        }
+      } catch (err) {
+        btnText.innerText = 'Extract Acoustic Embeddings & Clone Voice';
+        statusEl.innerText = 'Error: ' + err.message;
+        alert('Voice cloning failed: ' + err.message);
+      }
+    }
+
+    function renderExtractedProfile(prof) {
+      document.getElementById('profileF0').innerText = `${prof.fundamental_freq_f0} Hz`;
+      document.getElementById('profileCentroid').innerText = `${Math.round(prof.spectral_centroid)} Hz`;
+      document.getElementById('profileShift').innerText = `${prof.pitch_shift_semitones > 0 ? '+' : ''}${prof.pitch_shift_semitones} st`;
+      document.getElementById('profileCadence').innerText = `${prof.length_scale}x`;
+      document.getElementById('cloneGenderBadge').innerText = (prof.gender_estimate || 'neutral').toUpperCase();
+
+      // Render 128-D embedding bar chart
+      const canvas = document.getElementById('embeddingCanvas');
+      if (canvas && prof.embedding_vector) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#38bdf8';
+        const numDims = Math.min(prof.embedding_vector.length, 64);
+        const barWidth = canvas.width / numDims;
+
+        prof.embedding_vector.slice(0, numDims).forEach((val, i) => {
+          const h = Math.abs(val) * canvas.height * 2.5;
+          const x = i * barWidth;
+          const y = (canvas.height - h) / 2;
+          ctx.fillRect(x, Math.max(2, y), barWidth - 1, Math.max(3, h));
+        });
+      }
+    }
+
+    async function auditionClonedVoice() {
+      const audBtn = document.getElementById('auditionCloneBtn');
+      const profileId = audBtn.dataset.profileId;
+      if (!profileId) return;
+
+      // Switch to tab 1 and select the profile
+      switchTab('synthesis');
+      const select = document.getElementById('voiceProfileSelect');
+      select.value = profileId;
+      synthesizeSpeech();
+    }
+
+    // Refresh Profile Lists
+    async function refreshProfilesList() {
+      try {
+        const resp = await fetch('/api/tts/voices');
+        const data = await resp.json();
+        
+        // Update Select dropdown in Tab 1
+        const select = document.getElementById('voiceProfileSelect');
+        const currentVal = select.value;
+        select.innerHTML = '';
+        data.voices.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.profile_id;
+          opt.innerText = `${v.name} (${v.fundamental_freq_f0}Hz)`;
+          select.appendChild(opt);
+        });
+        if (data.voices.some(v => v.profile_id === currentVal)) {
+          select.value = currentVal;
+        }
+
+        // Update Table in Tab 2
+        const tbody = document.getElementById('profilesTableBody');
+        tbody.innerHTML = '';
+        data.voices.forEach(v => {
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-50 transition";
+          tr.innerHTML = `
+            <td class="p-3 font-mono text-slate-500 font-bold">${v.profile_id}</td>
+            <td class="p-3 font-bold text-slate-900">${v.name}</td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${v.gender_estimate === 'female' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}">${(v.gender_estimate || 'neutral').toUpperCase()}</span></td>
+            <td class="p-3 font-mono text-sky-600 font-bold">${v.fundamental_freq_f0} Hz</td>
+            <td class="p-3 font-mono text-amber-600">${Math.round(v.spectral_centroid)} Hz</td>
+            <td class="p-3 font-mono text-slate-700">${v.pitch_shift_semitones > 0 ? '+' : ''}${v.pitch_shift_semitones} st</td>
+            <td class="p-3">
+              <button onclick="selectProfileForSynthesis('${v.profile_id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg transition text-[10px]">
+                <i class="fa-solid fa-play mr-1"></i> Audition
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      } catch (err) {
+        console.error("Failed to load profiles:", err);
+      }
+    }
+
+    function selectProfileForSynthesis(profileId) {
+      switchTab('synthesis');
+      document.getElementById('voiceProfileSelect').value = profileId;
+      synthesizeSpeech();
+    }
+
+    // Benchmark Arena Race
+    async function runBenchmarkRace() {
+      const btn = document.getElementById('benchBtnText');
+      btn.innerText = 'Racing Engines...';
+
+      const prompt = "The quick brown fox jumps over the lazy dog and tests speech latency.";
+      try {
+        const resp = await fetch('/api/tts/benchmark', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: prompt })
+        });
+        const data = await resp.json();
+        btn.innerText = 'Run Live Benchmark Race';
+
+        data.engines.forEach(eng => {
+          if (eng.provider_id === 'neural_vits') {
+            document.getElementById('lat-vits').innerText = `${eng.latency_ms} ms`;
+          } else if (eng.provider_id === 'pyttsx3') {
+            document.getElementById('lat-pyttsx3').innerText = `${eng.latency_ms} ms`;
+          } else if (eng.provider_id === 'elevenlabs') {
+            document.getElementById('lat-elevenlabs').innerText = `${eng.latency_ms} ms`;
+          }
+        });
+
+      } catch (err) {
+        btn.innerText = 'Run Live Benchmark Race';
+        alert('Benchmark race error: ' + err.message);
+      }
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      refreshProfilesList();
+      inspectFrontEnd();
+      drawSimulatedWaveform();
+    });
   </script>
 </body>
 </html>
