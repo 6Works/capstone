@@ -65,9 +65,11 @@ class TTSResult(BaseModel):
     file_path: str = Field(description="Path to synthesized audio file")
     audio_format: str = Field(default="wav", description="Audio format (wav, mp3)")
     latency_sec: float = Field(default=0.0, description="Synthesis latency")
-    provider: str = Field(description="TTS Engine (pyttsx3, elevenlabs, gtts, etc.)")
+    provider: str = Field(description="TTS Engine (pyttsx3, elevenlabs, gtts, neural_vits, etc.)")
     speech_rate: int = Field(default=175, description="Speaking rate")
+    sample_rate: int = Field(default=16000, description="Sampling rate in Hz")
     status: str = Field(default="success", description="success, skipped, error")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Acoustic & voice cloning metadata")
     error: Optional[str] = None
 
 
