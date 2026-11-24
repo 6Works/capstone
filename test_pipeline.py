@@ -18,7 +18,15 @@ from services.audio_input import SyntheticAudioInput, FileAudioInput
 from services.asr import GoogleWebSpeechASR, MockASR, WhisperTransformerASR
 from services.nlp import RuleBasedNLPService, LLMNLPService
 from services.dialogue import ModularDialogueManager, ConversationMemoryStore
-from services.tts import Pyttsx3TTSService, ElevenLabsTTSService
+from services.tts import (
+    Pyttsx3TTSService,
+    ElevenLabsTTSService,
+    NeuralVoiceCloningTTSService,
+    TextNormalizer,
+    G2PPhonemizer,
+    voice_cloner,
+    VoiceCloner,
+)
 from services.audio_output import SystemSpeakerOutput, WebStreamAudioOutput
 from orchestrator.factory import PipelineFactory
 from orchestrator.pipeline import DecoupledVoicePipeline
@@ -142,6 +150,91 @@ class TestStage5TTSService:
         assert isinstance(res, TTSResult)
         assert res.status == "success"
         assert os.path.exists(res.file_path)
+
+    def test_text_normalizer_nsw_expansion(self):
+        """Verifies Non-Standard Words (NSW) expansion based on course Chapter 3."""
+        norm = TextNormalizer.normalize("Item costs $4.50 with 50% discount at 10:30am on 2026 for the ASR API.")
+        assert norm["changes_detected"] is True
+        text = norm["normalized_text"]
+        assert "four dollars and fifty cents" in text
+        assert "fifty percent" in text
+        assert "ten thirty A M" in text
+        assert "twenty twenty-six" in text
+        assert "A S R" in text
+        assert "A P I" in text
+
+    def test_g2p_phonemization_breakdown(self):
+        """Verifies Grapheme-to-Phoneme (G2P) phonetic tokenization into IPA."""
+        phon = G2PPhonemizer.phonemize_sentence("Hello Mira acoustic vocoder")
+        assert phon["token_count"] == 4
+        assert len(phon["ipa_string"]) > 0
+        assert "həˈloʊ" in phon["ipa_string"]
+        assert "ˈmɪərə" in phon["ipa_string"]
+        assert "voʊˈkoʊdər" in phon["ipa_string"]
+
+    def test_speaker_profile_catalog(self):
+        """Verifies archetypal speaker profiles (Mira, Alex, Sarah, David)."""
+        profiles = voice_cloner.list_profiles()
+        assert len(profiles) >= 4
+        ids = [p["profile_id"] for p in profiles]
+        assert "mira_neural" in ids
+        assert "alex_interviewer" in ids
+        assert "sarah_executive" in ids
+        assert "david_architect" in ids
+        mira = voice_cloner.get_profile("mira_neural")
+        assert mira.fundamental_freq_f0 > 200.0
+        assert len(mira.embedding_vector) == 128
+
+    def test_neural_voice_cloning_tts_synthesis(self):
+        """Verifies VITS neural synthesis with speaker profile conditioning."""
+        tts = NeuralVoiceCloningTTSService(speaker_profile_id="alex_interviewer")
+        res = tts.synthesize("Testing neural voice cloning architecture.")
+        assert isinstance(res, TTSResult)
+        assert res.status == "success"
+        assert "alex_interviewer" in res.provider
+        assert res.sample_rate == 16000
+        assert os.path.exists(res.file_path)
+        assert res.latency_sec < 5.0
+        assert "normalized_text" in res.metadata
+
+    def test_zero_shot_acoustic_extraction(self):
+        """Verifies extracting F0, centroid, and 128-D embedding from reference audio."""
+        import tempfile, wave, numpy as np
+        sr = 16000
+        duration = 1.0
+        t = np.linspace(0, duration, int(sr * duration), endpoint=False)
+        # Synthetic 220 Hz harmonic signal (female F0 range)
+        signal_data = (0.5 * np.sin(2 * np.pi * 220 * t) + 0.25 * np.sin(2 * np.pi * 440 * t)).astype(np.float32)
+        pcm_data = (signal_data * 32767).astype(np.int16)
+
+        temp_wav = os.path.join(tempfile.gettempdir(), f"test_acoustic_{int(np.random.randint(10000))}.wav")
+        try:
+            with wave.open(temp_wav, "wb") as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(sr)
+                wf.writeframes(pcm_data.tobytes())
+
+            profile = VoiceCloner.extract_acoustic_profile_from_wav(temp_wav, profile_name="Unit Test Clone")
+            assert profile.fundamental_freq_f0 > 150.0
+            assert profile.spectral_centroid > 200.0
+            assert len(profile.embedding_vector) == 128
+            assert -8.0 <= profile.pitch_shift_semitones <= 8.0
+        finally:
+            if os.path.exists(temp_wav):
+                try:
+                    os.remove(temp_wav)
+                except Exception:
+                    pass
+
+    def test_factory_neural_vits_provider(self):
+        """Verifies PipelineFactory dynamically injects NeuralVoiceCloningTTSService."""
+        pipeline = PipelineFactory.create_pipeline(
+            asr_provider="mock",
+            tts_provider="neural_vits",
+            output_provider="web"
+        )
+        assert isinstance(pipeline.tts, NeuralVoiceCloningTTSService)
 
 
 class TestStage6AudioOutputService:
