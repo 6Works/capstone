@@ -17,7 +17,7 @@ from services.audio_input import MicrophoneAudioInput, FileAudioInput, Synthetic
 from services.asr import GoogleWebSpeechASR, WhisperTransformerASR, MockASR
 from services.nlp import RuleBasedNLPService, LLMNLPService
 from services.dialogue import ModularDialogueManager, LLMDialogueManager
-from services.tts import Pyttsx3TTSService, GTTSService, ElevenLabsTTSService
+from services.tts import Pyttsx3TTSService, GTTSService, ElevenLabsTTSService, NeuralVoiceCloningTTSService
 from services.audio_output import SystemSpeakerOutput, WebStreamAudioOutput
 from .pipeline import DecoupledVoicePipeline
 
@@ -68,7 +68,9 @@ class PipelineFactory:
             dialogue = ModularDialogueManager(bot_name=bot_name)
 
         # 5. Resolve TTS
-        if tts_provider == "elevenlabs":
+        if tts_provider in ["neural_vits", "neural", "cloned", "voice_cloning"]:
+            tts: ITTSService = NeuralVoiceCloningTTSService()
+        elif tts_provider == "elevenlabs":
             tts: ITTSService = ElevenLabsTTSService(api_key=elevenlabs_api_key)
         elif tts_provider == "gtts":
             tts = GTTSService()
