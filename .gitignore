@@ -38,6 +38,8 @@ Thumbs.db
 *.pth
 *.pt
 *.ckpt
+*.onnx
+models/
 
 # Temporary files
 tmp/
