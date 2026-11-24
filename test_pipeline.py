@@ -24,8 +24,11 @@ from services.tts import (
     NeuralVoiceCloningTTSService,
     TextNormalizer,
     G2PPhonemizer,
+    HomographDisambiguator,
     voice_cloner,
     VoiceCloner,
+    AcousticAnalyzer,
+    FormantSynthesizer,
 )
 from services.audio_output import SystemSpeakerOutput, WebStreamAudioOutput
 from orchestrator.factory import PipelineFactory
@@ -235,6 +238,71 @@ class TestStage5TTSService:
             output_provider="web"
         )
         assert isinstance(pipeline.tts, NeuralVoiceCloningTTSService)
+
+    def test_homograph_disambiguation_rules(self):
+        """Verifies context-aware homograph resolution based on Course Chapter 3."""
+        past_read = HomographDisambiguator.disambiguate("read", prev_word="have")
+        assert past_read["ipa"] == "rɛd"
+        assert past_read["sense"] == "past"
+
+        pres_read = HomographDisambiguator.disambiguate("read", prev_word="will")
+        assert pres_read["ipa"] == "riːd"
+        assert pres_read["sense"] == "present"
+
+        live_adj = HomographDisambiguator.disambiguate("live", next_word="stream")
+        assert live_adj["ipa"] == "laɪv"
+        assert live_adj["sense"] == "adjective"
+
+        lead_metal = HomographDisambiguator.disambiguate("lead", next_word="pipe")
+        assert lead_metal["ipa"] == "lɛd"
+        assert lead_metal["sense"] == "metal_noun"
+
+    def test_acoustic_analyzer_mel_spectrogram(self):
+        """Verifies extracting 80-band Mel-Spectrogram and F0 pitch contour."""
+        import tempfile, wave, numpy as np
+        sr = 16000
+        duration = 0.5
+        t = np.linspace(0, duration, int(sr * duration), endpoint=False)
+        audio = (0.5 * np.sin(2 * np.pi * 200 * t) * 32767).astype(np.int16)
+
+        temp_wav = os.path.join(tempfile.gettempdir(), f"test_spec_{int(np.random.randint(9999))}.wav")
+        try:
+            with wave.open(temp_wav, "wb") as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(sr)
+                wf.writeframes(audio.tobytes())
+
+            res = AcousticAnalyzer.analyze_wav(temp_wav)
+            assert res["status"] == "success"
+            assert res["num_mel_bands"] == 80
+            assert res["num_time_frames"] > 0
+            assert len(res["mel_spectrogram"]) == 80
+            assert 180.0 <= res["mean_f0_hz"] <= 220.0
+        finally:
+            if os.path.exists(temp_wav):
+                try:
+                    os.remove(temp_wav)
+                except Exception:
+                    pass
+
+    def test_formant_synthesizer_klatt_vowels(self):
+        """Verifies Klatt digital cascade formant synthesis based on Course Module 3."""
+        wav_path = FormantSynthesizer.synthesize_vowel("a", f0=130.0, duration=0.3)
+        assert os.path.exists(wav_path)
+        assert os.path.getsize(wav_path) > 1000
+        try:
+            os.remove(wav_path)
+        except Exception:
+            pass
+
+    def test_latent_space_voice_morphing(self):
+        """Verifies interpolating speaker embeddings and acoustic profiles."""
+        morphed = voice_cloner.morph_profiles("mira_neural", "alex_interviewer", alpha=0.5)
+        assert morphed.profile_id.startswith("morph_")
+        assert len(morphed.embedding_vector) == 128
+        # Mira is 218Hz, Alex is 124Hz -> 50/50 blend should be around 171Hz
+        assert 160.0 <= morphed.fundamental_freq_f0 <= 180.0
 
 
 class TestStage6AudioOutputService:
