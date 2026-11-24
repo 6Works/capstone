@@ -104,6 +104,7 @@ def get_available_providers():
                 {"id": "modular", "name": "Decoupled Memory & State Machine (Deterministic)", "status": "active"}
             ],
             "tts": [
+                {"id": "neural_vits", "name": "Neural VITS & Voice Cloning (Zero-Shot Local ONNX)", "status": "active"},
                 {"id": "pyttsx3", "name": "pyttsx3 SAPI5 (Offline native Windows)", "status": "active"},
                 {"id": "elevenlabs", "name": "ElevenLabs (Human Cadence & Natural Pauses)", "status": "ready"},
                 {"id": "gtts", "name": "Google Text-To-Speech (MP3)", "status": "active"}
@@ -241,8 +242,11 @@ class NLPTestRequest(BaseModel):
 
 class TTSTestRequest(BaseModel):
     text: str
-    provider: Optional[str] = "pyttsx3"
+    provider: Optional[str] = "neural_vits"
     speech_rate: Optional[int] = 175
+    profile_id: Optional[str] = "mira_neural"
+    with_pauses: Optional[bool] = True
+    with_normalization: Optional[bool] = True
 
 
 class DialogueTestRequest(BaseModel):
@@ -463,8 +467,20 @@ def test_stage4_dialogue(req: DialogueTestRequest):
 
 @app.post("/api/test/stage5-tts")
 def test_stage5_tts(req: TTSTestRequest):
-    from services.tts import Pyttsx3TTSService, ElevenLabsTTSService, GTTSService
-    if req.provider == "elevenlabs":
+    from services.tts import (
+        Pyttsx3TTSService,
+        ElevenLabsTTSService,
+        GTTSService,
+        NeuralVoiceCloningTTSService
+    )
+    if req.provider in ["neural_vits", "neural", "cloned"]:
+        service = NeuralVoiceCloningTTSService(
+            speaker_profile_id=req.profile_id or "mira_neural",
+            speech_rate=req.speech_rate or 175,
+            with_human_pauses=req.with_pauses if req.with_pauses is not None else True,
+            with_normalization=req.with_normalization if req.with_normalization is not None else True
+        )
+    elif req.provider == "elevenlabs":
         service = ElevenLabsTTSService()
     elif req.provider == "gtts":
         service = GTTSService()
@@ -482,6 +498,147 @@ def test_stage5_tts(req: TTSTestRequest):
     data = res.model_dump()
     data["audio_url"] = audio_url
     return data
+
+
+# ============================================================================
+# Neural TTS & Voice Cloning Course Studio Endpoints
+# ============================================================================
+
+class TextNormalizeRequest(BaseModel):
+    text: str
+
+
+@app.get("/api/tts/voices")
+def get_tts_voices():
+    """Lists available speaker profiles including zero-shot cloned voices."""
+    from services.tts import voice_cloner
+    return {
+        "status": "success",
+        "voices": voice_cloner.list_profiles()
+    }
+
+
+@app.post("/api/tts/normalize-text")
+def normalize_and_phonemize_text(req: TextNormalizeRequest):
+    """
+    Chapter 3 Front-End Inspector:
+    Expands Non-Standard Words (NSW) and computes Grapheme-to-Phoneme (G2P) breakdown.
+    """
+    from services.tts import TextNormalizer, G2PPhonemizer
+    norm = TextNormalizer.normalize(req.text)
+    g2p = G2PPhonemizer.phonemize_sentence(norm["normalized_text"])
+    return {
+        "status": "success",
+        "original_text": norm["original_text"],
+        "normalized_text": norm["normalized_text"],
+        "changes_detected": norm["changes_detected"],
+        "phonetics": g2p
+    }
+
+
+@app.post("/api/tts/clone-voice")
+async def clone_voice_from_reference(
+    file: UploadFile = File(...),
+    name: Optional[str] = Form("Custom Cloned Voice")
+):
+    """
+    Chapter 4 Zero-Shot Voice Cloning:
+    Extracts acoustic speaker profile (F0, spectral centroid, 128-D embedding) from audio.
+    """
+    from services.tts import VoiceCloner, voice_cloner
+    os.makedirs("storage/temp_audio", exist_ok=True)
+    temp_wav = os.path.join("storage/temp_audio", f"ref_clone_{int(time.time()*1000)}.wav")
+
+    with open(temp_wav, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    try:
+        profile = VoiceCloner.extract_acoustic_profile_from_wav(temp_wav, profile_name=name)
+        voice_cloner.save_cloned_profile(profile)
+        return {
+            "status": "success",
+            "message": f"Successfully extracted acoustic profile and created cloned voice '{name}'",
+            "profile": profile.to_dict()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Acoustic profiling failed: {str(e)}")
+    finally:
+        if os.path.exists(temp_wav):
+            try:
+                os.remove(temp_wav)
+            except Exception:
+                pass
+
+
+@app.post("/api/tts/benchmark")
+def benchmark_tts_engines(req: TextNormalizeRequest):
+    """
+    Course Arena: Compares Neural VITS Cloned vs pyttsx3 vs ElevenLabs Cadence vs gTTS.
+    """
+    from services.tts import (
+        Pyttsx3TTSService,
+        ElevenLabsTTSService,
+        GTTSService,
+        NeuralVoiceCloningTTSService
+    )
+
+    results = []
+
+    # 1. Neural VITS Cloned
+    vits = NeuralVoiceCloningTTSService(speaker_profile_id="mira_neural")
+    r1 = vits.synthesize(req.text)
+    results.append({
+        "engine": "Neural VITS (Zero-Shot ONNX)",
+        "provider_id": "neural_vits",
+        "latency_ms": int(r1.latency_sec * 1000),
+        "sample_rate": 16000,
+        "format": r1.audio_format.upper(),
+        "status": r1.status,
+        "human_cadence": "High (Adaptive Prosody)",
+        "offline": True
+    })
+
+    # 2. pyttsx3 SAPI5
+    sapi = Pyttsx3TTSService()
+    r2 = sapi.synthesize(req.text)
+    results.append({
+        "engine": "pyttsx3 Windows SAPI5",
+        "provider_id": "pyttsx3",
+        "latency_ms": int(r2.latency_sec * 1000),
+        "sample_rate": 22050,
+        "format": r2.audio_format.upper(),
+        "status": r2.status,
+        "human_cadence": "Low (Flat Formant)",
+        "offline": True
+    })
+
+    # 3. ElevenLabs Cadence
+    eleven = ElevenLabsTTSService()
+    r3 = eleven.synthesize(req.text)
+    results.append({
+        "engine": "ElevenLabs Cadence Model",
+        "provider_id": "elevenlabs",
+        "latency_ms": int(r3.latency_sec * 1000),
+        "sample_rate": 44100 if eleven.api_key else 22050,
+        "format": r3.audio_format.upper(),
+        "status": r3.status,
+        "human_cadence": "Highest (Breaths & Micro-pauses)",
+        "offline": eleven.api_key is None
+    })
+
+    # Clean up temp audio files
+    for r in [r1, r2, r3]:
+        if r.file_path and os.path.exists(r.file_path):
+            try:
+                os.remove(r.file_path)
+            except Exception:
+                pass
+
+    return {
+        "status": "success",
+        "benchmark_text": req.text,
+        "engines": results
+    }
 
 
 # ============================================================================
