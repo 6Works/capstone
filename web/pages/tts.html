@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stage 5: Neural TTS & Voice Cloning Studio</title>
+  <title>Stage 5: The Monster TTS & Voice Cloning Course Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/static/css/style.css">
@@ -37,13 +37,13 @@
         <a href="/dialogue" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left"></i></a>
         <span class="text-xs font-semibold text-slate-400">Platform</span>
         <span class="text-xs text-slate-300">/</span>
-        <span class="text-xs font-bold text-rose-600">Stage 5: Neural TTS & Zero-Shot Voice Cloning</span>
+        <span class="text-xs font-bold text-rose-600">Stage 5: Neural TTS & Voice Cloning Course Studio</span>
       </div>
       
       <div class="flex items-center space-x-3">
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
           <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-600 animate-pulse"></span>
-          VITS Acoustic Model + HiFi Vocoder
+          The Sound of AI Curriculum
         </span>
         <a href="/audio-output" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition flex items-center space-x-1.5 shadow-sm">
           <span>Next: Stage 6 (Audio Output)</span>
@@ -57,32 +57,44 @@
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-rose-400 mb-1">
-            <i class="fa-solid fa-waveform-lines"></i>
-            <span>Stage 5 of 6 · The Sound of AI Architecture</span>
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Stage 5 of 6 · The Monster TTS & Voice Cloning Course</span>
           </div>
-          <h1 class="text-2xl font-black tracking-tight">Neural Text-to-Speech & Zero-Shot Voice Cloning Studio</h1>
+          <h1 class="text-2xl font-black tracking-tight">Neural Speech Synthesis, Voice Cloning & Psychoacoustics</h1>
           <p class="text-sm text-slate-400 mt-1 max-w-2xl">
-            Text Normalization (NSW), G2P Phonemization, 128-D Speaker Embeddings, and End-to-End VITS Neural Synthesis with Local ONNX Inference.
+            Full syllabus implementation: Human Speech Physics, Homograph G2P, Klatt Formant Resonators, 80-Band Mel-Spectrograms, VITS Neural Synthesis, and Latent Voice Morphing.
           </p>
         </div>
         
         <!-- Tab Switcher Header -->
-        <div class="flex items-center space-x-1 bg-slate-800/90 p-1.5 rounded-xl border border-slate-700 text-xs font-bold">
-          <button onclick="switchTab('synthesis')" id="tabBtn-synthesis" class="tab-btn active px-3.5 py-2 rounded-lg transition flex items-center space-x-2">
+        <div class="flex flex-wrap items-center gap-1 bg-slate-800/90 p-1.5 rounded-xl border border-slate-700 text-xs font-bold">
+          <button onclick="switchTab('synthesis')" id="tabBtn-synthesis" class="tab-btn active px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5">
             <i class="fa-solid fa-microphone-lines"></i>
-            <span>Synthesis Studio</span>
+            <span>Synthesis</span>
           </button>
-          <button onclick="switchTab('cloning')" id="tabBtn-cloning" class="tab-btn text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition flex items-center space-x-2">
+          <button onclick="switchTab('spectrogram')" id="tabBtn-spectrogram" class="tab-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-chart-simple"></i>
+            <span>Mel-Spectrogram</span>
+          </button>
+          <button onclick="switchTab('cloning')" id="tabBtn-cloning" class="tab-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5">
             <i class="fa-solid fa-clone"></i>
-            <span>Voice Cloning Lab</span>
+            <span>Voice Cloning</span>
           </button>
-          <button onclick="switchTab('visualizer')" id="tabBtn-visualizer" class="tab-btn text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition flex items-center space-x-2">
-            <i class="fa-solid fa-diagram-project"></i>
-            <span>Pipeline Architecture</span>
+          <button onclick="switchTab('morphing')" id="tabBtn-morphing" class="tab-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-shuffle"></i>
+            <span>Voice Morphing</span>
           </button>
-          <button onclick="switchTab('benchmark')" id="tabBtn-benchmark" class="tab-btn text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition flex items-center space-x-2">
+          <button onclick="switchTab('homographs')" id="tabBtn-homographs" class="tab-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-language"></i>
+            <span>Homographs</span>
+          </button>
+          <button onclick="switchTab('formants')" id="tabBtn-formants" class="tab-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-wave-square"></i>
+            <span>Klatt Formants</span>
+          </button>
+          <button onclick="switchTab('arena')" id="tabBtn-arena" class="tab-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5">
             <i class="fa-solid fa-bolt"></i>
-            <span>Engine Arena</span>
+            <span>Arena</span>
           </button>
         </div>
       </div>
@@ -96,7 +108,6 @@
       <!-- ==================================================================== -->
       <div id="tabContent-synthesis" class="space-y-6">
         
-        <!-- Top Controls: Persona & Synthesis Settings -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
           <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-100 gap-4">
             <div>
@@ -108,7 +119,6 @@
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
-              <!-- Engine Selector -->
               <div class="flex items-center space-x-2 text-xs">
                 <span class="text-slate-500 font-semibold">Engine:</span>
                 <select id="ttsEngineSelect" onchange="onEngineChange()" class="bg-slate-100 border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700">
@@ -119,7 +129,6 @@
                 </select>
               </div>
 
-              <!-- Speaker Profile Selector -->
               <div id="voiceProfileContainer" class="flex items-center space-x-2 text-xs">
                 <span class="text-slate-500 font-semibold">Vocal Profile:</span>
                 <select id="voiceProfileSelect" class="bg-rose-50 border border-rose-300 rounded-lg px-3 py-1.5 text-xs font-bold text-rose-800">
@@ -132,7 +141,6 @@
             </div>
           </div>
 
-          <!-- Main Input Grid -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-4">
               <div>
@@ -142,7 +150,7 @@
                     <span class="text-[11px] text-slate-400">Course Presets:</span>
                     <button onclick="setSamplePrompt('nsw')" class="text-[11px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">NSW & Currency</button>
                     <button onclick="setSamplePrompt('tech')" class="text-[11px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">Tech Architecture</button>
-                    <button onclick="setSamplePrompt('greeting')" class="text-[11px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">Interviewer</button>
+                    <button onclick="setSamplePrompt('homograph')" class="text-[11px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">Homograph Disambiguation</button>
                   </div>
                 </div>
                 <textarea id="ttsTextInput" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-rose-500 leading-relaxed font-sans">Hello! In 2026, our decoupled voice architecture processes $4.50 transactions and 99.5% of ASR requests under 150ms.</textarea>
@@ -180,7 +188,6 @@
                 </div>
               </div>
 
-              <!-- Action Bar -->
               <div class="flex items-center space-x-3">
                 <button onclick="synthesizeSpeech()" id="synthBtn" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
                   <i class="fa-solid fa-volume-high"></i>
@@ -204,7 +211,6 @@
                 
                 <canvas id="waveformCanvas" width="300" height="60" class="w-full h-14 bg-slate-950 rounded-lg border border-slate-800 mb-3"></canvas>
 
-                <!-- HTML5 Audio -->
                 <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700 space-y-2">
                   <audio id="ttsAudioPlayer" controls class="w-full h-8"></audio>
                   <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-0.5">
@@ -243,7 +249,7 @@
           <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 class="text-sm font-bold text-slate-900 flex items-center">
               <i class="fa-solid fa-language text-rose-600 mr-2"></i>
-              Chapter 3 Front-End Inspector: Text Normalization (NSW) & G2P Phonemes
+              Module 2 Front-End Inspector: Text Normalization (NSW) & G2P Phonemes
             </h3>
             <span class="text-xs text-slate-400">Phonemic transcription for acoustic models</span>
           </div>
@@ -270,11 +276,68 @@
             </div>
           </div>
 
-          <!-- Phoneme Token Breakdown Stream -->
           <div>
             <div class="text-[11px] font-bold text-slate-600 uppercase mb-2">Phonetic Token Sequence:</div>
-            <div id="phonemeChipsContainer" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scroll p-2 bg-slate-50 rounded-xl border border-slate-200">
-              <!-- Dynamically populated chips -->
+            <div id="phonemeChipsContainer" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scroll p-2 bg-slate-50 rounded-xl border border-slate-200"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================================================================== -->
+      <!-- TAB 2: MEL-SPECTROGRAM & ACOUSTIC VIEWER (MODULE 1) -->
+      <!-- ==================================================================== -->
+      <div id="tabContent-spectrogram" class="hidden space-y-6">
+        
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 flex items-center">
+                <i class="fa-solid fa-chart-simple text-rose-600 mr-2"></i>
+                80-Band Mel-Spectrogram & Pitch F0 Contour Analyzer
+              </h2>
+              <p class="text-xs text-slate-500">Module 1 Psychoacoustics: Short-Time Fourier Transform (STFT) mapped to human cochlear critical bands.</p>
+            </div>
+            <span id="specDurationBadge" class="text-xs font-mono px-3 py-1 bg-slate-100 text-slate-700 rounded-lg">Duration: -- s</span>
+          </div>
+
+          <!-- Heatmap Canvas Container -->
+          <div class="p-6 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+              <span class="font-bold text-rose-400 uppercase tracking-widest text-[10px]">Acoustic Energy Distribution (80 Mel Filterbanks: 80Hz - 8kHz)</span>
+              <div class="flex items-center space-x-3 text-[11px]">
+                <span class="flex items-center"><span class="w-3 h-3 bg-indigo-950 mr-1 rounded-xs"></span> Low Energy</span>
+                <span class="flex items-center"><span class="w-3 h-3 bg-rose-600 mr-1 rounded-xs"></span> High Energy</span>
+                <span class="flex items-center"><span class="w-3 h-1 bg-amber-400 mr-1"></span> F0 Pitch Track</span>
+              </div>
+            </div>
+
+            <!-- Canvas -->
+            <div class="relative w-full h-64 bg-black rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+              <canvas id="spectrogramCanvas" width="900" height="256" class="w-full h-full object-fill"></canvas>
+              <div id="specEmptyNotice" class="absolute text-slate-500 text-xs italic">
+                Synthesize voice in Tab 1 or record audio in Tab 2 to generate spectrogram
+              </div>
+            </div>
+
+            <!-- Pitch Contour & Dynamic Range Stats -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
+              <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 font-mono">
+                <div class="text-[10px] text-slate-400 uppercase">Mean Pitch (F0):</div>
+                <div id="specMeanF0" class="text-lg font-bold text-amber-400">-- Hz</div>
+              </div>
+              <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 font-mono">
+                <div class="text-[10px] text-slate-400 uppercase">Pitch Max / Min:</div>
+                <div id="specRangeF0" class="text-lg font-bold text-sky-400">-- / -- Hz</div>
+              </div>
+              <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 font-mono">
+                <div class="text-[10px] text-slate-400 uppercase">Mel Filterbanks:</div>
+                <div class="text-lg font-bold text-rose-400">80 Bands</div>
+              </div>
+              <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 font-mono">
+                <div class="text-[10px] text-slate-400 uppercase">Time Frames:</div>
+                <div id="specFramesCount" class="text-lg font-bold text-emerald-400">-- Frames</div>
+              </div>
             </div>
           </div>
         </div>
@@ -282,7 +345,7 @@
       </div>
 
       <!-- ==================================================================== -->
-      <!-- TAB 2: ZERO-SHOT VOICE CLONING LAB -->
+      <!-- TAB 3: ZERO-SHOT VOICE CLONING LAB -->
       <!-- ==================================================================== -->
       <div id="tabContent-cloning" class="hidden space-y-6">
         
@@ -296,18 +359,13 @@
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            <!-- Left: Audio Capture & Profile Input -->
             <div class="space-y-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">Cloned Voice Name:</label>
                 <input type="text" id="cloneVoiceName" value="Interview Candidate Voice" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800 font-semibold focus:outline-hidden focus:ring-2 focus:ring-rose-500">
               </div>
 
-              <!-- Dual Input: Mic Record or File Upload -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                
-                <!-- Mic Recorder Card -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 flex flex-col justify-between">
                   <div>
                     <span class="text-xs font-bold text-slate-800 flex items-center">
@@ -326,7 +384,6 @@
                   </div>
                 </div>
 
-                <!-- File Upload Card -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 flex flex-col justify-between">
                   <div>
                     <span class="text-xs font-bold text-slate-800 flex items-center">
@@ -340,7 +397,6 @@
                     <input type="file" id="cloneAudioFileInput" accept="audio/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                   </div>
                 </div>
-
               </div>
 
               <button onclick="submitVoiceCloning()" id="processCloneBtn" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center space-x-2">
@@ -351,19 +407,18 @@
               <div id="cloneStatusMsg" class="text-xs text-center text-slate-500">Awaiting audio input...</div>
             </div>
 
-            <!-- Right: Extracted Acoustic Identity & 128-D Embedding -->
+            <!-- Extracted Acoustic Identity -->
             <div class="p-5 bg-slate-900 rounded-xl text-slate-100 space-y-4">
               <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                 <span class="text-[11px] font-bold uppercase tracking-widest text-rose-400">Extracted Acoustic Profile</span>
                 <span id="cloneGenderBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">Neutral</span>
               </div>
 
-              <!-- Acoustic Features Grid -->
               <div class="grid grid-cols-2 gap-3 text-xs">
                 <div class="p-2.5 bg-slate-800/80 rounded-lg border border-slate-700">
                   <div class="text-[10px] text-slate-400">Fundamental F0:</div>
                   <div id="profileF0" class="text-lg font-bold text-sky-400 font-mono">-- Hz</div>
-                  <div class="text-[10px] text-slate-500">Vocal fold vibration rate</div>
+                  <div class="text-[10px] text-slate-500">Vocal fold rate</div>
                 </div>
 
                 <div class="p-2.5 bg-slate-800/80 rounded-lg border border-slate-700">
@@ -375,17 +430,16 @@
                 <div class="p-2.5 bg-slate-800/80 rounded-lg border border-slate-700">
                   <div class="text-[10px] text-slate-400">Pitch Shift Offset:</div>
                   <div id="profileShift" class="text-lg font-bold text-rose-400 font-mono">-- st</div>
-                  <div class="text-[10px] text-slate-500">Relative to base model</div>
+                  <div class="text-[10px] text-slate-500">Relative to base</div>
                 </div>
 
                 <div class="p-2.5 bg-slate-800/80 rounded-lg border border-slate-700">
                   <div class="text-[10px] text-slate-400">Duration Scale:</div>
                   <div id="profileCadence" class="text-lg font-bold text-emerald-400 font-mono">-- x</div>
-                  <div class="text-[10px] text-slate-500">Cadence tempo multiplier</div>
+                  <div class="text-[10px] text-slate-500">Cadence tempo</div>
                 </div>
               </div>
 
-              <!-- 128-D Embedding Preview Canvas -->
               <div>
                 <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
                   <span>128-Dimensional Latent Embedding Vector (z_spk):</span>
@@ -394,7 +448,6 @@
                 <canvas id="embeddingCanvas" width="300" height="40" class="w-full h-10 bg-slate-950 rounded-lg border border-slate-800"></canvas>
               </div>
 
-              <!-- Instant Audition Button -->
               <div class="pt-2">
                 <button onclick="auditionClonedVoice()" id="auditionCloneBtn" disabled class="w-full py-2.5 bg-rose-600/50 cursor-not-allowed text-white font-bold text-xs rounded-lg transition flex items-center justify-center space-x-2">
                   <i class="fa-solid fa-play"></i>
@@ -402,11 +455,10 @@
                 </button>
               </div>
             </div>
-
           </div>
         </div>
 
-        <!-- Saved Profiles Table -->
+        <!-- Registered Voices Table -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 class="text-base font-bold text-slate-900 flex items-center">
@@ -429,9 +481,7 @@
                   <th class="p-3">Action</th>
                 </tr>
               </thead>
-              <tbody id="profilesTableBody" class="divide-y divide-slate-100 text-[11px]">
-                <!-- Populated dynamically -->
-              </tbody>
+              <tbody id="profilesTableBody" class="divide-y divide-slate-100 text-[11px]"></tbody>
             </table>
           </div>
         </div>
@@ -439,127 +489,231 @@
       </div>
 
       <!-- ==================================================================== -->
-      <!-- TAB 3: 2-STAGE NEURAL PIPELINE VISUALIZER -->
+      <!-- TAB 4: LATENT VOICE MORPHING (MODULE 5) -->
       <!-- ==================================================================== -->
-      <div id="tabContent-visualizer" class="hidden space-y-6">
+      <div id="tabContent-morphing" class="hidden space-y-6">
         
         <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
           <div class="pb-3 border-b border-slate-100">
             <h2 class="text-lg font-bold text-slate-900 flex items-center">
-              <i class="fa-solid fa-diagram-project text-rose-600 mr-2"></i>
-              Neural TTS & Voice Cloning Course Architecture
+              <i class="fa-solid fa-shuffle text-rose-600 mr-2"></i>
+              Acoustic Latent Space Voice Morphing
             </h2>
-            <p class="text-xs text-slate-500">Interactive walkthrough of the 4-tier neural pipeline taught in 'The Sound of AI' curriculum.</p>
+            <p class="text-xs text-slate-500">Module 5: Interpolate linearly in the 128-D speaker embedding space to create hybrid vocal identities (z_morph = (1-α)z_A + αz_B).</p>
           </div>
 
-          <!-- Flowchart Stages -->
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-200">
             
-            <!-- Stage 1: Text Front-End -->
-            <div class="p-4 bg-rose-50 rounded-xl border border-rose-200 space-y-2">
-              <div class="flex items-center space-x-2 text-rose-700 font-bold text-xs uppercase">
-                <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px]">1</span>
-                <span>Text Front-End</span>
-              </div>
-              <p class="text-[11px] text-slate-600 font-medium">
-                Converts unstructured orthography into standardized linguistic tokens.
-              </p>
-              <ul class="text-[10px] text-slate-500 space-y-1 pt-1 list-disc list-inside">
-                <li>NSW Normalization ($4.50 -> words)</li>
-                <li>G2P Phonemization (IPA / CMU)</li>
-                <li>Lexical Stress Marking</li>
-              </ul>
+            <!-- Voice A -->
+            <div class="space-y-3 p-4 bg-white rounded-xl border border-slate-200 shadow-2xs">
+              <span class="text-xs font-bold text-rose-600 uppercase">Voice A (Source):</span>
+              <select id="morphSelectA" onchange="updateMorphPreview()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-700">
+                <option value="mira_neural" selected>Mira (Warm Conversational - 218Hz)</option>
+                <option value="alex_interviewer">Alex (Technical Interviewer - 124Hz)</option>
+                <option value="sarah_executive">Sarah (Executive Recruiter - 238Hz)</option>
+                <option value="david_architect">David (Systems Architect - 98Hz)</option>
+              </select>
+              <div class="text-[11px] text-slate-500">Starting vocal identity (at α = 0.0)</div>
             </div>
 
-            <!-- Stage 2: Speaker Encoder -->
-            <div class="p-4 bg-sky-50 rounded-xl border border-sky-200 space-y-2">
-              <div class="flex items-center space-x-2 text-sky-700 font-bold text-xs uppercase">
-                <span class="w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px]">2</span>
-                <span>Speaker Encoder</span>
+            <!-- Morph Slider -->
+            <div class="space-y-3 flex flex-col justify-center text-center">
+              <div class="font-bold text-xs text-slate-700">
+                Interpolation Alpha (α): <span id="morphAlphaVal" class="text-rose-600 font-mono">50% Blend</span>
               </div>
-              <p class="text-[11px] text-slate-600 font-medium">
-                Extracts vocal identity from 3-5 seconds of target speaker audio.
-              </p>
-              <ul class="text-[10px] text-slate-500 space-y-1 pt-1 list-disc list-inside">
-                <li>Pitch Contour (F0 estimation)</li>
-                <li>Spectral Centroid (Timbre)</li>
-                <li>128-D Acoustic Latent Embedding</li>
-              </ul>
+              <input type="range" id="morphSlider" min="0" max="100" value="50" oninput="updateMorphPreview()" class="w-full accent-rose-600">
+              <div class="flex justify-between text-[10px] text-slate-400">
+                <span>100% Voice A</span>
+                <span>50 / 50</span>
+                <span>100% Voice B</span>
+              </div>
             </div>
 
-            <!-- Stage 3: Acoustic Model -->
-            <div class="p-4 bg-purple-50 rounded-xl border border-purple-200 space-y-2">
-              <div class="flex items-center space-x-2 text-purple-700 font-bold text-xs uppercase">
-                <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">3</span>
-                <span>Acoustic Modeling</span>
-              </div>
-              <p class="text-[11px] text-slate-600 font-medium">
-                Maps phoneme tokens + speaker embedding into intermediate representation.
-              </p>
-              <ul class="text-[10px] text-slate-500 space-y-1 pt-1 list-disc list-inside">
-                <li>VITS Normalizing Flow Prior</li>
-                <li>Duration & Pitch Predictor</li>
-                <li>Stochastic Latent Alignment</li>
-              </ul>
-            </div>
-
-            <!-- Stage 4: Neural Vocoder -->
-            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 space-y-2">
-              <div class="flex items-center space-x-2 text-emerald-700 font-bold text-xs uppercase">
-                <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">4</span>
-                <span>Neural Vocoder</span>
-              </div>
-              <p class="text-[11px] text-slate-600 font-medium">
-                Reconstructs high-fidelity continuous time-domain speech waveforms.
-              </p>
-              <ul class="text-[10px] text-slate-500 space-y-1 pt-1 list-disc list-inside">
-                <li>HiFi-GAN Transposed Convolutions</li>
-                <li>Multi-Receptive Field Fusion</li>
-                <li>16 kHz Continuous Audio Waveform</li>
-              </ul>
+            <!-- Voice B -->
+            <div class="space-y-3 p-4 bg-white rounded-xl border border-slate-200 shadow-2xs">
+              <span class="text-xs font-bold text-sky-600 uppercase">Voice B (Target):</span>
+              <select id="morphSelectB" onchange="updateMorphPreview()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-700">
+                <option value="mira_neural">Mira (Warm Conversational - 218Hz)</option>
+                <option value="alex_interviewer" selected>Alex (Technical Interviewer - 124Hz)</option>
+                <option value="sarah_executive">Sarah (Executive Recruiter - 238Hz)</option>
+                <option value="david_architect">David (Systems Architect - 98Hz)</option>
+              </select>
+              <div class="text-[11px] text-slate-500">Destination vocal identity (at α = 1.0)</div>
             </div>
 
           </div>
 
-          <!-- Psychoacoustics & Speech Physics Deep Dive -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-            <div class="p-5 bg-slate-900 rounded-xl text-slate-100 space-y-3">
-              <h4 class="text-xs font-bold uppercase tracking-widest text-rose-400 flex items-center">
-                <i class="fa-solid fa-lungs mr-2"></i>
-                Vocal Tract Physics (Chapter 2)
-              </h4>
-              <p class="text-xs text-slate-300 leading-relaxed">
-                Human speech generation relies on the source-filter model:
-              </p>
-              <div class="space-y-2 text-xs">
-                <div class="p-2.5 bg-slate-800 rounded-lg border border-slate-700">
-                  <span class="font-bold text-sky-400">1. Vocal Fold Excitation (Source):</span>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Airflow vibrates vocal folds at fundamental frequency F0, producing harmonic comb spectrum.</p>
-                </div>
-                <div class="p-2.5 bg-slate-800 rounded-lg border border-slate-700">
-                  <span class="font-bold text-amber-400">2. Vocal Tract Resonances (Filter):</span>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Pharynx, oral and nasal cavities shape formant bands (F1, F2, F3) creating distinctive vowels and timbre.</p>
-                </div>
+          <!-- Morph Action & Telemetry Preview -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-slate-900 rounded-xl text-slate-100">
+            <div>
+              <div class="text-xs font-bold text-rose-400">Estimated Morphed Pitch (F0): <span id="morphPreviewF0" class="text-white font-mono">171.0 Hz</span></div>
+              <div class="text-[11px] text-slate-400">Linear acoustic blend + spherical normalized 128-D embedding projection.</div>
+            </div>
+            
+            <button onclick="executeVoiceMorph()" id="morphBtn" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span id="morphBtnText">Create Hybrid Voice Profile</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================================================================== -->
+      <!-- TAB 5: HOMOGRAPH DISAMBIGUATION (MODULE 2) -->
+      <!-- ==================================================================== -->
+      <div id="tabContent-homographs" class="hidden space-y-6">
+        
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="pb-3 border-b border-slate-100">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-language text-rose-600 mr-2"></i>
+              Context-Aware Homograph Disambiguation Playground
+            </h2>
+            <p class="text-xs text-slate-500">Module 2: Words spelled identically have different phonemic pronunciations based on syntactic part-of-speech context.</p>
+          </div>
+
+          <!-- Homograph Quick Test Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+              <div class="font-bold text-xs text-slate-800 flex items-center justify-between">
+                <span>"read"</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-mono">/riːd/ vs /rɛd/</span>
               </div>
+              <p class="text-[11px] text-slate-600">Present vs Past participle based on auxiliary verbs ('have read' vs 'will read').</p>
+              <button onclick="testHomographSentence('I have read the system architecture document.')" class="w-full text-left p-2 rounded bg-white border border-slate-200 text-[11px] text-slate-700 hover:border-rose-400 transition font-mono">
+                "I have read the document" → /rɛd/
+              </button>
+              <button onclick="testHomographSentence('Please read the prompt carefully.')" class="w-full text-left p-2 rounded bg-white border border-slate-200 text-[11px] text-slate-700 hover:border-rose-400 transition font-mono">
+                "Please read the prompt" → /riːd/
+              </button>
             </div>
 
-            <div class="p-5 bg-slate-900 rounded-xl text-slate-100 space-y-3">
-              <h4 class="text-xs font-bold uppercase tracking-widest text-rose-400 flex items-center">
-                <i class="fa-solid fa-ear-listen mr-2"></i>
-                Psychoacoustic Perception (Chapter 2)
-              </h4>
-              <p class="text-xs text-slate-300 leading-relaxed">
-                Human auditory perception compresses frequency resolution logarithmically:
-              </p>
-              <div class="space-y-2 text-xs">
-                <div class="p-2.5 bg-slate-800 rounded-lg border border-slate-700">
-                  <span class="font-bold text-purple-400">Mel-Scale Filterbanks:</span>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Triangular overlapping filters mimicking the cochlea's non-linear critical bands, prioritizing 300Hz-3kHz.</p>
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+              <div class="font-bold text-xs text-slate-800 flex items-center justify-between">
+                <span>"live"</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-mono">/lɪv/ vs /laɪv/</span>
+              </div>
+              <p class="text-[11px] text-slate-600">Verb (residence) vs Adjective (real-time stream, concert).</p>
+              <button onclick="testHomographSentence('We are broadcasting a live demo of the speech agent.')" class="w-full text-left p-2 rounded bg-white border border-slate-200 text-[11px] text-slate-700 hover:border-rose-400 transition font-mono">
+                "a live demo" → /laɪv/
+              </button>
+              <button onclick="testHomographSentence('Where do you live currently?')" class="w-full text-left p-2 rounded bg-white border border-slate-200 text-[11px] text-slate-700 hover:border-rose-400 transition font-mono">
+                "do you live" → /lɪv/
+              </button>
+            </div>
+
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+              <div class="font-bold text-xs text-slate-800 flex items-center justify-between">
+                <span>"lead"</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-mono">/liːd/ vs /lɛd/</span>
+              </div>
+              <p class="text-[11px] text-slate-600">Verb (guide) vs Noun (heavy metal material).</p>
+              <button onclick="testHomographSentence('I lead the distributed backend team.')" class="w-full text-left p-2 rounded bg-white border border-slate-200 text-[11px] text-slate-700 hover:border-rose-400 transition font-mono">
+                "I lead the team" → /liːd/
+              </button>
+              <button onclick="testHomographSentence('The old water lead pipe was replaced.')" class="w-full text-left p-2 rounded bg-white border border-slate-200 text-[11px] text-slate-700 hover:border-rose-400 transition font-mono">
+                "lead pipe" → /lɛd/
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Homograph Disambiguation Output Console -->
+          <div class="p-4 bg-slate-900 rounded-xl text-slate-100 space-y-2">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-rose-400">Syntactic Context Inspection:</div>
+            <div id="homographConsole" class="font-mono text-xs text-slate-300">
+              Select or test a sentence above to see contextual syntactic rule firing.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================================================================== -->
+      <!-- TAB 6: KLATT FORMANT SYNTHESIS (MODULE 3) -->
+      <!-- ==================================================================== -->
+      <div id="tabContent-formants" class="hidden space-y-6">
+        
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="pb-3 border-b border-slate-100">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-wave-square text-rose-600 mr-2"></i>
+              Historical Klatt Formant Synthesizer Simulator
+            </h2>
+            <p class="text-xs text-slate-500">Module 3 Traditional Methods: 1980s rule-based acoustic speech synthesis using cascaded digital biquad resonators.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Select Vowel Formant Target:</label>
+                <div class="grid grid-cols-5 gap-2">
+                  <button onclick="selectFormantVowel('a')" id="vowelBtn-a" class="p-3 rounded-xl border border-rose-500 bg-rose-50 text-rose-700 font-bold text-sm text-center">
+                    /ɑː/<br><span class="text-[10px] text-slate-500 font-normal">father</span>
+                  </button>
+                  <button onclick="selectFormantVowel('i')" id="vowelBtn-i" class="p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold text-sm text-center">
+                    /i/<br><span class="text-[10px] text-slate-500 font-normal">beet</span>
+                  </button>
+                  <button onclick="selectFormantVowel('u')" id="vowelBtn-u" class="p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold text-sm text-center">
+                    /uː/<br><span class="text-[10px] text-slate-500 font-normal">boot</span>
+                  </button>
+                  <button onclick="selectFormantVowel('e')" id="vowelBtn-e" class="p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold text-sm text-center">
+                    /ɛ/<br><span class="text-[10px] text-slate-500 font-normal">bet</span>
+                  </button>
+                  <button onclick="selectFormantVowel('o')" id="vowelBtn-o" class="p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold text-sm text-center">
+                    /oʊ/<br><span class="text-[10px] text-slate-500 font-normal">boat</span>
+                  </button>
                 </div>
-                <div class="p-2.5 bg-slate-800 rounded-lg border border-slate-700">
-                  <span class="font-bold text-emerald-400">Acoustic Cadence & Breaths:</span>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Conversational speech requires 150-250ms breathing pauses at clause boundaries to avoid auditory fatigue.</p>
+              </div>
+
+              <div>
+                <div class="flex justify-between font-bold text-xs text-slate-700 mb-1">
+                  <span>Glottal Vibration Pitch (F0):</span>
+                  <span id="formantF0Val" class="text-rose-600 font-mono">130 Hz</span>
                 </div>
+                <input type="range" id="formantF0Slider" min="80" max="280" value="130" oninput="document.getElementById('formantF0Val').innerText = this.value + ' Hz'" class="w-full accent-rose-600">
+                <div class="flex justify-between text-[10px] text-slate-400">
+                  <span>80 Hz (Bass)</span>
+                  <span>130 Hz (Baritone)</span>
+                  <span>240 Hz (Soprano)</span>
+                </div>
+              </div>
+
+              <button onclick="synthesizeFormantAudio()" id="formantSynthBtn" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-play"></i>
+                <span id="formantSynthBtnText">Synthesize Klatt Formant Acoustic Waveform</span>
+              </button>
+            </div>
+
+            <!-- Resonator Telemetry Card -->
+            <div class="p-5 bg-slate-900 rounded-xl text-slate-100 flex flex-col justify-between space-y-4">
+              <div>
+                <div class="text-[10px] font-bold uppercase tracking-widest text-rose-400 mb-2">Vocal Tract Digital Resonators (F1, F2, F3)</div>
+                
+                <div class="space-y-2 text-xs font-mono">
+                  <div class="flex justify-between p-2 bg-slate-800 rounded-lg">
+                    <span class="text-sky-400">Formant 1 (F1 - Pharyngeal):</span>
+                    <span id="resF1" class="font-bold text-white">730 Hz (BW: 80Hz)</span>
+                  </div>
+                  <div class="flex justify-between p-2 bg-slate-800 rounded-lg">
+                    <span class="text-amber-400">Formant 2 (F2 - Oral Cavity):</span>
+                    <span id="resF2" class="font-bold text-white">1090 Hz (BW: 90Hz)</span>
+                  </div>
+                  <div class="flex justify-between p-2 bg-slate-800 rounded-lg">
+                    <span class="text-purple-400">Formant 3 (F3 - Lip Radiation):</span>
+                    <span id="resF3" class="font-bold text-white">2440 Hz (BW: 130Hz)</span>
+                  </div>
+                </div>
+
+                <div class="mt-4 bg-slate-800 p-2.5 rounded-lg border border-slate-700">
+                  <audio id="formantAudioPlayer" controls class="w-full h-8"></audio>
+                </div>
+              </div>
+
+              <div class="text-[11px] text-slate-400 italic">
+                Notice the synthetic, robotic character typical of early 1980s formant synthesis compared to modern neural VITS vocoders!
               </div>
             </div>
           </div>
@@ -568,9 +722,9 @@
       </div>
 
       <!-- ==================================================================== -->
-      <!-- TAB 4: MULTI-ENGINE BENCHMARK ARENA -->
+      <!-- TAB 7: MULTI-ENGINE BENCHMARK ARENA -->
       <!-- ==================================================================== -->
-      <div id="tabContent-benchmark" class="hidden space-y-6">
+      <div id="tabContent-arena" class="hidden space-y-6">
         
         <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-4">
@@ -658,23 +812,27 @@
   <script>
     renderSidebar('tts');
 
-    // Tab Switcher
+    let currentVowel = 'a';
+    let lastAudioFilename = null;
+
     function switchTab(tabId) {
-      const tabs = ['synthesis', 'cloning', 'visualizer', 'benchmark'];
+      const tabs = ['synthesis', 'spectrogram', 'cloning', 'morphing', 'homographs', 'formants', 'arena'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tabBtn-${t}`);
         const content = document.getElementById(`tabContent-${t}`);
-        if (t === tabId) {
-          btn.classList.add('active');
-          btn.classList.remove('text-slate-300');
-          content.classList.remove('hidden');
-        } else {
-          btn.classList.remove('active');
-          btn.classList.add('text-slate-300');
-          content.classList.add('hidden');
+        if (btn && content) {
+          if (t === tabId) {
+            btn.classList.add('active');
+            btn.classList.remove('text-slate-300');
+            content.classList.remove('hidden');
+          } else {
+            btn.classList.remove('active');
+            btn.classList.add('text-slate-300');
+            content.classList.add('hidden');
+          }
         }
       });
-      if (tabId === 'cloning') {
+      if (tabId === 'cloning' || tabId === 'morphing') {
         refreshProfilesList();
       }
     }
@@ -695,13 +853,13 @@
         input.value = "In 2026, the company invested $4.50 per user, yielding a 99.5% success rate for the ASR and TTS APIs.";
       } else if (type === 'tech') {
         input.value = "Our neural VITS vocoder converts phonemes into 16kHz audio using HiFi-GAN transposed convolutions on CPU.";
-      } else if (type === 'greeting') {
-        input.value = "Hello! I am your AI interviewer. Let's discuss your experience with distributed systems and event streams.";
+      } else if (type === 'homograph') {
+        input.value = "I have read the document, and I will lead the live broadcast at present.";
       }
       inspectFrontEnd();
     }
 
-    // Inspect Text Normalization & G2P Phonetics
+    // Inspect G2P and Homographs
     async function inspectFrontEnd() {
       const text = document.getElementById('ttsTextInput').value.trim();
       if (!text) return;
@@ -726,13 +884,15 @@
           badge.innerText = "No NSW Needed";
         }
 
-        // Render phoneme chips
         const container = document.getElementById('phonemeChipsContainer');
         container.innerHTML = '';
         data.phonetics.tokens.forEach(tok => {
           const chip = document.createElement('div');
-          chip.className = "px-2 py-1 rounded-md bg-white border border-slate-300 text-slate-800 text-[11px] font-mono flex items-center space-x-1 shadow-2xs";
+          chip.className = `px-2 py-1 rounded-md ${tok.homograph ? 'bg-amber-50 border-amber-300' : 'bg-white border-slate-300'} border text-slate-800 text-[11px] font-mono flex items-center space-x-1 shadow-2xs`;
           chip.innerHTML = `<span class="font-bold text-slate-900">${tok.word}</span><span class="text-rose-600 text-[10px]">/${tok.ipa || tok.word}/</span>`;
+          if (tok.homograph) {
+            chip.title = `Homograph resolved as ${tok.sense}: ${tok.homograph_rule}`;
+          }
           container.appendChild(chip);
         });
 
@@ -780,7 +940,6 @@
         btn.innerText = 'Synthesize & Audition';
         status.innerText = `Generated in ${duration} ms`;
 
-        // Telemetry update
         document.getElementById('ttsLatency').innerText = `${duration} ms`;
         document.getElementById('ttsBackendName').innerText = data.provider;
         document.getElementById('playerFormat').innerText = (data.audio_format || 'wav').toUpperCase();
@@ -803,6 +962,12 @@
             document.getElementById('playerState').innerText = 'Finished';
           };
         }
+
+        // Render Mel-Spectrogram if available
+        if (data.spectrogram) {
+          renderMelSpectrogram(data.spectrogram);
+        }
+
       } catch (err) {
         btn.innerText = 'Synthesize & Audition';
         status.innerText = 'Error: ' + err.message;
@@ -810,7 +975,71 @@
       }
     }
 
-    // Waveform Drawer
+    // Mel-Spectrogram Heatmap Renderer
+    function renderMelSpectrogram(spec) {
+      if (!spec || !spec.mel_spectrogram) return;
+
+      document.getElementById('specEmptyNotice').classList.add('hidden');
+      document.getElementById('specDurationBadge').innerText = `Duration: ${spec.duration_sec}s`;
+      document.getElementById('specMeanF0').innerText = `${spec.mean_f0_hz} Hz`;
+      document.getElementById('specRangeF0').innerText = `${spec.max_f0_hz} / ${spec.min_f0_hz} Hz`;
+      document.getElementById('specFramesCount').innerText = `${spec.num_time_frames} Frames`;
+
+      const canvas = document.getElementById('spectrogramCanvas');
+      const ctx = canvas.getContext('2d');
+      const grid = spec.mel_spectrogram; // [80 bands x T frames]
+      const nBands = grid.length;
+      const nFrames = grid[0].length;
+
+      const cellW = canvas.width / nFrames;
+      const cellH = canvas.height / nBands;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Render 2D Mel heat bins (invert Y so low freq is bottom)
+      for (let m = 0; m < nBands; m++) {
+        const y = canvas.height - (m + 1) * cellH;
+        for (let t = 0; t < nFrames; t++) {
+          const val = grid[m][t]; // 0.0 to 1.0
+          const x = t * cellW;
+
+          // Colormap: Deep Navy -> Magenta -> Orange -> Yellow
+          const r = Math.min(255, Math.floor(val * 280));
+          const g = Math.min(255, Math.floor(Math.max(0, val - 0.4) * 350));
+          const b = Math.min(255, Math.floor(Math.sin(val * Math.PI) * 180 + 20));
+
+          ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+          ctx.fillRect(x, y, cellW + 0.5, cellH + 0.5);
+        }
+      }
+
+      // Overlay F0 pitch contour as glowing yellow track
+      if (spec.f0_contour && spec.f0_contour.length > 0) {
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        let started = false;
+
+        spec.f0_contour.forEach((f0, t) => {
+          if (f0 > 50) {
+            const x = t * cellW + cellW / 2;
+            // Map F0 (60Hz to 400Hz) to lower half of canvas
+            const normF0 = (f0 - 60) / (400 - 60);
+            const y = canvas.height - normF0 * (canvas.height * 0.45) - 10;
+            if (!started) {
+              ctx.moveTo(x, y);
+              started = true;
+            } else {
+              ctx.lineTo(x, y);
+            }
+          } else {
+            started = false;
+          }
+        });
+        ctx.stroke();
+      }
+    }
+
     function drawSimulatedWaveform() {
       const canvas = document.getElementById('waveformCanvas');
       if (!canvas) return;
@@ -829,7 +1058,7 @@
       }
     }
 
-    // Microphone Recording for Voice Cloning
+    // Voice Cloning Recorder
     let cloneMediaRecorder = null;
     let cloneAudioChunks = [];
     let cloneTimerInterval = null;
@@ -880,7 +1109,6 @@
       }
     }
 
-    // Submit Voice Cloning
     async function submitVoiceCloning() {
       const name = document.getElementById('cloneVoiceName').value.trim() || 'Custom Cloned Voice';
       const fileInput = document.getElementById('cloneAudioFileInput');
@@ -942,7 +1170,6 @@
       document.getElementById('profileCadence').innerText = `${prof.length_scale}x`;
       document.getElementById('cloneGenderBadge').innerText = (prof.gender_estimate || 'neutral').toUpperCase();
 
-      // Render 128-D embedding bar chart
       const canvas = document.getElementById('embeddingCanvas');
       if (canvas && prof.embedding_vector) {
         const ctx = canvas.getContext('2d');
@@ -965,20 +1192,160 @@
       const profileId = audBtn.dataset.profileId;
       if (!profileId) return;
 
-      // Switch to tab 1 and select the profile
       switchTab('synthesis');
       const select = document.getElementById('voiceProfileSelect');
       select.value = profileId;
       synthesizeSpeech();
     }
 
-    // Refresh Profile Lists
+    // Voice Morphing Engine
+    function updateMorphPreview() {
+      const alpha = parseInt(document.getElementById('morphSlider').value) / 100.0;
+      document.getElementById('morphAlphaVal').innerText = `${Math.round(alpha * 100)}% Blend`;
+
+      // Estimate blended F0 from selected profiles
+      const profA = document.getElementById('morphSelectA').value;
+      const profB = document.getElementById('morphSelectB').value;
+      
+      const f0Map = {
+        'mira_neural': 218.0,
+        'alex_interviewer': 124.0,
+        'sarah_executive': 238.0,
+        'david_architect': 98.0
+      };
+
+      const f0A = f0Map[profA] || 175.0;
+      const f0B = f0Map[profB] || 175.0;
+      const blendedF0 = (1.0 - alpha) * f0A + alpha * f0B;
+
+      document.getElementById('morphPreviewF0').innerText = `${blendedF0.toFixed(1)} Hz`;
+    }
+
+    async function executeVoiceMorph() {
+      const profA = document.getElementById('morphSelectA').value;
+      const profB = document.getElementById('morphSelectB').value;
+      const alpha = parseInt(document.getElementById('morphSlider').value) / 100.0;
+
+      const btn = document.getElementById('morphBtnText');
+      btn.innerText = 'Interpolating Latent Vectors...';
+
+      try {
+        const resp = await fetch('/api/tts/morph-voices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            profile_id_a: profA,
+            profile_id_b: profB,
+            alpha: alpha
+          })
+        });
+
+        const data = await resp.json();
+        btn.innerText = 'Create Hybrid Voice Profile';
+
+        if (data.status === 'success') {
+          alert(`Successfully created hybrid voice '${data.profile.name}'!`);
+          await refreshProfilesList();
+          switchTab('synthesis');
+          document.getElementById('voiceProfileSelect').value = data.profile.profile_id;
+          synthesizeSpeech();
+        }
+      } catch (err) {
+        btn.innerText = 'Create Hybrid Voice Profile';
+        alert('Voice morphing failed: ' + err.message);
+      }
+    }
+
+    // Homograph Sentence Tester
+    async function testHomographSentence(sentence) {
+      document.getElementById('ttsTextInput').value = sentence;
+      switchTab('synthesis');
+      await inspectFrontEnd();
+
+      try {
+        const resp = await fetch('/api/tts/normalize-text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: sentence })
+        });
+        const data = await resp.json();
+        const consoleEl = document.getElementById('homographConsole');
+
+        if (data.phonetics.homographs_disambiguated && data.phonetics.homographs_disambiguated.length > 0) {
+          consoleEl.innerHTML = data.phonetics.homographs_disambiguated.map(h => `
+            <div class="p-2 bg-slate-800 rounded-lg border border-slate-700">
+              <span class="text-rose-400 font-bold">${h.word}</span> → <span class="text-white">/${h.ipa}/</span> (<span class="text-emerald-400 font-bold">${h.sense}</span>)
+              <div class="text-[10px] text-slate-400 mt-0.5">Rule: ${h.rule}</div>
+            </div>
+          `).join('');
+        } else {
+          consoleEl.innerText = `Syntactic parse complete. All tokens transcribed.`;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Klatt Formant Synthesizer
+    function selectFormantVowel(vowel) {
+      currentVowel = vowel;
+      ['a', 'i', 'u', 'e', 'o'].forEach(v => {
+        const btn = document.getElementById(`vowelBtn-${v}`);
+        if (btn) {
+          if (v === vowel) {
+            btn.className = "p-3 rounded-xl border border-rose-500 bg-rose-50 text-rose-700 font-bold text-sm text-center";
+          } else {
+            btn.className = "p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold text-sm text-center";
+          }
+        }
+      });
+
+      const targets = {
+        'a': { f1: '730 Hz', f2: '1090 Hz', f3: '2440 Hz' },
+        'i': { f1: '280 Hz', f2: '2250 Hz', f3: '3000 Hz' },
+        'u': { f1: '300 Hz', f2: '870 Hz',  f3: '2240 Hz' },
+        'e': { f1: '530 Hz', f2: '1840 Hz', f3: '2480 Hz' },
+        'o': { f1: '570 Hz', f2: '840 Hz',  f3: '2410 Hz' }
+      };
+
+      const t = targets[vowel];
+      document.getElementById('resF1').innerText = `${t.f1} (BW: 80Hz)`;
+      document.getElementById('resF2').innerText = `${t.f2} (BW: 90Hz)`;
+      document.getElementById('resF3').innerText = `${t.f3} (BW: 120Hz)`;
+    }
+
+    async function synthesizeFormantAudio() {
+      const f0 = parseFloat(document.getElementById('formantF0Slider').value);
+      const btn = document.getElementById('formantSynthBtnText');
+      btn.innerText = 'Synthesizing Resonators...';
+
+      try {
+        const resp = await fetch('/api/tts/formant-synth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vowel: currentVowel, f0: f0 })
+        });
+        const data = await resp.json();
+        btn.innerText = 'Synthesize Klatt Formant Acoustic Waveform';
+
+        if (data.audio_url) {
+          const player = document.getElementById('formantAudioPlayer');
+          player.src = data.audio_url + '?t=' + Date.now();
+          player.play();
+        }
+      } catch (err) {
+        btn.innerText = 'Synthesize Klatt Formant Acoustic Waveform';
+        alert('Formant synthesis error: ' + err.message);
+      }
+    }
+
+    // Refresh Profiles
     async function refreshProfilesList() {
       try {
         const resp = await fetch('/api/tts/voices');
         const data = await resp.json();
         
-        // Update Select dropdown in Tab 1
+        // Select in Tab 1
         const select = document.getElementById('voiceProfileSelect');
         const currentVal = select.value;
         select.innerHTML = '';
@@ -992,7 +1359,7 @@
           select.value = currentVal;
         }
 
-        // Update Table in Tab 2
+        // Table in Tab 3
         const tbody = document.getElementById('profilesTableBody');
         tbody.innerHTML = '';
         data.voices.forEach(v => {
@@ -1056,11 +1423,11 @@
       }
     }
 
-    // Initialize on load
     window.addEventListener('DOMContentLoaded', () => {
       refreshProfilesList();
       inspectFrontEnd();
       drawSimulatedWaveform();
+      updateMorphPreview();
     });
   </script>
 </body>
