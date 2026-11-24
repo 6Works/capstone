@@ -1,14 +1,132 @@
 """
 Text Normalization and Grapheme-to-Phoneme (G2P) Front-End.
-Based on "How Machines Process Text" from the Neural TTS & Voice Cloning Course.
+Based on Module 2 ("How Machines Process Text") from the Neural TTS & Voice Cloning Course.
 
 Transforms raw unstructured text containing Non-Standard Words (NSW)
 such as numbers, currencies, dates, abbreviations, and technical acronyms
 into fluent, spoken phonemic representations for acoustic models.
+Includes Context-Aware Homograph Disambiguation (e.g. read/read, lead/lead, live/live).
 """
 
 import re
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
+
+
+class HomographDisambiguator:
+    """
+    Context-aware homograph disambiguation engine for Text-to-Speech front-ends.
+    Based on Chapter 3 ("How Do Speaking AIs Understand Text?") of The Sound of AI course.
+    """
+
+    HOMOGRAPHS = {
+        "read": {
+            "past": {"ipa": "rɛd", "arpabet": "R EH1 D", "rule": "Past participle/past tense context (e.g. 'have read', 'already read')"},
+            "present": {"ipa": "riːd", "arpabet": "R IY1 D", "rule": "Present/infinitive tense context (e.g. 'will read', 'to read')"}
+        },
+        "lead": {
+            "metal": {"ipa": "lɛd", "arpabet": "L EH1 D", "rule": "Chemical element / heavy metal (e.g. 'lead pipe', 'lead weight')"},
+            "verb": {"ipa": "liːd", "arpabet": "L IY1 D", "rule": "Action to guide or precede (e.g. 'lead the way', 'will lead')"}
+        },
+        "live": {
+            "adj": {"ipa": "laɪv", "arpabet": "L AY1 V", "rule": "Adjective modifying broadcast/stream/performance (e.g. 'live stream', 'live demo')"},
+            "verb": {"ipa": "lɪv", "arpabet": "L IH1 V", "rule": "Verb denoting residence or existence (e.g. 'I live in', 'where you live')"}
+        },
+        "record": {
+            "noun": {"ipa": "ˈrɛkərd", "arpabet": "R EH1 K ER0 D", "rule": "Noun denoting document/achievement (e.g. 'world record', 'the record')"},
+            "verb": {"ipa": "rɪˈkɔːrd", "arpabet": "R IH0 K AO1 R D", "rule": "Verb denoting capturing audio/data (e.g. 'to record', 'will record')"}
+        },
+        "present": {
+            "noun": {"ipa": "ˈprɛzənt", "arpabet": "P R EH1 Z AH0 N T", "rule": "Noun (gift) or temporal state (e.g. 'birthday present', 'at present')"},
+            "verb": {"ipa": "prɪˈzɛnt", "arpabet": "P R IH0 Z EH1 N T", "rule": "Verb meaning to introduce or show (e.g. 'to present', 'present the data')"}
+        },
+        "wind": {
+            "noun": {"ipa": "wɪnd", "arpabet": "W IH1 N D", "rule": "Noun referring to atmospheric air flow (e.g. 'strong wind', 'cold wind')"},
+            "verb": {"ipa": "waɪnd", "arpabet": "W AY1 N D", "rule": "Verb meaning to turn, coil or conclude (e.g. 'wind down', 'wind the clock')"}
+        }
+    }
+
+    @classmethod
+    def disambiguate(cls, word: str, prev_word: Optional[str] = None, next_word: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """Determines the phonemic pronunciation of a homograph based on syntactic context."""
+        w = word.lower()
+        if w not in cls.HOMOGRAPHS:
+            return None
+
+        prev_w = (prev_word or "").lower()
+        next_w = (next_word or "").lower()
+        h_data = cls.HOMOGRAPHS[w]
+
+        if w == "read":
+            if prev_w in ["have", "has", "had", "already", "been", "was", "were", "recently", "just"]:
+                res = dict(h_data["past"])
+                res["sense"] = "past"
+                return res
+            res = dict(h_data["present"])
+            res["sense"] = "present"
+            return res
+
+        elif w == "live":
+            if next_w in ["stream", "streaming", "music", "broadcast", "show", "performance", "feed", "event", "demo", "recording"]:
+                res = dict(h_data["adj"])
+                res["sense"] = "adjective"
+                return res
+            if prev_w in ["a", "the", "our", "their"]:
+                res = dict(h_data["adj"])
+                res["sense"] = "adjective"
+                return res
+            res = dict(h_data["verb"])
+            res["sense"] = "verb"
+            return res
+
+        elif w == "lead":
+            if next_w in ["pipe", "pipes", "poisoning", "bullet", "bullets", "pencil", "paint", "weight"]:
+                res = dict(h_data["metal"])
+                res["sense"] = "metal_noun"
+                return res
+            if prev_w in ["of", "heavy", "toxic"]:
+                res = dict(h_data["metal"])
+                res["sense"] = "metal_noun"
+                return res
+            res = dict(h_data["verb"])
+            res["sense"] = "verb"
+            return res
+
+        elif w == "record":
+            if prev_w in ["to", "will", "would", "shall", "can", "could", "please", "must", "and"]:
+                res = dict(h_data["verb"])
+                res["sense"] = "verb"
+                return res
+            if prev_w in ["a", "the", "new", "world", "track", "broken", "medical"]:
+                res = dict(h_data["noun"])
+                res["sense"] = "noun"
+                return res
+            res = dict(h_data["noun"])
+            res["sense"] = "noun"
+            return res
+
+        elif w == "present":
+            if prev_w in ["to", "will", "would", "shall", "can", "could"]:
+                res = dict(h_data["verb"])
+                res["sense"] = "verb"
+                return res
+            res = dict(h_data["noun"])
+            res["sense"] = "noun"
+            return res
+
+        elif w == "wind":
+            if next_w in ["down", "up", "the", "clock"] or prev_w in ["to", "will"]:
+                res = dict(h_data["verb"])
+                res["sense"] = "verb"
+                return res
+            res = dict(h_data["noun"])
+            res["sense"] = "noun"
+            return res
+
+        return None
+
+    @classmethod
+    def list_homographs(cls) -> Dict[str, Any]:
+        return cls.HOMOGRAPHS
 
 
 class TextNormalizer:
@@ -201,11 +319,9 @@ class TextNormalizer:
             def _replace_unit(m):
                 num_str = m.group(1)
                 if "." in num_str:
-                    num_val = float(num_str)
                     words = f"{num_str}"
                 else:
-                    num_val = int(num_str)
-                    words = cls.num_to_words(num_val)
+                    words = cls.num_to_words(int(num_str))
                 return f"{words} {expanded}"
             text = re.sub(pattern, _replace_unit, text, flags=re.IGNORECASE)
         return text
@@ -240,7 +356,6 @@ class TextNormalizer:
             num = m.group(1)
             if num in cls.ORDINALS:
                 return cls.ORDINALS[num]
-            # Fallback
             try:
                 val = int(num)
                 last_two = val % 100
@@ -308,7 +423,6 @@ class TextNormalizer:
         step7 = cls.normalize_numbers(step6)
         normalized = cls.normalize_acronyms(step7)
 
-        # Clean excess whitespace
         normalized = re.sub(r"\s+", " ", normalized).strip()
 
         return {
@@ -322,10 +436,9 @@ class G2PPhonemizer:
     """
     Grapheme-to-Phoneme (G2P) phonetic transcription engine.
     Translates orthographic words into IPA / ARPAbet phonetic representations
-    with syllable segmentation and lexical stress markers.
+    with context-aware homograph disambiguation and syllable stress markers.
     """
 
-    # Comprehensive phonetic lexicon for common technical, conversational & academic words
     LEXICON = {
         "hello": {"ipa": "həˈloʊ", "arpabet": "HH AH0 L OW1", "syllables": ["hel", "lo"], "stress": 2},
         "mira": {"ipa": "ˈmɪərə", "arpabet": "M IH1 R AH0", "syllables": ["mi", "ra"], "stress": 1},
@@ -358,7 +471,6 @@ class G2PPhonemizer:
         "doctor": {"ipa": "ˈdɒktər", "arpabet": "D AA1 K T ER0", "syllables": ["doc", "tor"], "stress": 1},
     }
 
-    # Rule-based English G2P phonetic mapping for out-of-vocabulary words
     VOWEL_MAP = {
         "a": "æ", "e": "ɛ", "i": "ɪ", "o": "ɒ", "u": "ʌ",
         "ai": "eɪ", "ay": "eɪ", "ea": "iː", "ee": "iː",
@@ -395,7 +507,6 @@ class G2PPhonemizer:
                 i += 1
 
         ipa_str = "".join(ipa_parts)
-        # Add primary stress mark to first syllable
         ipa_with_stress = "ˈ" + ipa_str if ipa_str else ""
         return {
             "ipa": ipa_with_stress,
@@ -406,11 +517,26 @@ class G2PPhonemizer:
         }
 
     @classmethod
-    def phonemize_word(cls, word: str) -> Dict[str, Any]:
-        """Translates a single word into phonetic IPA/ARPAbet notation."""
+    def phonemize_word(cls, word: str, prev_word: Optional[str] = None, next_word: Optional[str] = None) -> Dict[str, Any]:
+        """Translates a single word into phonetic notation with homograph disambiguation."""
         clean = re.sub(r"[^\w]", "", word.lower())
         if not clean:
             return {"word": word, "ipa": "", "arpabet": "", "syllables": [], "stress": 0}
+
+        # Check for context-sensitive homographs first
+        homo = HomographDisambiguator.disambiguate(clean, prev_word=prev_word, next_word=next_word)
+        if homo:
+            return {
+                "word": word,
+                "ipa": homo["ipa"],
+                "arpabet": homo["arpabet"],
+                "syllables": [clean],
+                "stress": 1,
+                "heuristic": False,
+                "homograph": True,
+                "homograph_rule": homo["rule"],
+                "sense": homo.get("sense")
+            }
 
         if clean in cls.LEXICON:
             entry = dict(cls.LEXICON[clean])
@@ -425,32 +551,47 @@ class G2PPhonemizer:
     @classmethod
     def phonemize_sentence(cls, sentence: str) -> Dict[str, Any]:
         """
-        Translates a full sentence into phonetic tokens.
+        Translates a full sentence into phonetic tokens with contextual homograph resolution.
         Preserves punctuation for prosodic pause boundaries.
         """
         tokens = re.findall(r"\w+|[^\w\s]", sentence)
         results = []
         full_ipa = []
         full_arpabet = []
+        homographs_found = []
 
-        for token in tokens:
+        words_only = [t for t in tokens if not re.match(r"[^\w\s]", t)]
+
+        for i, token in enumerate(tokens):
             if re.match(r"[^\w\s]", token):
-                # Punctuation marker
                 results.append({"word": token, "type": "punctuation", "ipa": token, "arpabet": token})
                 full_ipa.append(token)
                 full_arpabet.append(token)
             else:
-                phon = cls.phonemize_word(token)
+                # Find previous and next word for context
+                w_idx = words_only.index(token) if token in words_only else -1
+                prev_w = words_only[w_idx - 1] if w_idx > 0 else None
+                next_w = words_only[w_idx + 1] if 0 <= w_idx < len(words_only) - 1 else None
+
+                phon = cls.phonemize_word(token, prev_word=prev_w, next_word=next_w)
                 results.append(phon)
                 if phon.get("ipa"):
                     full_ipa.append(phon["ipa"])
                 if phon.get("arpabet"):
                     full_arpabet.append(phon["arpabet"])
+                if phon.get("homograph"):
+                    homographs_found.append({
+                        "word": token,
+                        "ipa": phon["ipa"],
+                        "rule": phon["homograph_rule"],
+                        "sense": phon.get("sense")
+                    })
 
         return {
             "input_sentence": sentence,
             "tokens": results,
             "ipa_string": " ".join(full_ipa),
             "arpabet_string": " ".join(full_arpabet),
-            "token_count": len(results)
+            "token_count": len(results),
+            "homographs_disambiguated": homographs_found
         }
