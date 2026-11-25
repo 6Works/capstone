@@ -1,0 +1,8 @@
+{
+  "experiment_id": "tts_piper_raw",
+  "description": "Unconditioned Piper VITS en_US-lessac-low without WSOLA pitch shift or dual-gender switching.",
+  "provider": "piper_raw",
+  "model_path": "models/piper/en_US-lessac-low.onnx",
+  "with_conditioning": false,
+  "seeds": [42, 1337, 2026]
+}

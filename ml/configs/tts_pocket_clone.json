@@ -1,0 +1,8 @@
+{
+  "experiment_id": "tts_pocket_clone",
+  "description": "Layer C improved zero-shot flow-matching Kyutai Pocket TTS INT8 (5 flow steps, 24 kHz CPU).",
+  "provider": "pocket_tts",
+  "num_steps": 5,
+  "speed": 1.0,
+  "seeds": [42, 1337, 2026]
+}

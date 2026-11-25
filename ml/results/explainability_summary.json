@@ -1,0 +1,53 @@
+{
+  "figures": {
+    "asr_word_confidence_heatmap": "ml/results/figures/fig1_asr_word_confidence_heatmap.png",
+    "campp_spectral_saliency": "ml/results/figures/fig2_campp_spectral_saliency.png",
+    "speaker_embedding_pca": "ml/results/figures/fig3_speaker_embedding_pca_tsne.png"
+  },
+  "campp_spectral_saliency": {
+    "0-300 Hz (F0 Pitch)": {
+      "mean_drop": 0.3382,
+      "std": 0.0957
+    },
+    "300-600 Hz (F1 Low)": {
+      "mean_drop": 0.3646,
+      "std": 0.1075
+    },
+    "600-1.0 kHz (F1 High)": {
+      "mean_drop": 0.5193,
+      "std": 0.1209
+    },
+    "1.0-1.8 kHz (F2 Vowel)": {
+      "mean_drop": 0.6515,
+      "std": 0.1201
+    },
+    "1.8-3.0 kHz (F3 Formant)": {
+      "mean_drop": 0.7687,
+      "std": 0.1148
+    },
+    "3.0-4.5 kHz (Speaker Presence)": {
+      "mean_drop": 0.6202,
+      "std": 0.1503
+    },
+    "4.5-6.5 kHz (Consonants)": {
+      "mean_drop": 0.4666,
+      "std": 0.1338
+    },
+    "6.5-7.9 kHz (Air / Fricative)": {
+      "mean_drop": 0.2704,
+      "std": 0.1383
+    }
+  },
+  "speaker_cluster_silhouette": {
+    "random_proj_128d": {
+      "same_cos": 0.9976,
+      "diff_cos": 0.9916,
+      "separation_gap": 0.006
+    },
+    "wespeaker_campp_512d": {
+      "same_cos": 0.8308,
+      "diff_cos": 0.5527,
+      "separation_gap": 0.2781
+    }
+  }
+}

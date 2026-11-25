@@ -1,0 +1,375 @@
+{
+  "experiment": "layer_c_tts_cloning_ablation_v1",
+  "num_speakers": 12,
+  "num_prompt_sets": 3,
+  "total_generations_per_engine": 36,
+  "configs": {
+    "tts_pyttsx3": {
+      "config": {
+        "experiment_id": "tts_pyttsx3",
+        "description": "Stage 5 offline SAPI5 concatenative/formant floor baseline (no voice cloning).",
+        "provider": "pyttsx3",
+        "speech_rate": 175,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ]
+      },
+      "peak_rss_mb": 131.23,
+      "avg_latency_ms": 133.9,
+      "p95_latency_ms": 160.0,
+      "cpu_rtf": 0.0288,
+      "cost_per_1k_turns_usd": 0.0019,
+      "campp_sim_heldout_val": {
+        "mean": 0.4776,
+        "std": 0.1469,
+        "min": 0.1678,
+        "max": 0.7389,
+        "n_seeds": 36
+      },
+      "campp_sim_enroll": {
+        "mean": 0.4704,
+        "std": 0.1589,
+        "min": 0.1795,
+        "max": 0.755,
+        "n_seeds": 36
+      },
+      "f0_mae_hz": {
+        "mean": 57.9472,
+        "std": 44.7309,
+        "min": 1.6,
+        "max": 159.6,
+        "n_seeds": 36
+      },
+      "roundtrip_wer": {
+        "mean": 0.1111,
+        "std": 0.1593,
+        "min": 0.0,
+        "max": 0.3333,
+        "n_seeds": 36
+      },
+      "prompt_split_means": {
+        "seed_42": {
+          "campp_sim_mean": 0.5018,
+          "f0_mae_hz": 61.58,
+          "roundtrip_wer": 0.3333
+        },
+        "seed_1337": {
+          "campp_sim_mean": 0.4846,
+          "f0_mae_hz": 69.77,
+          "roundtrip_wer": 0.0
+        },
+        "seed_2026": {
+          "campp_sim_mean": 0.4463,
+          "f0_mae_hz": 42.49,
+          "roundtrip_wer": 0.0
+        }
+      }
+    },
+    "tts_piper_raw": {
+      "config": {
+        "experiment_id": "tts_piper_raw",
+        "description": "Unconditioned Piper VITS en_US-lessac-low without WSOLA pitch shift or dual-gender switching.",
+        "provider": "piper_raw",
+        "model_path": "models/piper/en_US-lessac-low.onnx",
+        "with_conditioning": false,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ]
+      },
+      "peak_rss_mb": 241.47,
+      "avg_latency_ms": 274.5,
+      "p95_latency_ms": 300.8,
+      "cpu_rtf": 0.0572,
+      "cost_per_1k_turns_usd": 0.0038,
+      "campp_sim_heldout_val": {
+        "mean": 0.5297,
+        "std": 0.107,
+        "min": 0.3454,
+        "max": 0.7444,
+        "n_seeds": 36
+      },
+      "campp_sim_enroll": {
+        "mean": 0.5257,
+        "std": 0.1085,
+        "min": 0.2798,
+        "max": 0.7713,
+        "n_seeds": 36
+      },
+      "f0_mae_hz": {
+        "mean": 50.4778,
+        "std": 27.5843,
+        "min": 0.0,
+        "max": 93.3,
+        "n_seeds": 36
+      },
+      "roundtrip_wer": {
+        "mean": 0.0825,
+        "std": 0.1075,
+        "min": 0.0,
+        "max": 0.3333,
+        "n_seeds": 36
+      },
+      "prompt_split_means": {
+        "seed_42": {
+          "campp_sim_mean": 0.5212,
+          "f0_mae_hz": 50.73,
+          "roundtrip_wer": 0.1944
+        },
+        "seed_1337": {
+          "campp_sim_mean": 0.5405,
+          "f0_mae_hz": 49.05,
+          "roundtrip_wer": 0.0
+        },
+        "seed_2026": {
+          "campp_sim_mean": 0.5275,
+          "f0_mae_hz": 51.66,
+          "roundtrip_wer": 0.053
+        }
+      }
+    },
+    "tts_piper_dual_wsola": {
+      "config": {
+        "experiment_id": "tts_piper_dual_wsola",
+        "description": "Dual-gender Piper VITS (lessac/ryan) conditioned via extracted F0 semitone WSOLA + spectral tilt EQ.",
+        "provider": "piper_dual_wsola",
+        "with_conditioning": true,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ]
+      },
+      "peak_rss_mb": 239.53,
+      "avg_latency_ms": 859.8,
+      "p95_latency_ms": 1545.0,
+      "cpu_rtf": 0.1897,
+      "cost_per_1k_turns_usd": 0.0119,
+      "campp_sim_heldout_val": {
+        "mean": 0.4159,
+        "std": 0.1246,
+        "min": 0.2204,
+        "max": 0.6883,
+        "n_seeds": 36
+      },
+      "campp_sim_enroll": {
+        "mean": 0.4133,
+        "std": 0.1219,
+        "min": 0.1722,
+        "max": 0.7298,
+        "n_seeds": 36
+      },
+      "f0_mae_hz": {
+        "mean": 25.2361,
+        "std": 13.5824,
+        "min": 4.6,
+        "max": 56.5,
+        "n_seeds": 36
+      },
+      "roundtrip_wer": {
+        "mean": 0.0892,
+        "std": 0.1314,
+        "min": 0.0,
+        "max": 0.4167,
+        "n_seeds": 36
+      },
+      "prompt_split_means": {
+        "seed_42": {
+          "campp_sim_mean": 0.4028,
+          "f0_mae_hz": 22.76,
+          "roundtrip_wer": 0.2222
+        },
+        "seed_1337": {
+          "campp_sim_mean": 0.3888,
+          "f0_mae_hz": 22.28,
+          "roundtrip_wer": 0.0151
+        },
+        "seed_2026": {
+          "campp_sim_mean": 0.456,
+          "f0_mae_hz": 30.67,
+          "roundtrip_wer": 0.0303
+        }
+      }
+    },
+    "tts_pocket_clone": {
+      "config": {
+        "experiment_id": "tts_pocket_clone",
+        "description": "Layer C improved zero-shot flow-matching Kyutai Pocket TTS INT8 (5 flow steps, 24 kHz CPU).",
+        "provider": "pocket_tts",
+        "num_steps": 5,
+        "speed": 1.0,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ]
+      },
+      "peak_rss_mb": 239.96,
+      "avg_latency_ms": 1977.9,
+      "p95_latency_ms": 2296.2,
+      "cpu_rtf": 0.4384,
+      "cost_per_1k_turns_usd": 0.0275,
+      "campp_sim_heldout_val": {
+        "mean": 0.5651,
+        "std": 0.1426,
+        "min": 0.2303,
+        "max": 0.8746,
+        "n_seeds": 36
+      },
+      "campp_sim_enroll": {
+        "mean": 0.5896,
+        "std": 0.1476,
+        "min": 0.3047,
+        "max": 0.8573,
+        "n_seeds": 36
+      },
+      "f0_mae_hz": {
+        "mean": 30.6611,
+        "std": 33.0283,
+        "min": 0.9,
+        "max": 154.9,
+        "n_seeds": 36
+      },
+      "roundtrip_wer": {
+        "mean": 0.093,
+        "std": 0.1307,
+        "min": 0.0,
+        "max": 0.5,
+        "n_seeds": 36
+      },
+      "prompt_split_means": {
+        "seed_42": {
+          "campp_sim_mean": 0.5896,
+          "f0_mae_hz": 28.49,
+          "roundtrip_wer": 0.1806
+        },
+        "seed_1337": {
+          "campp_sim_mean": 0.5459,
+          "f0_mae_hz": 34.7,
+          "roundtrip_wer": 0.0454
+        },
+        "seed_2026": {
+          "campp_sim_mean": 0.5599,
+          "f0_mae_hz": 28.79,
+          "roundtrip_wer": 0.053
+        }
+      }
+    },
+    "tts_edgetts_ref": {
+      "config": {
+        "experiment_id": "tts_edgetts_ref",
+        "description": "Cloud Microsoft Azure Neural EdgeTTS upper naturalness/intelligibility reference (non-cloning preset voices).",
+        "provider": "edge_tts",
+        "voices": {
+          "female": "en-US-JennyNeural",
+          "male": "en-US-GuyNeural"
+        },
+        "seeds": [
+          42,
+          1337,
+          2026
+        ]
+      },
+      "peak_rss_mb": 111.66,
+      "avg_latency_ms": 1346.9,
+      "p95_latency_ms": 1626.2,
+      "cpu_rtf": 0.2597,
+      "cost_per_1k_turns_usd": 0.0187,
+      "campp_sim_heldout_val": {
+        "mean": 0.5853,
+        "std": 0.1388,
+        "min": 0.2531,
+        "max": 0.7546,
+        "n_seeds": 36
+      },
+      "campp_sim_enroll": {
+        "mean": 0.5472,
+        "std": 0.1263,
+        "min": 0.2712,
+        "max": 0.7706,
+        "n_seeds": 36
+      },
+      "f0_mae_hz": {
+        "mean": 29.9861,
+        "std": 19.0236,
+        "min": 2.2,
+        "max": 74.2,
+        "n_seeds": 36
+      },
+      "roundtrip_wer": {
+        "mean": 0.0185,
+        "std": 0.0531,
+        "min": 0.0,
+        "max": 0.1667,
+        "n_seeds": 36
+      },
+      "prompt_split_means": {
+        "seed_42": {
+          "campp_sim_mean": 0.6252,
+          "f0_mae_hz": 26.37,
+          "roundtrip_wer": 0.0556
+        },
+        "seed_1337": {
+          "campp_sim_mean": 0.5652,
+          "f0_mae_hz": 29.69,
+          "roundtrip_wer": 0.0
+        },
+        "seed_2026": {
+          "campp_sim_mean": 0.5656,
+          "f0_mae_hz": 33.89,
+          "roundtrip_wer": 0.0
+        }
+      }
+    }
+  },
+  "wsola_dsp_stoi": {
+    "piper_dual_wsola_vs_raw_female": {
+      "mean": 0.2843,
+      "std": 0.1267,
+      "min": 0.1074,
+      "max": 0.5481,
+      "n_seeds": 18
+    }
+  },
+  "paired_bootstrap": {
+    "pocket_vs_piper_wsola_campp": {
+      "observed_improvement": 0.1493,
+      "ci_95_low": 0.0872,
+      "ci_95_high": 0.2108,
+      "p_value": 0.0
+    },
+    "pocket_vs_piper_raw_campp": {
+      "observed_improvement": 0.0354,
+      "ci_95_low": -0.0155,
+      "ci_95_high": 0.0943,
+      "p_value": 0.178
+    },
+    "pocket_vs_pyttsx3_campp": {
+      "observed_improvement": 0.0876,
+      "ci_95_low": 0.0278,
+      "ci_95_high": 0.1474,
+      "p_value": 0.004
+    },
+    "pocket_vs_edgetts_campp": {
+      "observed_improvement": -0.0202,
+      "ci_95_low": -0.0685,
+      "ci_95_high": 0.0298,
+      "p_value": 0.412
+    },
+    "pocket_vs_piper_wsola_f0_mae": {
+      "observed_improvement": -5.425,
+      "ci_95_low": -14.9691,
+      "ci_95_high": 2.667,
+      "p_value": 0.192
+    },
+    "pocket_vs_pyttsx3_wer": {
+      "observed_improvement": 0.0181,
+      "ci_95_low": -0.0265,
+      "ci_95_high": 0.0652,
+      "p_value": 0.494
+    }
+  }
+}

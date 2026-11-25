@@ -105,20 +105,14 @@ All remote manifests are fetched in **Session 4** via lightweight streaming slic
   2. Added `preprocess_asr_transcript` ASR pre-repair hook and evaluated 7 reproducible configs across 3 seeds (`[42, 1337, 2026]`) on `MINDS-14` (`28` balanced test items across gold + `asr_tiny_baseline` + `asr_small_improved`), `CLINC-OOS` (`35` items incl. `7 oos`), `Interview QA` (`30` items), and `Interview Rubric` (`10` stratified test answers).
 - **Status**: Verified `53 passed in 70.37s` in `test_pipeline.py`; `slu_qwen15b_repair` lifted MINDS-14 F1 `0.0 -> 0.8294 ± 0.0014` (`p=0.0`) & schema validity `0.0 -> 1.0`; `slu_llama3b_repair` lifted Interview Rubric schema validity `0.50 -> 1.0` & MINDS-14 F1 to `0.9262 ± 0.0`; `slu_qwen3b_repair` (`1.80 GB`, `2.23 GB VRAM`, `$0.0172 / 1k turns`) matched `llama3.1:8b` (`$0.1698 / 1k turns`) on MINDS-14 (`0.8667` vs `0.8619`, `p=0.798`) while beating 8B on Interview SLU (`0.7606` vs `0.6939`), Rubric Spearman rho (`0.6897` vs `0.4188`), and noisy `asr_tiny_baseline` (`0.9619` vs `0.9238` without pre-repair).
 
-### Session 7 — Layer C (Stage 5 TTS) Cloning Ablation & Multi-Modal Explainability — `Next`
-- **Files**: `ml/configs/tts_*.json`, `ml/experiments/run_tts_ablation.py`, `ml/experiments/explainability.py`, `ml/results/tts_ablation.json`, `ml/results/figures/`.
+### Session 7 — Layer C (Stage 5 TTS) Cloning Ablation & Multi-Modal Explainability — `Done`
+- **Files**: `services/tts/tts_services.py`, `ml/configs/tts_*.json`, `ml/experiments/run_tts_ablation.py`, `ml/experiments/explainability.py`, `ml/results/tts_ablation.json`, `ml/results/explainability_summary.json`, `ml/results/figures/*.png`, `test_pipeline.py`.
 - **Implementation Spec**:
-  1. Benchmark across unseen LibriSpeech test speakers (`>=10` ref clips × held-out texts) over 3 seeds:
-     - `Pyttsx3` (SAPI5)
-     - `Piper VITS` (raw neutral vs. dual-gender + WSOLA)
-     - `Pocket TTS INT8` (zero-shot conditioned on reference WAV)
-     - `EdgeTTS` (cloud upper reference)
-  2. Log `CAM++ Cosine Similarity`, Whisper-Roundtrip `WER`, `STOI`, `F0 MAE`, and `CPU RTF`.
-  3. Generate **Explainability Visualizations** (`ml/results/figures/*.png`):
-     - **Layer A**: Word-level Whisper confidence & deletion/substitution error heatmap over clean vs. noisy SNR utterances (`word_timestamps=True`).
-     - **Layer C**: Spectral Mel-band Occlusion Saliency (sensitivity of CAM++ cosine similarity to masking 8 frequency bands) + 2D PCA/t-SNE projection comparing `RandomProj-128D` vs `WeSpeaker CAM++` clusters across LibriSpeech speakers!
+  1. Benchmarked 5 TTS configs across all 12 unseen LibriSpeech test speakers x 3 held-out utterances (`36` pairs/engine) on held-out `val` target clips (`Pyttsx3`, unconditioned `Piper raw`, `Piper dual+WSOLA`, `Pocket TTS INT8` 5 steps, and `EdgeTTS` cloud reference).
+  2. Rendered 3 multi-modal 300-DPI explainability visuals in `ml/results/figures/`: Whisper word-confidence heatmap across SNRs (`fig1`), WeSpeaker CAM++ 8-band spectral occlusion saliency (`fig2`, confirming F2/F3 formants `1.0–4.5 kHz` dominate cosine drop `0.620–0.769` vs `0.338` for `0–300 Hz` F0), and `RandomProj-128D` vs `CAM++-512D` + `Pocket TTS` t-SNE clustering (`fig3`).
+- **Status**: Verified `55 passed in 59.85s` in `test_pipeline.py`; `Pocket TTS` lifted held-out `CAM++` speaker similarity to `0.5651` (`0.5896` vs enroll) from `0.4159` on `Piper dual+WSOLA` (`+0.1493`, `p=0.0`; WSOLA DSP degraded waveform `STOI=0.2843`) while running offline at `0.4384` CPU RTF and `239.96 MB` Peak RSS.
 
-### Session 8 — End-to-End 6-Stage Ablation Matrix, Pareto Curve & Error Analysis
+### Session 8 — End-to-End 6-Stage Ablation Matrix, Pareto Curve & Error Analysis — `Next`
 - **Files**: `ml/configs/e2e_ablation_matrix.json`, `ml/experiments/run_e2e_ablation.py`, `ml/results/e2e_ablation_matrix.json`, `ml/results/error_analysis.md`.
 - **Implementation Spec**:
   1. Execute the full 8-row **Ablation Matrix** (from `Research-First Capstone Plan` Section 5) across 3 seeds `[42, 1337, 2026]` on end-to-end spoken Audio -> ASR -> SLU -> TTS turns:

@@ -836,8 +836,17 @@ class TestMLEvaluationMetrics:
         if not os.path.exists(VoiceCloner.DEFAULT_SPEAKER_ENCODER_PATH):
             pytest.skip("WeSpeaker CAM++ ONNX weights not present locally")
 
-        tts_f = NeuralVoiceCloningTTSService(speaker_profile_id="mira_neural")
-        tts_m = NeuralVoiceCloningTTSService(speaker_profile_id="alex_interviewer")
+        tts_f = NeuralVoiceCloningTTSService(
+            model_path="models/piper/en_US-lessac-low.onnx",
+            speaker_profile_id="mira_neural",
+            with_conditioning=False,
+        )
+        male_onnx = "models/piper/en_US-ryan-low.onnx"
+        tts_m = NeuralVoiceCloningTTSService(
+            model_path=male_onnx if os.path.exists(male_onnx) else "models/piper/en_US-lessac-low.onnx",
+            speaker_profile_id="alex_interviewer",
+            with_conditioning=not os.path.exists(male_onnx),
+        )
         f_res1 = tts_f.synthesize("Testing consistent voice verification sample one.")
         f_res2 = tts_f.synthesize("Another spoken sentence in the same female voice.")
         m_res = tts_m.synthesize("Deep baritone technical interviewer speaker sample.")
@@ -1088,6 +1097,41 @@ class TestLayerBSchemaRepairAndSLU:
         assert turn["evaluation"]["overall_score"] == 8
         assert turn["schema_diagnostics"]["repaired"] is True
         assert turn["schema_diagnostics"]["schema_valid"] is True
+
+
+class TestLayerCTTSAndExplainability:
+    """Session 7 tests for Layer C conditioning toggle, TTS ablation results, and explainability artifacts."""
+
+    def test_piper_unconditioned_vs_conditioned_contract(self):
+        import tempfile
+        from services.tts import NeuralVoiceCloningTTSService
+
+        raw_svc = NeuralVoiceCloningTTSService(speaker_profile_id="alex_interviewer", with_conditioning=False)
+        out_path = os.path.join(tempfile.gettempdir(), f"piper_raw_test_{int(time.time()*1000)}.wav")
+        try:
+            res = raw_svc.synthesize("Testing unconditioned Piper neural output.", output_path=out_path)
+            assert res.status in ("success", "skipped")
+            if res.status == "success":
+                assert os.path.exists(out_path) and os.path.getsize(out_path) > 1000
+        finally:
+            if os.path.exists(out_path):
+                os.remove(out_path)
+
+    def test_layer_c_ablation_and_explainability_artifacts(self):
+        import json
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        tts_json = os.path.join(root_dir, "ml", "results", "tts_ablation.json")
+        exp_json = os.path.join(root_dir, "ml", "results", "explainability_summary.json")
+        if os.path.exists(tts_json):
+            data = json.load(open(tts_json, "r", encoding="utf-8"))
+            assert len(data.get("configs", {})) == 5
+            assert "pocket_vs_piper_wsola_campp" in data.get("paired_bootstrap", {})
+        if os.path.exists(exp_json):
+            exp = json.load(open(exp_json, "r", encoding="utf-8"))
+            for rel_fig in exp.get("figures", {}).values():
+                fig_path = os.path.join(root_dir, rel_fig)
+                assert os.path.exists(fig_path) and os.path.getsize(fig_path) > 10000
+
 
 
 

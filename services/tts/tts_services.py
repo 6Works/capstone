@@ -318,13 +318,15 @@ class NeuralVoiceCloningTTSService(ITTSService):
         speaker_profile_id: str = "mira_neural",
         speech_rate: int = 175,
         with_human_pauses: bool = True,
-        with_normalization: bool = True
+        with_normalization: bool = True,
+        with_conditioning: bool = True,
     ):
         self.model_path = model_path
         self.speaker_profile_id = speaker_profile_id
         self.speech_rate = speech_rate
         self.with_human_pauses = with_human_pauses
         self.with_normalization = with_normalization
+        self.with_conditioning = with_conditioning
         self.fallback = Pyttsx3TTSService(speech_rate=speech_rate)
 
     @classmethod
@@ -378,10 +380,10 @@ class NeuralVoiceCloningTTSService(ITTSService):
         if not profile:
             profile = voice_cloner.get_profile("mira_neural")
 
-        # Select base neural acoustic model matching speaker gender
+        # Select base neural acoustic model matching speaker gender when conditioning active
         gender = profile.gender_estimate if profile else "neutral"
         male_model_path = "models/piper/en_US-ryan-low.onnx"
-        if gender == "male" and os.path.exists(male_model_path):
+        if self.with_conditioning and gender == "male" and os.path.exists(male_model_path):
             active_model = male_model_path
         else:
             active_model = self.model_path
@@ -436,7 +438,7 @@ class NeuralVoiceCloningTTSService(ITTSService):
                     all_phonemes.extend(chunk.phonemes)
 
             # 4. Acoustic Timbre Conditioning for Cloned Speaker
-            if profile:
+            if profile and self.with_conditioning:
                 VoiceCloner.apply_acoustic_timbre_conditioning(temp_raw_path, profile, output_path)
                 try:
                     os.remove(temp_raw_path)

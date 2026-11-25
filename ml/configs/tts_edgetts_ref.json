@@ -1,0 +1,7 @@
+{
+  "experiment_id": "tts_edgetts_ref",
+  "description": "Cloud Microsoft Azure Neural EdgeTTS upper naturalness/intelligibility reference (non-cloning preset voices).",
+  "provider": "edge_tts",
+  "voices": {"female": "en-US-JennyNeural", "male": "en-US-GuyNeural"},
+  "seeds": [42, 1337, 2026]
+}

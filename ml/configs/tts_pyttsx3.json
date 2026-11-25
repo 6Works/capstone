@@ -1,0 +1,7 @@
+{
+  "experiment_id": "tts_pyttsx3",
+  "description": "Stage 5 offline SAPI5 concatenative/formant floor baseline (no voice cloning).",
+  "provider": "pyttsx3",
+  "speech_rate": 175,
+  "seeds": [42, 1337, 2026]
+}
