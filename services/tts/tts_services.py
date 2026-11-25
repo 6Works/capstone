@@ -234,6 +234,14 @@ class NeuralVoiceCloningTTSService(ITTSService):
         if not profile:
             profile = voice_cloner.get_profile("mira_neural")
 
+        # Select base neural acoustic model matching speaker gender
+        gender = profile.gender_estimate if profile else "neutral"
+        male_model_path = "models/piper/en_US-ryan-low.onnx"
+        if gender == "male" and os.path.exists(male_model_path):
+            active_model = male_model_path
+        else:
+            active_model = self.model_path
+
         # 1. Text Normalization
         processed_text = text
         norm_info = {}
@@ -251,7 +259,9 @@ class NeuralVoiceCloningTTSService(ITTSService):
 
         # 3. Neural VITS Synthesis
         try:
-            voice = self.get_or_load_voice(self.model_path)
+            voice = self.get_or_load_voice(active_model)
+            if voice is None:
+                voice = self.get_or_load_voice(self.model_path)
             if voice is None:
                 raise FileNotFoundError(f"Model file not found at {self.model_path}")
 
