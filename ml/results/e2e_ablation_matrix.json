@@ -1,0 +1,613 @@
+{
+  "experiment": "session8_e2e_ablation_matrix_v1",
+  "num_turns": 24,
+  "seeds": [
+    42,
+    1337,
+    2026
+  ],
+  "pareto_figure": "ml/results/figures/fig4_e2e_pareto_front.png",
+  "matrix": [
+    {
+      "id": "Baseline",
+      "asr": "asr_tiny_baseline",
+      "slu": "slu_qwen15b_raw",
+      "tts": "tts_piper_dual_wsola",
+      "e2e_task_success_pct": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n_seeds": 3
+      },
+      "e2e_composite_score": {
+        "mean": 0.4192,
+        "std": 0.0005,
+        "min": 0.4187,
+        "max": 0.4195,
+        "n_seeds": 3
+      },
+      "stage_a_pass_pct": 66.67,
+      "stage_b_pass_pct": 0.0,
+      "stage_c_pass_pct": 25.0,
+      "e2e_latency_ms": 1495.4,
+      "p95_latency_ms": 2505.1,
+      "est_peak_memory_mb": 1727.5,
+      "cost_per_1k_turns_usd": 0.0208
+    },
+    {
+      "id": "+A",
+      "asr": "asr_small_improved",
+      "slu": "slu_qwen15b_raw",
+      "tts": "tts_piper_dual_wsola",
+      "e2e_task_success_pct": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n_seeds": 3
+      },
+      "e2e_composite_score": {
+        "mean": 0.4551,
+        "std": 0.0,
+        "min": 0.4551,
+        "max": 0.4551,
+        "n_seeds": 3
+      },
+      "stage_a_pass_pct": 95.83,
+      "stage_b_pass_pct": 0.0,
+      "stage_c_pass_pct": 25.0,
+      "e2e_latency_ms": 5165.9,
+      "p95_latency_ms": 6228.8,
+      "est_peak_memory_mb": 2179.5,
+      "cost_per_1k_turns_usd": 0.0717
+    },
+    {
+      "id": "+B",
+      "asr": "asr_tiny_baseline",
+      "slu": "slu_qwen3b_repair",
+      "tts": "tts_piper_dual_wsola",
+      "e2e_task_success_pct": {
+        "mean": 8.33,
+        "std": 0.0,
+        "min": 8.33,
+        "max": 8.33,
+        "n_seeds": 3
+      },
+      "e2e_composite_score": {
+        "mean": 0.6771,
+        "std": 0.0002,
+        "min": 0.677,
+        "max": 0.6773,
+        "n_seeds": 3
+      },
+      "stage_a_pass_pct": 66.67,
+      "stage_b_pass_pct": 75.0,
+      "stage_c_pass_pct": 16.67,
+      "e2e_latency_ms": 2308.5,
+      "p95_latency_ms": 3338.8,
+      "est_peak_memory_mb": 2669.6,
+      "cost_per_1k_turns_usd": 0.0321
+    },
+    {
+      "id": "+C",
+      "asr": "asr_tiny_baseline",
+      "slu": "slu_qwen15b_raw",
+      "tts": "tts_pocket_clone",
+      "e2e_task_success_pct": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n_seeds": 3
+      },
+      "e2e_composite_score": {
+        "mean": 0.461,
+        "std": 0.0011,
+        "min": 0.4604,
+        "max": 0.4623,
+        "n_seeds": 3
+      },
+      "stage_a_pass_pct": 66.67,
+      "stage_b_pass_pct": 0.0,
+      "stage_c_pass_pct": 58.33,
+      "e2e_latency_ms": 2819.9,
+      "p95_latency_ms": 3574.0,
+      "est_peak_memory_mb": 1727.7,
+      "cost_per_1k_turns_usd": 0.0392
+    },
+    {
+      "id": "Full (A+B+C)",
+      "asr": "asr_small_improved",
+      "slu": "slu_qwen3b_repair",
+      "tts": "tts_pocket_clone",
+      "e2e_task_success_pct": {
+        "mean": 41.67,
+        "std": 0.0,
+        "min": 41.67,
+        "max": 41.67,
+        "n_seeds": 3
+      },
+      "e2e_composite_score": {
+        "mean": 0.7552,
+        "std": 0.0096,
+        "min": 0.7493,
+        "max": 0.7663,
+        "n_seeds": 3
+      },
+      "stage_a_pass_pct": 95.83,
+      "stage_b_pass_pct": 76.39,
+      "stage_c_pass_pct": 56.94,
+      "e2e_latency_ms": 6868.4,
+      "p95_latency_ms": 7724.7,
+      "est_peak_memory_mb": 3121.8,
+      "cost_per_1k_turns_usd": 0.0954
+    },
+    {
+      "id": "Full - A",
+      "asr": "asr_tiny_baseline",
+      "slu": "slu_qwen3b_repair",
+      "tts": "tts_pocket_clone",
+      "e2e_task_success_pct": {
+        "mean": 41.67,
+        "std": 0.0,
+        "min": 41.67,
+        "max": 41.67,
+        "n_seeds": 3
+      },
+      "e2e_composite_score": {
+        "mean": 0.7221,
+        "std": 0.0001,
+        "min": 0.722,
+        "max": 0.7222,
+        "n_seeds": 3
+      },
+      "stage_a_pass_pct": 66.67,
+      "stage_b_pass_pct": 75.0,
+      "stage_c_pass_pct": 58.33,
+      "e2e_latency_ms": 3230.9,
+      "p95_latency_ms": 3869.5,
+      "est_peak_memory_mb": 2669.8,
+      "cost_per_1k_turns_usd": 0.0449
+    },
+    {
+      "id": "Full - B",
+      "asr": "asr_small_improved",
+      "slu": "slu_qwen15b_raw",
+      "tts": "tts_pocket_clone",
+      "e2e_task_success_pct": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n_seeds": 3
+      },
+      "e2e_composite_score": {
+        "mean": 0.4949,
+        "std": 0.0,
+        "min": 0.4949,
+        "max": 0.4949,
+        "n_seeds": 3
+      },
+      "stage_a_pass_pct": 95.83,
+      "stage_b_pass_pct": 0.0,
+      "stage_c_pass_pct": 58.33,
+      "e2e_latency_ms": 6525.7,
+      "p95_latency_ms": 7399.9,
+      "est_peak_memory_mb": 2179.7,
+      "cost_per_1k_turns_usd": 0.0906
+    },
+    {
+      "id": "Full - C",
+      "asr": "asr_small_improved",
+      "slu": "slu_qwen3b_repair",
+      "tts": "tts_piper_dual_wsola",
+      "e2e_task_success_pct": {
+        "mean": 8.33,
+        "std": 0.0,
+        "min": 8.33,
+        "max": 8.33,
+        "n_seeds": 3
+      },
+      "e2e_composite_score": {
+        "mean": 0.717,
+        "std": 0.0097,
+        "min": 0.7113,
+        "max": 0.7282,
+        "n_seeds": 3
+      },
+      "stage_a_pass_pct": 95.83,
+      "stage_b_pass_pct": 76.39,
+      "stage_c_pass_pct": 11.11,
+      "e2e_latency_ms": 5908.6,
+      "p95_latency_ms": 6961.3,
+      "est_peak_memory_mb": 3121.6,
+      "cost_per_1k_turns_usd": 0.0821
+    },
+    {
+      "id": "Edge (A_tiny+B+C)",
+      "asr": "asr_tiny_improved",
+      "slu": "slu_qwen3b_repair",
+      "tts": "tts_pocket_clone",
+      "e2e_task_success_pct": {
+        "mean": 37.5,
+        "std": 0.0,
+        "min": 37.5,
+        "max": 37.5,
+        "n_seeds": 3
+      },
+      "e2e_composite_score": {
+        "mean": 0.6864,
+        "std": 0.0,
+        "min": 0.6864,
+        "max": 0.6864,
+        "n_seeds": 3
+      },
+      "stage_a_pass_pct": 75.0,
+      "stage_b_pass_pct": 66.67,
+      "stage_c_pass_pct": 58.33,
+      "e2e_latency_ms": 3591.7,
+      "p95_latency_ms": 4722.0,
+      "est_peak_memory_mb": 2670.4,
+      "cost_per_1k_turns_usd": 0.0499
+    }
+  ],
+  "paired_bootstrap": {
+    "full_vs_baseline_e2e_success": {
+      "observed_improvement": 0.4167,
+      "ci_95_low": 0.2083,
+      "ci_95_high": 0.625,
+      "p_value": 0.0
+    },
+    "full_vs_full_minus_a_e2e_success": {
+      "observed_improvement": 0.0,
+      "ci_95_low": 0.0,
+      "ci_95_high": 0.0,
+      "p_value": 1.0
+    },
+    "full_vs_full_minus_b_e2e_success": {
+      "observed_improvement": 0.4167,
+      "ci_95_low": 0.2083,
+      "ci_95_high": 0.625,
+      "p_value": 0.0
+    },
+    "full_vs_full_minus_c_e2e_success": {
+      "observed_improvement": 0.3333,
+      "ci_95_low": 0.125,
+      "ci_95_high": 0.5417,
+      "p_value": 0.002
+    },
+    "edge_vs_baseline_e2e_success": {
+      "observed_improvement": 0.375,
+      "ci_95_low": 0.2083,
+      "ci_95_high": 0.5417,
+      "p_value": 0.0
+    },
+    "full_vs_edge_e2e_success": {
+      "observed_improvement": 0.0417,
+      "ci_95_low": 0.0,
+      "ci_95_high": 0.125,
+      "p_value": 0.656
+    },
+    "full_vs_baseline_composite": {
+      "observed_improvement": 0.3306,
+      "ci_95_low": 0.2719,
+      "ci_95_high": 0.383,
+      "p_value": 0.0
+    },
+    "edge_vs_baseline_composite": {
+      "observed_improvement": 0.267,
+      "ci_95_low": 0.1987,
+      "ci_95_high": 0.3312,
+      "p_value": 0.0
+    }
+  },
+  "full_residual_failures": [
+    {
+      "id": "pn_05",
+      "domain": "interview",
+      "reference_text": "Priya benchmarked CTranslate2 quantization on Kubernetes nodes.",
+      "gold_intent": "answer",
+      "asr_transcript": "Priya benchmarked CTranslate2 quantization on Kubernetes nodes.",
+      "asr_wer": 0.0,
+      "r_entity": 1.0,
+      "predicted_intent": "project_query",
+      "schema_valid": true,
+      "reply_text": "Our architecture follows SOLID: 1.",
+      "tts_campp_sim": 0.7813,
+      "tts_roundtrip_wer": 0.0,
+      "e2e_success": false,
+      "composite_score": 0.5844
+    },
+    {
+      "id": "pn_08",
+      "domain": "interview",
+      "reference_text": "Karthik paired Silero VAD with Whisper beam search.",
+      "gold_intent": "answer",
+      "asr_transcript": "Karthik paired Silero VAD with Whisper beam search,",
+      "asr_wer": 0.0,
+      "r_entity": 1.0,
+      "predicted_intent": "calculation_query",
+      "schema_valid": true,
+      "reply_text": "Please specify the numbers to calculate.",
+      "tts_campp_sim": 0.5446,
+      "tts_roundtrip_wer": 0.0,
+      "e2e_success": false,
+      "composite_score": 0.5134
+    },
+    {
+      "id": "pn_10",
+      "domain": "interview",
+      "reference_text": "Sneha audited the Llama embeddings inside ChromaDB.",
+      "gold_intent": "answer",
+      "asr_transcript": "Sneha audited the Llama embeddings inside ChromaDB.",
+      "asr_wer": 0.0,
+      "r_entity": 1.0,
+      "predicted_intent": "project_query",
+      "schema_valid": true,
+      "reply_text": "Our architecture follows SOLID: 1.",
+      "tts_campp_sim": 0.4583,
+      "tts_roundtrip_wer": 0.0,
+      "e2e_success": false,
+      "composite_score": 0.4875
+    },
+    {
+      "id": "pn_18",
+      "domain": "interview",
+      "reference_text": "Tanvi deployed Kyutai Pocket TTS models on CPU.",
+      "gold_intent": "answer",
+      "asr_transcript": "Tanvi deployed Kyutai Pocket TTS models on CPU.",
+      "asr_wer": 0.0,
+      "r_entity": 1.0,
+      "predicted_intent": "greeting",
+      "schema_valid": true,
+      "reply_text": "Hello! I am Mira, your decoupled modular voice assistant.",
+      "tts_campp_sim": 0.4647,
+      "tts_roundtrip_wer": 0.1111,
+      "e2e_success": false,
+      "composite_score": 0.4894
+    },
+    {
+      "id": "qa_10",
+      "domain": "interview",
+      "reference_text": "Can you explain the six stages of your SOLID pipeline?",
+      "gold_intent": "project_query",
+      "asr_transcript": "Can you explain the 6 stages of your SOLID pipeline?",
+      "asr_wer": 0.1,
+      "r_entity": null,
+      "predicted_intent": "project_query",
+      "schema_valid": true,
+      "reply_text": "Our architecture follows SOLID: 1.",
+      "tts_campp_sim": 0.4367,
+      "tts_roundtrip_wer": 0.2,
+      "e2e_success": false,
+      "composite_score": 0.796
+    },
+    {
+      "id": "qa_15",
+      "domain": "interview",
+      "reference_text": "Calculate 48 multiplied by 12 for throughput estimation.",
+      "gold_intent": "calculation_query",
+      "asr_transcript": "Calculate 48 multiplied by 12 for throughput estimation.",
+      "asr_wer": 0.0,
+      "r_entity": null,
+      "predicted_intent": "calculation_query",
+      "schema_valid": true,
+      "reply_text": "Please specify the numbers to calculate.",
+      "tts_campp_sim": 0.3852,
+      "tts_roundtrip_wer": 0.0,
+      "e2e_success": false,
+      "composite_score": 0.8156
+    },
+    {
+      "id": "qa_21",
+      "domain": "interview",
+      "reference_text": "Can you tell me the current time before we wrap up?",
+      "gold_intent": "time_query",
+      "asr_transcript": "Can you tell me the current time before we wrap up?",
+      "asr_wer": 0.0,
+      "r_entity": null,
+      "predicted_intent": "time_query",
+      "schema_valid": true,
+      "reply_text": "The current time is 03:53 AM.",
+      "tts_campp_sim": 0.3276,
+      "tts_roundtrip_wer": 0.2857,
+      "e2e_success": false,
+      "composite_score": 0.7983
+    },
+    {
+      "id": "qa_02",
+      "domain": "interview",
+      "reference_text": "Good afternoon, Sachin is ready to begin.",
+      "gold_intent": "greeting",
+      "asr_transcript": "Good afternoon, Sachin is ready to begin.",
+      "asr_wer": 0.0,
+      "r_entity": null,
+      "predicted_intent": "greeting",
+      "schema_valid": true,
+      "reply_text": "Hello! I am Mira, your decoupled modular voice assistant.",
+      "tts_campp_sim": 0.3713,
+      "tts_roundtrip_wer": 0.0,
+      "e2e_success": false,
+      "composite_score": 0.8114
+    },
+    {
+      "id": "qa_06",
+      "domain": "interview",
+      "reference_text": "Introduce yourself and explain your role in this call.",
+      "gold_intent": "identity_query",
+      "asr_transcript": "Introduce yourself and explain your role in this call.",
+      "asr_wer": 0.0,
+      "r_entity": null,
+      "predicted_intent": "greeting",
+      "schema_valid": true,
+      "reply_text": "Hello! I am Mira, your decoupled modular voice assistant.",
+      "tts_campp_sim": 0.4833,
+      "tts_roundtrip_wer": 0.0,
+      "e2e_success": false,
+      "composite_score": 0.495
+    },
+    {
+      "id": "en-AU_236_1",
+      "domain": "minds14",
+      "reference_text": "hello how did my name is help me today I just want to update my address details on my account",
+      "gold_intent": "address",
+      "asr_transcript": "I was just wondering if you could help me today. I just wanted to update my address details on my account, please.",
+      "asr_wer": 0.45,
+      "r_entity": null,
+      "predicted_intent": "address",
+      "schema_valid": true,
+      "reply_text": "I can assist you with your address request.",
+      "tts_campp_sim": 0.5775,
+      "tts_roundtrip_wer": 0.0,
+      "e2e_success": false,
+      "composite_score": 0.7157
+    },
+    {
+      "id": "en-US_183_2",
+      "domain": "minds14",
+      "reference_text": "hello I'm having a problem with my with the app it won't load my account",
+      "gold_intent": "app_error",
+      "asr_transcript": "Hello, I'm having a problem with the app. It won't load my account.",
+      "asr_wer": 0.1333,
+      "r_entity": null,
+      "predicted_intent": "app_error",
+      "schema_valid": true,
+      "reply_text": "I can assist you with your app error request.",
+      "tts_campp_sim": 0.4958,
+      "tts_roundtrip_wer": 0.0,
+      "e2e_success": false,
+      "composite_score": 0.8021
+    },
+    {
+      "id": "en-GB_388_5",
+      "domain": "minds14",
+      "reference_text": "I'm calling about a business loan",
+      "gold_intent": "business_loan",
+      "asr_transcript": "I'm calling about a business loan.",
+      "asr_wer": 0.0,
+      "r_entity": null,
+      "predicted_intent": "business_loan",
+      "schema_valid": true,
+      "reply_text": "I can assist you with your business loan request.",
+      "tts_campp_sim": 0.2569,
+      "tts_roundtrip_wer": 0.1111,
+      "e2e_success": false,
+      "composite_score": 0.7771
+    },
+    {
+      "id": "en-US_479_6",
+      "domain": "minds14",
+      "reference_text": "good morning I'm trying to use my ATM debit card and it is coming up I was wondering if you tell me why I have enough money in the account to cover the charges",
+      "gold_intent": "card_issues",
+      "asr_transcript": "Good morning. I'm trying to use my ATM debit card and it is coming up refused. I was wondering if you could tell me why. I think I have enough money in the account to cover the charges. Thank you very much.",
+      "asr_wer": 0.2353,
+      "r_entity": null,
+      "predicted_intent": "card_issues",
+      "schema_valid": true,
+      "reply_text": "I can assist you with your card issues request.",
+      "tts_campp_sim": 0.3102,
+      "tts_roundtrip_wer": 0.1111,
+      "e2e_success": false,
+      "composite_score": 0.7107
+    },
+    {
+      "id": "en-AU_61_9",
+      "domain": "minds14",
+      "reference_text": "hi I'm just calling because ID like to freeze all transactions on my",
+      "gold_intent": "freeze",
+      "asr_transcript": "Hi, I'm just calling because I'd like to phrase all transactions on my card.",
+      "asr_wer": 0.2308,
+      "r_entity": null,
+      "predicted_intent": "latest_transactions",
+      "schema_valid": true,
+      "reply_text": "I can assist you with your latest transactions request.",
+      "tts_campp_sim": 0.629,
+      "tts_roundtrip_wer": 0.0,
+      "e2e_success": false,
+      "composite_score": 0.4579
+    }
+  ],
+  "baseline_sample_failures": [
+    {
+      "id": "pn_05",
+      "domain": "interview",
+      "reference_text": "Priya benchmarked CTranslate2 quantization on Kubernetes nodes.",
+      "gold_intent": "answer",
+      "asr_transcript": "Pre-a-bench marked C-Translate to quantization on Cuba needs nodes.",
+      "asr_wer": 0.8571,
+      "r_entity": 0.0,
+      "predicted_intent": "__fallback__",
+      "schema_valid": false,
+      "reply_text": "You said: 'Pre-a-bench marked C-Translate to quantization on Cuba needs nodes.",
+      "tts_campp_sim": 0.4337,
+      "tts_roundtrip_wer": 0.4545,
+      "e2e_success": false,
+      "composite_score": 0.1801
+    },
+    {
+      "id": "pn_08",
+      "domain": "interview",
+      "reference_text": "Karthik paired Silero VAD with Whisper beam search.",
+      "gold_intent": "answer",
+      "asr_transcript": "Cartic paired celero VAD with whisper beam such.",
+      "asr_wer": 0.375,
+      "r_entity": 0.3333,
+      "predicted_intent": "__fallback__",
+      "schema_valid": false,
+      "reply_text": "You said: 'Cartic paired celero VAD with whisper beam such.",
+      "tts_campp_sim": 0.7604,
+      "tts_roundtrip_wer": 0.3,
+      "e2e_success": false,
+      "composite_score": 0.4469
+    },
+    {
+      "id": "pn_10",
+      "domain": "interview",
+      "reference_text": "Sneha audited the Llama embeddings inside ChromaDB.",
+      "gold_intent": "answer",
+      "asr_transcript": "Sneha audited the lumbly embeddings inside ChromaDB.",
+      "asr_wer": 0.1429,
+      "r_entity": 0.6667,
+      "predicted_intent": "__fallback__",
+      "schema_valid": false,
+      "reply_text": "You said: 'Sneha audited the lumbly embeddings inside ChromaDB.",
+      "tts_campp_sim": 0.4054,
+      "tts_roundtrip_wer": 0.1111,
+      "e2e_success": false,
+      "composite_score": 0.4216
+    },
+    {
+      "id": "pn_18",
+      "domain": "interview",
+      "reference_text": "Tanvi deployed Kyutai Pocket TTS models on CPU.",
+      "gold_intent": "answer",
+      "asr_transcript": "10 the deployed QTIPOC at TTS models on CPU.",
+      "asr_wer": 0.5,
+      "r_entity": 0.0,
+      "predicted_intent": "__fallback__",
+      "schema_valid": false,
+      "reply_text": "You said: '10 the deployed QTIPOC at TTS models on CPU.",
+      "tts_campp_sim": 0.5557,
+      "tts_roundtrip_wer": 0.0909,
+      "e2e_success": false,
+      "composite_score": 0.3417
+    },
+    {
+      "id": "qa_01",
+      "domain": "interview",
+      "reference_text": "Hi everyone, great to meet you for today's system check.",
+      "gold_intent": "greeting",
+      "asr_transcript": "Hi everyone, great to meet you for today's system check.",
+      "asr_wer": 0.0,
+      "r_entity": null,
+      "predicted_intent": "__fallback__",
+      "schema_valid": false,
+      "reply_text": "Hello! I am Mira, your decoupled modular voice assistant.",
+      "tts_campp_sim": 0.4991,
+      "tts_roundtrip_wer": 0.1111,
+      "e2e_success": false,
+      "composite_score": 0.4997
+    }
+  ]
+}

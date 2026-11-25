@@ -112,15 +112,14 @@ All remote manifests are fetched in **Session 4** via lightweight streaming slic
   2. Rendered 3 multi-modal 300-DPI explainability visuals in `ml/results/figures/`: Whisper word-confidence heatmap across SNRs (`fig1`), WeSpeaker CAM++ 8-band spectral occlusion saliency (`fig2`, confirming F2/F3 formants `1.0–4.5 kHz` dominate cosine drop `0.620–0.769` vs `0.338` for `0–300 Hz` F0), and `RandomProj-128D` vs `CAM++-512D` + `Pocket TTS` t-SNE clustering (`fig3`).
 - **Status**: Verified `55 passed in 59.85s` in `test_pipeline.py`; `Pocket TTS` lifted held-out `CAM++` speaker similarity to `0.5651` (`0.5896` vs enroll) from `0.4159` on `Piper dual+WSOLA` (`+0.1493`, `p=0.0`; WSOLA DSP degraded waveform `STOI=0.2843`) while running offline at `0.4384` CPU RTF and `239.96 MB` Peak RSS.
 
-### Session 8 — End-to-End 6-Stage Ablation Matrix, Pareto Curve & Error Analysis — `Next`
-- **Files**: `ml/configs/e2e_ablation_matrix.json`, `ml/experiments/run_e2e_ablation.py`, `ml/results/e2e_ablation_matrix.json`, `ml/results/error_analysis.md`.
+### Session 8 — End-to-End 6-Stage Ablation Matrix, Pareto Curve & Error Analysis — `Done`
+- **Files**: `ml/configs/e2e_ablation_matrix.json`, `ml/experiments/run_e2e_ablation.py`, `ml/results/e2e_ablation_matrix.json`, `ml/results/error_analysis.md`, `ml/results/figures/fig4_e2e_pareto_front.png`, `test_pipeline.py`.
 - **Implementation Spec**:
-  1. Execute the full 8-row **Ablation Matrix** (from `Research-First Capstone Plan` Section 5) across 3 seeds `[42, 1337, 2026]` on end-to-end spoken Audio -> ASR -> SLU -> TTS turns:
-     - `Baseline`, `+A`, `+B`, `+C`, `Full (A+B+C)`, `Full - A`, `Full - B`, `Full - C`.
-  2. Compute Composite End-to-End Task Success (`mean ± std`), E2E Latency (ms), Peak Memory (MB), Cost / 1k turns, and Paired Bootstrap significance tests ($p$-values).
-  3. Plot **Accuracy-vs-Cost Pareto Front** figure and compile **structured Failure & Error Analysis** (showing actual transcript, predicted JSON, TTS failure audio metadata, and root-cause diagnosis, including negative/failed experiment runs).
+  1. Executed all 8 core ablation rows + `Edge (A_tiny+B+C)` (`9` rows total) across 3 seeds `[42, 1337, 2026]` on 24 balanced multi-domain spoken turns/seed (`4` proper nouns, `10` interview QA, `10` MINDS-14 across 12 unseen LibriSpeech speakers).
+  2. Computed Conjunctive E2E Task Success, Continuous Composite Score, E2E Latency/Cost Pareto Frontier (`fig4`), Paired Bootstrap p-values, and full Cross-Layer Error & Negative Result Analysis (`ml/results/error_analysis.md`).
+- **Status**: Verified `Full (A+B+C)` lifted Conjunctive E2E Task Success from `0.0% -> 41.67%` (`p=0.0`, Composite `0.4192 -> 0.7552`, `p=0.0`); dropping Layer B (`Full-B`) collapsed E2E to `0.0%` (`p=0.0`), dropping Layer C (`Full-C`) collapsed E2E to `8.33%` (`p=0.002`), while `Edge (A_tiny+B+C)` reached `37.5%` E2E (`p=0.0` vs baseline) at `$0.0499 / 1k` turns (`47.7%` lower cost than Full).
 
-### Session 9 — Production Hardening, CI/CD, Model Cards & Live Soak Validation
+### Session 9 — Production Hardening, CI/CD, Model Cards & Live Soak Validation — `Next`
 - **Files**: `.github/workflows/ci.yml`, `Dockerfile` *(minimal multi-stage or slim Python 3.10 CPU)*, `ml/cards/model_cards.md`, `orchestrator/factory.py`.
 - **Implementation Spec**:
   1. Wire winning defaults cleanly into `PipelineFactory` and `server.py` (configurable via env/runtime without breaking existing callers).

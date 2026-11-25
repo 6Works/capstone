@@ -300,6 +300,7 @@ class VoiceCloner:
             pass
 
         # Fallback to PyAV for WebM (Opus), MP3, OGG, AAC
+        container = None
         try:
             import av
             container = av.open(audio_path)
@@ -316,6 +317,12 @@ class VoiceCloner:
             return audio, target_sr
         except Exception as e:
             raise ValueError(f"Unable to decode audio from {audio_path}: {e}")
+        finally:
+            if container is not None:
+                try:
+                    container.close()
+                except Exception:
+                    pass
 
     @classmethod
     def extract_acoustic_profile_from_wav(

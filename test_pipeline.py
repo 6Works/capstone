@@ -830,32 +830,34 @@ class TestMLEvaluationMetrics:
 
     def test_campp_neural_speaker_encoder_and_morph_compat(self):
         """Verifies WeSpeaker CAM++ 512-D embeddings discriminate distinct voices and morph safely with 128-D presets."""
-        from services.tts import VoiceCloner, NeuralVoiceCloningTTSService, voice_cloner
+        from services.tts import VoiceCloner, voice_cloner
+        from services.tts.formant_synthesizer import FormantSynthesizer
         from ml.metrics import compute_speaker_similarity
+        from ml.datasets import load_manifest, add_awgn
 
         if not os.path.exists(VoiceCloner.DEFAULT_SPEAKER_ENCODER_PATH):
             pytest.skip("WeSpeaker CAM++ ONNX weights not present locally")
 
-        tts_f = NeuralVoiceCloningTTSService(
-            model_path="models/piper/en_US-lessac-low.onnx",
-            speaker_profile_id="mira_neural",
-            with_conditioning=False,
-        )
-        male_onnx = "models/piper/en_US-ryan-low.onnx"
-        tts_m = NeuralVoiceCloningTTSService(
-            model_path=male_onnx if os.path.exists(male_onnx) else "models/piper/en_US-lessac-low.onnx",
-            speaker_profile_id="alex_interviewer",
-            with_conditioning=not os.path.exists(male_onnx),
-        )
-        f_res1 = tts_f.synthesize("Testing consistent voice verification sample one.")
-        f_res2 = tts_f.synthesize("Another spoken sentence in the same female voice.")
-        m_res = tts_m.synthesize("Deep baritone technical interviewer speaker sample.")
-
-        paths = [r.file_path for r in (f_res1, f_res2, m_res) if r.file_path]
+        # Prefer cached real human speakers (deterministic, non-VITS); fall back to Klatt formant signals in CI
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        ls_items = load_manifest("librispeech_60")["items"]
+        spk_1320 = [os.path.join(root_dir, x["audio_path"]) for x in ls_items if x["speaker_id"] == "1320"][:2]
+        spk_2094 = [os.path.join(root_dir, x["audio_path"]) for x in ls_items if x["speaker_id"] == "2094"][:1]
+        temp_paths = []
         try:
-            a1, sr1 = VoiceCloner.load_audio_signal(f_res1.file_path, target_sr=16000)
-            a2, sr2 = VoiceCloner.load_audio_signal(f_res2.file_path, target_sr=16000)
-            am, srm = VoiceCloner.load_audio_signal(m_res.file_path, target_sr=16000)
+            if len(spk_1320) == 2 and spk_2094 and all(os.path.exists(p) for p in spk_1320 + spk_2094):
+                a1, sr1 = VoiceCloner.load_audio_signal(spk_1320[0], target_sr=16000)
+                a2, sr2 = VoiceCloner.load_audio_signal(spk_1320[1], target_sr=16000)
+                am, srm = VoiceCloner.load_audio_signal(spk_2094[0], target_sr=16000)
+                prof_wav = spk_1320[0]
+            else:
+                p1 = FormantSynthesizer.synthesize_vowel("a", f0=225.0, duration=1.5)
+                p2 = FormantSynthesizer.synthesize_vowel("i", f0=100.0, duration=1.5)
+                temp_paths.extend([p1, p2])
+                a1, sr1 = VoiceCloner.load_audio_signal(p1, target_sr=16000)
+                a2, sr2 = add_awgn(a1, 20.0, seed=42), sr1
+                am, srm = VoiceCloner.load_audio_signal(p2, target_sr=16000)
+                prof_wav = p1
 
             e_f1, b_f1 = VoiceCloner.extract_speaker_embedding(a1, sr1, use_neural=True)
             e_f2, b_f2 = VoiceCloner.extract_speaker_embedding(a2, sr2, use_neural=True)
@@ -868,8 +870,8 @@ class TestMLEvaluationMetrics:
             sim_diff = compute_speaker_similarity(e_f1, e_m)
             assert sim_same > sim_diff, f"Expected same-speaker ({sim_same}) > diff-speaker ({sim_diff})"
 
-            # Also verify 512-D extracted profile morphs cleanly with 128-D preset without shape mismatch
-            prof_cam = VoiceCloner.extract_acoustic_profile_from_wav(f_res1.file_path, profile_name="Temp CAM++")
+            # Verify 512-D extracted profile morphs cleanly with 128-D preset without shape mismatch
+            prof_cam = VoiceCloner.extract_acoustic_profile_from_wav(prof_wav, profile_name="Temp CAM++")
             assert prof_cam.encoder_backend == "wespeaker_campp_lm"
             assert len(prof_cam.embedding_vector) == 512
             voice_cloner.save_cloned_profile(prof_cam)
@@ -878,7 +880,7 @@ class TestMLEvaluationMetrics:
             voice_cloner.delete_profile(prof_cam.profile_id)
             voice_cloner.delete_profile(morphed.profile_id)
         finally:
-            for p in paths:
+            for p in temp_paths:
                 if os.path.exists(p):
                     try:
                         os.remove(p)
@@ -1131,6 +1133,35 @@ class TestLayerCTTSAndExplainability:
             for rel_fig in exp.get("figures", {}).values():
                 fig_path = os.path.join(root_dir, rel_fig)
                 assert os.path.exists(fig_path) and os.path.getsize(fig_path) > 10000
+
+
+class TestSession8EndToEndAblationMatrix:
+    """Session 8 structural and artifact tests for the 9-row E2E ablation matrix, Pareto figure, and error analysis."""
+
+    def test_e2e_matrix_schema_and_pareto_artifacts(self):
+        import json
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        mat_path = os.path.join(root_dir, "ml", "results", "e2e_ablation_matrix.json")
+        if not os.path.exists(mat_path):
+            pytest.skip("E2E ablation matrix artifact not yet generated")
+
+        data = json.load(open(mat_path, "r", encoding="utf-8"))
+        rows = {r["id"]: r for r in data.get("matrix", [])}
+        assert len(rows) == 9
+        for req_row in ("Baseline", "+A", "+B", "+C", "Full (A+B+C)", "Full - A", "Full - B", "Full - C", "Edge (A_tiny+B+C)"):
+            assert req_row in rows
+            assert rows[req_row]["e2e_task_success_pct"]["n_seeds"] == 3
+
+        assert rows["Full (A+B+C)"]["e2e_task_success_pct"]["mean"] > rows["Baseline"]["e2e_task_success_pct"]["mean"]
+        assert "full_vs_baseline_e2e_success" in data.get("paired_bootstrap", {})
+
+        fig4 = os.path.join(root_dir, data["pareto_figure"])
+        assert os.path.exists(fig4) and os.path.getsize(fig4) > 10000
+
+        err_md = os.path.join(root_dir, "ml", "results", "error_analysis.md")
+        if os.path.exists(err_md):
+            assert os.path.getsize(err_md) > 500
+
 
 
 
