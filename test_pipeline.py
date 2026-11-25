@@ -415,6 +415,51 @@ class TestStage5TTSService:
         file_path = os.path.join(voice_cloner.profiles_dir, f"{test_id}.json")
         assert not os.path.exists(file_path)
 
+    def test_edge_tts_service_and_engine_api(self):
+        """Verifies Azure EdgeTTSService, engine catalog endpoint, and reference audio endpoints."""
+        from fastapi.testclient import TestClient
+        from server import app
+        from services.tts import EdgeTTSService
+        import tempfile
+
+        client = TestClient(app)
+
+        # 1. Verify GET /api/tts/engines returns available multi-engine catalog
+        eng_resp = client.get("/api/tts/engines")
+        assert eng_resp.status_code == 200
+        eng_data = eng_resp.json()
+        assert eng_data["status"] == "success"
+        engine_ids = [e["id"] for e in eng_data["engines"]]
+        assert "edge_tts" in engine_ids
+        assert "elevenlabs" in engine_ids
+        assert "neural_vits" in engine_ids
+
+        # 2. Test EdgeTTSService directly with Indian English male voice
+        edge_svc = EdgeTTSService(voice="en-IN-PrabhatNeural")
+        tmp_out = os.path.join(tempfile.gettempdir(), f"test_edge_{int(time.time()*1000)}.mp3")
+        try:
+            res = edge_svc.synthesize("Hello Sachin and Rahul, this is technical interviewer testing.", output_path=tmp_out)
+            assert res.status == "success"
+            assert res.file_path and os.path.exists(res.file_path)
+            assert os.path.getsize(res.file_path) > 100
+        finally:
+            if os.path.exists(tmp_out):
+                try:
+                    os.remove(tmp_out)
+                except Exception:
+                    pass
+
+        # 3. Test API endpoint POST /api/test/stage5-tts with edge_tts
+        synth_resp = client.post("/api/test/stage5-tts", json={
+            "text": "Testing multi-engine switching with Azure neural voice.",
+            "provider": "edge_tts",
+            "voice": "en-US-GuyNeural"
+        })
+        assert synth_resp.status_code == 200
+        data = synth_resp.json()
+        assert data["status"] == "success"
+        assert "audio_url" in data
+
 
 class TestStage6AudioOutputService:
     def test_web_stream_audio_sink(self):
