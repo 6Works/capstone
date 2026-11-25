@@ -1,0 +1,116 @@
+{
+  "config": {
+    "experiment_id": "speaker_encoder_campp_v1",
+    "description": "Evaluates WeSpeaker CAM++ LM ONNX (512-D) vs baseline random Mel projection (128-D) on held-out LibriSpeech speakers.",
+    "encoder_model_path": "models/speaker/wespeaker_en_voxceleb_CAM++_LM.onnx",
+    "dataset_source": "openslr/librispeech_asr",
+    "dataset_config": "clean",
+    "dataset_split": "test",
+    "num_speakers": 4,
+    "utts_per_speaker": 3,
+    "noise_snr_db": 20.0,
+    "seed": 42
+  },
+  "conditions": {
+    "clean": {
+      "baseline_random_proj": {
+        "backend": "random_proj_baseline",
+        "embedding_dim": 128,
+        "same_speaker_mean": 0.9984,
+        "same_speaker_std": 0.0011,
+        "diff_speaker_mean": 0.9914,
+        "diff_speaker_std": 0.0043,
+        "separation_gap": 0.007,
+        "roc_auc": 0.9707,
+        "eer": 0.0787,
+        "cold_init_ms": 0.0,
+        "mean_latency_ms": 5.41,
+        "lowest_same_pair": {
+          "spk": "260",
+          "utt_a": "260-123440-0000",
+          "utt_b": "260-123440-0001",
+          "cos_sim": 0.9961
+        },
+        "num_same_pairs": 12,
+        "num_diff_pairs": 54
+      },
+      "neural_wespeaker_campp": {
+        "backend": "wespeaker_campp_lm",
+        "embedding_dim": 512,
+        "same_speaker_mean": 0.8062,
+        "same_speaker_std": 0.1799,
+        "diff_speaker_mean": 0.5045,
+        "diff_speaker_std": 0.1791,
+        "separation_gap": 0.3016,
+        "roc_auc": 0.8873,
+        "eer": 0.2639,
+        "cold_init_ms": 1090.74,
+        "mean_latency_ms": 109.16,
+        "lowest_same_pair": {
+          "spk": "260",
+          "utt_a": "260-123440-0000",
+          "utt_b": "260-123440-0001",
+          "cos_sim": 0.4709
+        },
+        "num_same_pairs": 12,
+        "num_diff_pairs": 54
+      },
+      "paired_bootstrap_discrimination": {
+        "observed_improvement": 0.3634,
+        "ci_95_low": 0.2835,
+        "ci_95_high": 0.4342,
+        "p_value": 0.0
+      }
+    },
+    "awgn_20db": {
+      "baseline_random_proj": {
+        "backend": "random_proj_baseline",
+        "embedding_dim": 128,
+        "same_speaker_mean": 0.9986,
+        "same_speaker_std": 0.0009,
+        "diff_speaker_mean": 0.9926,
+        "diff_speaker_std": 0.0039,
+        "separation_gap": 0.006,
+        "roc_auc": 0.966,
+        "eer": 0.088,
+        "cold_init_ms": 0.0,
+        "mean_latency_ms": 5.33,
+        "lowest_same_pair": {
+          "spk": "260",
+          "utt_a": "260-123440-0000",
+          "utt_b": "260-123440-0001",
+          "cos_sim": 0.9969
+        },
+        "num_same_pairs": 12,
+        "num_diff_pairs": 54
+      },
+      "neural_wespeaker_campp": {
+        "backend": "wespeaker_campp_lm",
+        "embedding_dim": 512,
+        "same_speaker_mean": 0.8663,
+        "same_speaker_std": 0.1197,
+        "diff_speaker_mean": 0.7115,
+        "diff_speaker_std": 0.1087,
+        "separation_gap": 0.1548,
+        "roc_auc": 0.8441,
+        "eer": 0.1852,
+        "cold_init_ms": 0.14,
+        "mean_latency_ms": 111.65,
+        "lowest_same_pair": {
+          "spk": "260",
+          "utt_a": "260-123440-0000",
+          "utt_b": "260-123440-0001",
+          "cos_sim": 0.5724
+        },
+        "num_same_pairs": 12,
+        "num_diff_pairs": 54
+      },
+      "paired_bootstrap_discrimination": {
+        "observed_improvement": 0.2059,
+        "ci_95_low": 0.1595,
+        "ci_95_high": 0.2528,
+        "p_value": 0.0
+      }
+    }
+  }
+}
