@@ -1,0 +1,12 @@
+{
+  "experiment_id": "slu_qwen15b_raw",
+  "description": "Quantized 1.5B SLM raw JSON output without constrained json_mode, schema repair, or ASR pre-repair.",
+  "provider": "ollama",
+  "model_name": "qwen2.5-coder:1.5b",
+  "use_json_mode": false,
+  "enable_schema_repair": false,
+  "enable_repair_retry": false,
+  "asr_pre_repair": false,
+  "seeds": [42, 1337, 2026],
+  "temperature": 0.1
+}

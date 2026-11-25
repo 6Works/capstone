@@ -1,0 +1,12 @@
+{
+  "experiment_id": "slu_llama3b_raw",
+  "description": "Quantized 3B Llama SLM raw JSON output without constrained json_mode, schema repair, or ASR pre-repair.",
+  "provider": "ollama",
+  "model_name": "llama3.2:3b",
+  "use_json_mode": false,
+  "enable_schema_repair": false,
+  "enable_repair_retry": false,
+  "asr_pre_repair": false,
+  "seeds": [42, 1337, 2026],
+  "temperature": 0.1
+}

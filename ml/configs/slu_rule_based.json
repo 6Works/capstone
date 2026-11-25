@@ -1,0 +1,12 @@
+{
+  "experiment_id": "slu_rule_based",
+  "description": "Stage 3/4 deterministic regex & keyword rubric baseline.",
+  "provider": "rule_based",
+  "model_name": "deterministic-v2",
+  "use_json_mode": false,
+  "enable_schema_repair": false,
+  "enable_repair_retry": false,
+  "asr_pre_repair": false,
+  "seeds": [42, 1337, 2026],
+  "temperature": 0.0
+}

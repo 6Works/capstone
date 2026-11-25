@@ -1,0 +1,2603 @@
+{
+  "experiment": "layer_b_slu_rubric_ablation_v1",
+  "configs": {
+    "slu_rule_based": {
+      "config": {
+        "experiment_id": "slu_rule_based",
+        "description": "Stage 3/4 deterministic regex & keyword rubric baseline.",
+        "provider": "rule_based",
+        "model_name": "deterministic-v2",
+        "use_json_mode": false,
+        "enable_schema_repair": false,
+        "enable_repair_retry": false,
+        "asr_pre_repair": false,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ],
+        "temperature": 0.0
+      },
+      "model_disk_gb": 0.0,
+      "model_vram_gb": 0.0,
+      "cost_per_1k_turns_usd": 0.0,
+      "minds14_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 1
+          },
+          "macro_f1": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 1
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 1
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 1
+          },
+          "avg_latency_ms": {
+            "mean": 0.1,
+            "std": 0.0,
+            "min": 0.1,
+            "max": 0.1,
+            "n_seeds": 1
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.0,
+          "macro_f1": 0.0,
+          "weighted_f1": 0.0,
+          "num_samples": 28,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 0.1,
+          "p95_latency_ms": 0.3,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        },
+        "per_item_correct_s42": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "minds14_asr_tiny_baseline": {
+        "accuracy": 0.0,
+        "macro_f1": 0.0,
+        "weighted_f1": 0.0,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 0.0,
+        "p95_latency_ms": 0.1,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "minds14_asr_tiny_no_prerepair": null,
+      "minds14_asr_small_improved": {
+        "accuracy": 0.0,
+        "macro_f1": 0.0,
+        "weighted_f1": 0.0,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 0.0,
+        "p95_latency_ms": 0.1,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "clinc_oos": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 1
+          },
+          "macro_f1": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 1
+          },
+          "oos_f1": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 1
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 1
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 1
+          },
+          "avg_latency_ms": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 1
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.0,
+          "macro_f1": 0.0,
+          "weighted_f1": 0.0,
+          "num_samples": 35,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 0.0,
+          "p95_latency_ms": 0.0,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0,
+          "oos_f1": 0.0
+        },
+        "per_item_correct_s42": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "interview_slu_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.6,
+            "std": 0.0,
+            "min": 0.6,
+            "max": 0.6,
+            "n_seeds": 1
+          },
+          "macro_f1": {
+            "mean": 0.6905,
+            "std": 0.0,
+            "min": 0.6905,
+            "max": 0.6905,
+            "n_seeds": 1
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 1
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 1
+          },
+          "avg_latency_ms": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 1
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.6,
+          "macro_f1": 0.6905,
+          "weighted_f1": 0.6032,
+          "num_samples": 30,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 0.0,
+          "p95_latency_ms": 0.0,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        }
+      },
+      "interview_slu_asr_tiny_baseline": {
+        "accuracy": 0.6,
+        "macro_f1": 0.6905,
+        "weighted_f1": 0.6032,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 0.0,
+        "p95_latency_ms": 0.0,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_slu_asr_small_improved": {
+        "accuracy": 0.6,
+        "macro_f1": 0.6905,
+        "weighted_f1": 0.6032,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 0.0,
+        "p95_latency_ms": 0.0,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_rubric": {
+        "summary": {
+          "spearman_vs_tier": {
+            "mean": 0.5437,
+            "std": 0.0,
+            "min": 0.5437,
+            "max": 0.5437,
+            "n_seeds": 1
+          },
+          "mae_vs_expected_midpoint": {
+            "mean": 2.15,
+            "std": 0.0,
+            "min": 2.15,
+            "max": 2.15,
+            "n_seeds": 1
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 1
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 1
+          },
+          "avg_latency_ms": {
+            "mean": 0.2,
+            "std": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "n_seeds": 1
+          }
+        },
+        "seed_42_scores": [
+          8.0,
+          8.0,
+          7.0,
+          7.0,
+          7.0,
+          8.0,
+          7.0,
+          7.0,
+          7.0,
+          6.0
+        ],
+        "spearman_vs_8b_ref": 0.4087,
+        "mae_vs_8b_ref": 1.7
+      }
+    },
+    "slu_qwen15b_raw": {
+      "config": {
+        "experiment_id": "slu_qwen15b_raw",
+        "description": "Quantized 1.5B SLM raw JSON output without constrained json_mode, schema repair, or ASR pre-repair.",
+        "provider": "ollama",
+        "model_name": "qwen2.5-coder:1.5b",
+        "use_json_mode": false,
+        "enable_schema_repair": false,
+        "enable_repair_retry": false,
+        "asr_pre_repair": false,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ],
+        "temperature": 0.1
+      },
+      "model_disk_gb": 0.92,
+      "model_vram_gb": 1.31,
+      "cost_per_1k_turns_usd": 0.0067,
+      "minds14_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 495.2333,
+            "std": 8.3291,
+            "min": 485.7,
+            "max": 501.1,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.0,
+          "macro_f1": 0.0,
+          "weighted_f1": 0.0,
+          "num_samples": 28,
+          "schema_valid_rate": 0.0,
+          "raw_valid_rate": 0.0,
+          "avg_latency_ms": 485.7,
+          "p95_latency_ms": 571.2,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        },
+        "per_item_correct_s42": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "minds14_asr_tiny_baseline": {
+        "accuracy": 0.0,
+        "macro_f1": 0.0,
+        "weighted_f1": 0.0,
+        "num_samples": 28,
+        "schema_valid_rate": 0.0,
+        "raw_valid_rate": 0.0,
+        "avg_latency_ms": 525.0,
+        "p95_latency_ms": 632.1,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "minds14_asr_tiny_no_prerepair": null,
+      "minds14_asr_small_improved": {
+        "accuracy": 0.0,
+        "macro_f1": 0.0,
+        "weighted_f1": 0.0,
+        "num_samples": 28,
+        "schema_valid_rate": 0.0,
+        "raw_valid_rate": 0.0,
+        "avg_latency_ms": 511.8,
+        "p95_latency_ms": 576.9,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "clinc_oos": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.0095,
+            "std": 0.0165,
+            "min": 0.0,
+            "max": 0.0286,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.0139,
+            "std": 0.0241,
+            "min": 0.0,
+            "max": 0.0417,
+            "n_seeds": 3
+          },
+          "oos_f1": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 0.0476,
+            "std": 0.0165,
+            "min": 0.0286,
+            "max": 0.0571,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 0.0476,
+            "std": 0.0165,
+            "min": 0.0286,
+            "max": 0.0571,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 468.3667,
+            "std": 5.2157,
+            "min": 463.4,
+            "max": 473.8,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.0,
+          "macro_f1": 0.0,
+          "weighted_f1": 0.0,
+          "num_samples": 35,
+          "schema_valid_rate": 0.0571,
+          "raw_valid_rate": 0.0571,
+          "avg_latency_ms": 463.4,
+          "p95_latency_ms": 531.5,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0,
+          "oos_f1": 0.0
+        },
+        "per_item_correct_s42": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "interview_slu_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 486.7,
+            "std": 6.4715,
+            "min": 479.3,
+            "max": 491.3,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.0,
+          "macro_f1": 0.0,
+          "weighted_f1": 0.0,
+          "num_samples": 30,
+          "schema_valid_rate": 0.0,
+          "raw_valid_rate": 0.0,
+          "avg_latency_ms": 479.3,
+          "p95_latency_ms": 526.5,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        }
+      },
+      "interview_slu_asr_tiny_baseline": {
+        "accuracy": 0.0,
+        "macro_f1": 0.0,
+        "weighted_f1": 0.0,
+        "num_samples": 30,
+        "schema_valid_rate": 0.0,
+        "raw_valid_rate": 0.0,
+        "avg_latency_ms": 522.8,
+        "p95_latency_ms": 647.0,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_slu_asr_small_improved": {
+        "accuracy": 0.0,
+        "macro_f1": 0.0,
+        "weighted_f1": 0.0,
+        "num_samples": 30,
+        "schema_valid_rate": 0.0,
+        "raw_valid_rate": 0.0,
+        "avg_latency_ms": 506.7,
+        "p95_latency_ms": 569.2,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_rubric": {
+        "summary": {
+          "spearman_vs_tier": {
+            "mean": 0.7511,
+            "std": 0.1106,
+            "min": 0.6873,
+            "max": 0.8788,
+            "n_seeds": 3
+          },
+          "mae_vs_expected_midpoint": {
+            "mean": 2.0167,
+            "std": 0.2309,
+            "min": 1.75,
+            "max": 2.15,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 0.9333,
+            "std": 0.1155,
+            "min": 0.8,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 0.9333,
+            "std": 0.1155,
+            "min": 0.8,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 4271.9667,
+            "std": 710.0609,
+            "min": 3838.1,
+            "max": 5091.4,
+            "n_seeds": 3
+          }
+        },
+        "seed_42_scores": [
+          9.0,
+          8.0,
+          8.0,
+          8.0,
+          8.0,
+          8.0,
+          8.0,
+          6.0,
+          7.0,
+          8.0
+        ],
+        "spearman_vs_8b_ref": 0.6058,
+        "mae_vs_8b_ref": 2.3
+      }
+    },
+    "slu_llama3b_raw": {
+      "config": {
+        "experiment_id": "slu_llama3b_raw",
+        "description": "Quantized 3B Llama SLM raw JSON output without constrained json_mode, schema repair, or ASR pre-repair.",
+        "provider": "ollama",
+        "model_name": "llama3.2:3b",
+        "use_json_mode": false,
+        "enable_schema_repair": false,
+        "enable_repair_retry": false,
+        "asr_pre_repair": false,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ],
+        "temperature": 0.1
+      },
+      "model_disk_gb": 1.88,
+      "model_vram_gb": 2.56,
+      "cost_per_1k_turns_usd": 0.0083,
+      "minds14_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.9286,
+            "std": 0.0,
+            "min": 0.9286,
+            "max": 0.9286,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.9262,
+            "std": 0.0,
+            "min": 0.9262,
+            "max": 0.9262,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 610.9,
+            "std": 10.1681,
+            "min": 599.4,
+            "max": 618.7,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.9286,
+          "macro_f1": 0.9262,
+          "weighted_f1": 0.9262,
+          "num_samples": 28,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 599.4,
+          "p95_latency_ms": 679.1,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        },
+        "per_item_correct_s42": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "minds14_asr_tiny_baseline": {
+        "accuracy": 0.8571,
+        "macro_f1": 0.8619,
+        "weighted_f1": 0.8619,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 651.4,
+        "p95_latency_ms": 885.8,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "minds14_asr_tiny_no_prerepair": null,
+      "minds14_asr_small_improved": {
+        "accuracy": 0.8571,
+        "macro_f1": 0.85,
+        "weighted_f1": 0.85,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 618.3,
+        "p95_latency_ms": 764.7,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "clinc_oos": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.7048,
+            "std": 0.0165,
+            "min": 0.6857,
+            "max": 0.7143,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.689,
+            "std": 0.0263,
+            "min": 0.6588,
+            "max": 0.7069,
+            "n_seeds": 3
+          },
+          "oos_f1": {
+            "mean": 0.4444,
+            "std": 0.0,
+            "min": 0.4444,
+            "max": 0.4444,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 0.9714,
+            "std": 0.0,
+            "min": 0.9714,
+            "max": 0.9714,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 0.9714,
+            "std": 0.0,
+            "min": 0.9714,
+            "max": 0.9714,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 591.5667,
+            "std": 6.914,
+            "min": 583.6,
+            "max": 596.0,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.7143,
+          "macro_f1": 0.7069,
+          "weighted_f1": 0.7098,
+          "num_samples": 35,
+          "schema_valid_rate": 0.9714,
+          "raw_valid_rate": 0.9714,
+          "avg_latency_ms": 583.6,
+          "p95_latency_ms": 748.5,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0,
+          "oos_f1": 0.4444
+        },
+        "per_item_correct_s42": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "interview_slu_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.4,
+            "std": 0.0,
+            "min": 0.4,
+            "max": 0.4,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.3124,
+            "std": 0.0199,
+            "min": 0.2895,
+            "max": 0.3239,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 0.9667,
+            "std": 0.0,
+            "min": 0.9667,
+            "max": 0.9667,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 0.9667,
+            "std": 0.0,
+            "min": 0.9667,
+            "max": 0.9667,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 581.9,
+            "std": 13.2616,
+            "min": 570.6,
+            "max": 596.5,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.4,
+          "macro_f1": 0.3239,
+          "weighted_f1": 0.3202,
+          "num_samples": 30,
+          "schema_valid_rate": 0.9667,
+          "raw_valid_rate": 0.9667,
+          "avg_latency_ms": 570.6,
+          "p95_latency_ms": 661.4,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        }
+      },
+      "interview_slu_asr_tiny_baseline": {
+        "accuracy": 0.4,
+        "macro_f1": 0.3564,
+        "weighted_f1": 0.3171,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 585.4,
+        "p95_latency_ms": 653.4,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_slu_asr_small_improved": {
+        "accuracy": 0.4,
+        "macro_f1": 0.3291,
+        "weighted_f1": 0.3254,
+        "num_samples": 30,
+        "schema_valid_rate": 0.9667,
+        "raw_valid_rate": 0.9667,
+        "avg_latency_ms": 631.0,
+        "p95_latency_ms": 636.8,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_rubric": {
+        "summary": {
+          "spearman_vs_tier": {
+            "mean": 0.4121,
+            "std": 0.1838,
+            "min": 0.2749,
+            "max": 0.6209,
+            "n_seeds": 3
+          },
+          "mae_vs_expected_midpoint": {
+            "mean": 1.9833,
+            "std": 0.1528,
+            "min": 1.85,
+            "max": 2.15,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 0.5,
+            "std": 0.1732,
+            "min": 0.3,
+            "max": 0.6,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 0.5,
+            "std": 0.1732,
+            "min": 0.3,
+            "max": 0.6,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 5253.6333,
+            "std": 214.8555,
+            "min": 5032.0,
+            "max": 5461.0,
+            "n_seeds": 3
+          }
+        },
+        "seed_42_scores": [
+          7.0,
+          6.0,
+          6.0,
+          7.0,
+          4.0,
+          7.0,
+          6.0,
+          7.0,
+          6.0,
+          4.0
+        ],
+        "spearman_vs_8b_ref": -0.386,
+        "mae_vs_8b_ref": 1.5
+      }
+    },
+    "slu_qwen15b_repair": {
+      "config": {
+        "experiment_id": "slu_qwen15b_repair",
+        "description": "Layer B improved 1.5B SLM with JSON mode, shared syntax repair, 1-shot schema retry, and ASR pre-repair.",
+        "provider": "ollama",
+        "model_name": "qwen2.5-coder:1.5b",
+        "use_json_mode": true,
+        "enable_schema_repair": true,
+        "enable_repair_retry": true,
+        "asr_pre_repair": true,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ],
+        "temperature": 0.1
+      },
+      "model_disk_gb": 0.92,
+      "model_vram_gb": 1.31,
+      "cost_per_1k_turns_usd": 0.0181,
+      "minds14_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.8571,
+            "std": 0.0,
+            "min": 0.8571,
+            "max": 0.8571,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.8294,
+            "std": 0.0014,
+            "min": 0.8286,
+            "max": 0.831,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 1263.7667,
+            "std": 34.8773,
+            "min": 1240.8,
+            "max": 1303.9,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.8571,
+          "macro_f1": 0.8286,
+          "weighted_f1": 0.8286,
+          "num_samples": 28,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 1303.9,
+          "p95_latency_ms": 1431.1,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        },
+        "per_item_correct_s42": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "minds14_asr_tiny_baseline": {
+        "accuracy": 0.7143,
+        "macro_f1": 0.6571,
+        "weighted_f1": 0.6571,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1252.7,
+        "p95_latency_ms": 1456.6,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 3
+      },
+      "minds14_asr_tiny_no_prerepair": {
+        "accuracy": 0.7143,
+        "macro_f1": 0.6571,
+        "weighted_f1": 0.6571,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1238.1,
+        "p95_latency_ms": 1369.4,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "minds14_asr_small_improved": {
+        "accuracy": 0.7857,
+        "macro_f1": 0.731,
+        "weighted_f1": 0.731,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1237.1,
+        "p95_latency_ms": 1357.4,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 3
+      },
+      "clinc_oos": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.6476,
+            "std": 0.0165,
+            "min": 0.6286,
+            "max": 0.6571,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.6321,
+            "std": 0.0143,
+            "min": 0.6156,
+            "max": 0.6403,
+            "n_seeds": 3
+          },
+          "oos_f1": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 1274.7333,
+            "std": 35.0677,
+            "min": 1250.9,
+            "max": 1315.0,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.6571,
+          "macro_f1": 0.6403,
+          "weighted_f1": 0.5854,
+          "num_samples": 35,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 1315.0,
+          "p95_latency_ms": 1468.3,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0,
+          "oos_f1": 0.0
+        },
+        "per_item_correct_s42": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      },
+      "interview_slu_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.5889,
+            "std": 0.0192,
+            "min": 0.5667,
+            "max": 0.6,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.6705,
+            "std": 0.0335,
+            "min": 0.632,
+            "max": 0.6921,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 1252.1667,
+            "std": 30.7139,
+            "min": 1229.4,
+            "max": 1287.1,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.5667,
+          "macro_f1": 0.632,
+          "weighted_f1": 0.5265,
+          "num_samples": 30,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 1287.1,
+          "p95_latency_ms": 1417.3,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        }
+      },
+      "interview_slu_asr_tiny_baseline": {
+        "accuracy": 0.6,
+        "macro_f1": 0.6875,
+        "weighted_f1": 0.5684,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1275.4,
+        "p95_latency_ms": 1394.4,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 1
+      },
+      "interview_slu_asr_small_improved": {
+        "accuracy": 0.6,
+        "macro_f1": 0.6875,
+        "weighted_f1": 0.5684,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1229.6,
+        "p95_latency_ms": 1335.3,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_rubric": {
+        "summary": {
+          "spearman_vs_tier": {
+            "mean": 0.6568,
+            "std": 0.0264,
+            "min": 0.6415,
+            "max": 0.6873,
+            "n_seeds": 3
+          },
+          "mae_vs_expected_midpoint": {
+            "mean": 2.2167,
+            "std": 0.0577,
+            "min": 2.15,
+            "max": 2.25,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 17362.1667,
+            "std": 197.3869,
+            "min": 17205.3,
+            "max": 17583.8,
+            "n_seeds": 3
+          }
+        },
+        "seed_42_scores": [
+          8.0,
+          8.0,
+          8.0,
+          8.0,
+          8.0,
+          8.0,
+          8.0,
+          6.0,
+          7.0,
+          8.0
+        ],
+        "spearman_vs_8b_ref": 0.6929,
+        "mae_vs_8b_ref": 2.2
+      }
+    },
+    "slu_llama3b_repair": {
+      "config": {
+        "experiment_id": "slu_llama3b_repair",
+        "description": "Layer B improved Llama 3.2 3B with JSON mode, shared syntax repair, 1-shot schema retry, and ASR pre-repair.",
+        "provider": "ollama",
+        "model_name": "llama3.2:3b",
+        "use_json_mode": true,
+        "enable_schema_repair": true,
+        "enable_repair_retry": true,
+        "asr_pre_repair": true,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ],
+        "temperature": 0.1
+      },
+      "model_disk_gb": 1.88,
+      "model_vram_gb": 2.56,
+      "cost_per_1k_turns_usd": 0.0153,
+      "minds14_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.9286,
+            "std": 0.0,
+            "min": 0.9286,
+            "max": 0.9286,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.9262,
+            "std": 0.0,
+            "min": 0.9262,
+            "max": 0.9262,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 1121.8333,
+            "std": 19.6067,
+            "min": 1099.3,
+            "max": 1135.0,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.9286,
+          "macro_f1": 0.9262,
+          "weighted_f1": 0.9262,
+          "num_samples": 28,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 1099.3,
+          "p95_latency_ms": 1191.2,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        },
+        "per_item_correct_s42": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "minds14_asr_tiny_baseline": {
+        "accuracy": 0.8571,
+        "macro_f1": 0.8619,
+        "weighted_f1": 0.8619,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1206.1,
+        "p95_latency_ms": 1409.3,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 3
+      },
+      "minds14_asr_tiny_no_prerepair": {
+        "accuracy": 0.8571,
+        "macro_f1": 0.8619,
+        "weighted_f1": 0.8619,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1152.1,
+        "p95_latency_ms": 1410.4,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "minds14_asr_small_improved": {
+        "accuracy": 0.8571,
+        "macro_f1": 0.8067,
+        "weighted_f1": 0.8643,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1136.7,
+        "p95_latency_ms": 1266.0,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 3
+      },
+      "clinc_oos": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.7143,
+            "std": 0.0,
+            "min": 0.7143,
+            "max": 0.7143,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.735,
+            "std": 0.0092,
+            "min": 0.725,
+            "max": 0.743,
+            "n_seeds": 3
+          },
+          "oos_f1": {
+            "mean": 0.4444,
+            "std": 0.0,
+            "min": 0.4444,
+            "max": 0.4444,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 1076.4,
+            "std": 1.1533,
+            "min": 1075.1,
+            "max": 1077.3,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.7143,
+          "macro_f1": 0.743,
+          "weighted_f1": 0.7003,
+          "num_samples": 35,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 1075.1,
+          "p95_latency_ms": 1194.8,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0,
+          "oos_f1": 0.4444
+        },
+        "per_item_correct_s42": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "interview_slu_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.4,
+            "std": 0.0,
+            "min": 0.4,
+            "max": 0.4,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.3371,
+            "std": 0.0234,
+            "min": 0.3101,
+            "max": 0.3506,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 1117.1,
+            "std": 9.2585,
+            "min": 1108.5,
+            "max": 1126.9,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.4,
+          "macro_f1": 0.3506,
+          "weighted_f1": 0.3119,
+          "num_samples": 30,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 1108.5,
+          "p95_latency_ms": 1187.0,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        }
+      },
+      "interview_slu_asr_tiny_baseline": {
+        "accuracy": 0.4,
+        "macro_f1": 0.3564,
+        "weighted_f1": 0.3171,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1102.8,
+        "p95_latency_ms": 1208.3,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 1
+      },
+      "interview_slu_asr_small_improved": {
+        "accuracy": 0.4,
+        "macro_f1": 0.3538,
+        "weighted_f1": 0.3147,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1112.1,
+        "p95_latency_ms": 1186.0,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_rubric": {
+        "summary": {
+          "spearman_vs_tier": {
+            "mean": 0.3941,
+            "std": 0.0,
+            "min": 0.3941,
+            "max": 0.3941,
+            "n_seeds": 3
+          },
+          "mae_vs_expected_midpoint": {
+            "mean": 2.05,
+            "std": 0.0,
+            "min": 2.05,
+            "max": 2.05,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 12165.9667,
+            "std": 275.3151,
+            "min": 11968.7,
+            "max": 12480.5,
+            "n_seeds": 3
+          }
+        },
+        "seed_42_scores": [
+          6.0,
+          6.0,
+          6.0,
+          6.0,
+          5.0,
+          6.0,
+          6.0,
+          6.0,
+          6.0,
+          4.0
+        ],
+        "spearman_vs_8b_ref": -0.198,
+        "mae_vs_8b_ref": 1.0
+      }
+    },
+    "slu_qwen3b_repair": {
+      "config": {
+        "experiment_id": "slu_qwen3b_repair",
+        "description": "Layer B improved Qwen 2.5 3B with JSON mode, shared syntax repair, 1-shot schema retry, and ASR pre-repair.",
+        "provider": "ollama",
+        "model_name": "qwen2.5:3b",
+        "use_json_mode": true,
+        "enable_schema_repair": true,
+        "enable_repair_retry": true,
+        "asr_pre_repair": true,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ],
+        "temperature": 0.1
+      },
+      "model_disk_gb": 1.8,
+      "model_vram_gb": 2.23,
+      "cost_per_1k_turns_usd": 0.0172,
+      "minds14_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.8929,
+            "std": 0.0,
+            "min": 0.8929,
+            "max": 0.8929,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.8667,
+            "std": 0.0,
+            "min": 0.8667,
+            "max": 0.8667,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 1258.2667,
+            "std": 33.1976,
+            "min": 1239.1,
+            "max": 1296.6,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.8929,
+          "macro_f1": 0.8667,
+          "weighted_f1": 0.8667,
+          "num_samples": 28,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 1239.1,
+          "p95_latency_ms": 1388.0,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        },
+        "per_item_correct_s42": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      },
+      "minds14_asr_tiny_baseline": {
+        "accuracy": 0.9643,
+        "macro_f1": 0.9619,
+        "weighted_f1": 0.9619,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1264.1,
+        "p95_latency_ms": 1512.6,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 3
+      },
+      "minds14_asr_tiny_no_prerepair": {
+        "accuracy": 0.9286,
+        "macro_f1": 0.9238,
+        "weighted_f1": 0.9238,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1264.1,
+        "p95_latency_ms": 1543.9,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "minds14_asr_small_improved": {
+        "accuracy": 0.9286,
+        "macro_f1": 0.9238,
+        "weighted_f1": 0.9238,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1258.5,
+        "p95_latency_ms": 1374.9,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 3
+      },
+      "clinc_oos": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.7905,
+            "std": 0.0165,
+            "min": 0.7714,
+            "max": 0.8,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.7972,
+            "std": 0.0192,
+            "min": 0.775,
+            "max": 0.8083,
+            "n_seeds": 3
+          },
+          "oos_f1": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 1200.2333,
+            "std": 21.1406,
+            "min": 1181.4,
+            "max": 1223.1,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.7714,
+          "macro_f1": 0.775,
+          "weighted_f1": 0.7086,
+          "num_samples": 35,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 1196.2,
+          "p95_latency_ms": 1318.4,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0,
+          "oos_f1": 0.0
+        },
+        "per_item_correct_s42": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "interview_slu_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.7,
+            "std": 0.0333,
+            "min": 0.6667,
+            "max": 0.7333,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.7606,
+            "std": 0.0273,
+            "min": 0.7337,
+            "max": 0.7882,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 1216.1667,
+            "std": 5.9164,
+            "min": 1211.8,
+            "max": 1222.9,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.7333,
+          "macro_f1": 0.7882,
+          "weighted_f1": 0.7299,
+          "num_samples": 30,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 1211.8,
+          "p95_latency_ms": 1290.8,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        }
+      },
+      "interview_slu_asr_tiny_baseline": {
+        "accuracy": 0.7,
+        "macro_f1": 0.7615,
+        "weighted_f1": 0.6809,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1237.9,
+        "p95_latency_ms": 1418.0,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 1
+      },
+      "interview_slu_asr_small_improved": {
+        "accuracy": 0.7,
+        "macro_f1": 0.7615,
+        "weighted_f1": 0.6809,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 1238.1,
+        "p95_latency_ms": 1352.7,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_rubric": {
+        "summary": {
+          "spearman_vs_tier": {
+            "mean": 0.6897,
+            "std": 0.0,
+            "min": 0.6897,
+            "max": 0.6897,
+            "n_seeds": 3
+          },
+          "mae_vs_expected_midpoint": {
+            "mean": 1.65,
+            "std": 0.0,
+            "min": 1.65,
+            "max": 1.65,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 18236.7667,
+            "std": 843.2378,
+            "min": 17458.3,
+            "max": 19132.5,
+            "n_seeds": 3
+          }
+        },
+        "seed_42_scores": [
+          8.0,
+          8.0,
+          7.0,
+          6.0,
+          5.0,
+          6.0,
+          6.0,
+          6.0,
+          5.0,
+          6.0
+        ],
+        "spearman_vs_8b_ref": 0.5438,
+        "mae_vs_8b_ref": 1.0
+      }
+    },
+    "slu_llama8b_ref": {
+      "config": {
+        "experiment_id": "slu_llama8b_ref",
+        "description": "Upper-bound local 8B Llama 3.1 reference ceiling with JSON mode, schema repair, and ASR pre-repair.",
+        "provider": "ollama",
+        "model_name": "llama3.1:latest",
+        "use_json_mode": true,
+        "enable_schema_repair": true,
+        "enable_repair_retry": true,
+        "asr_pre_repair": true,
+        "seeds": [
+          42,
+          1337,
+          2026
+        ],
+        "temperature": 0.1
+      },
+      "model_disk_gb": 4.58,
+      "model_vram_gb": 3.14,
+      "cost_per_1k_turns_usd": 0.1698,
+      "minds14_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.8809,
+            "std": 0.0413,
+            "min": 0.8571,
+            "max": 0.9286,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.8619,
+            "std": 0.0536,
+            "min": 0.831,
+            "max": 0.9238,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 3961.1667,
+            "std": 99.636,
+            "min": 3889.8,
+            "max": 4075.0,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.9286,
+          "macro_f1": 0.9238,
+          "weighted_f1": 0.9238,
+          "num_samples": 28,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 4075.0,
+          "p95_latency_ms": 4854.6,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        },
+        "per_item_correct_s42": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0
+        ]
+      },
+      "minds14_asr_tiny_baseline": {
+        "accuracy": 0.8929,
+        "macro_f1": 0.8857,
+        "weighted_f1": 0.8857,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 3875.2,
+        "p95_latency_ms": 4697.6,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 3
+      },
+      "minds14_asr_tiny_no_prerepair": {
+        "accuracy": 0.8929,
+        "macro_f1": 0.8857,
+        "weighted_f1": 0.8857,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 3852.6,
+        "p95_latency_ms": 4578.1,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "minds14_asr_small_improved": {
+        "accuracy": 0.9286,
+        "macro_f1": 0.9238,
+        "weighted_f1": 0.9238,
+        "num_samples": 28,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 3910.5,
+        "p95_latency_ms": 4630.5,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 3
+      },
+      "clinc_oos": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.8191,
+            "std": 0.0165,
+            "min": 0.8,
+            "max": 0.8286,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.8563,
+            "std": 0.0194,
+            "min": 0.8341,
+            "max": 0.8696,
+            "n_seeds": 3
+          },
+          "oos_f1": {
+            "mean": 0.4444,
+            "std": 0.0,
+            "min": 0.4444,
+            "max": 0.4444,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 3741.4333,
+            "std": 36.05,
+            "min": 3701.2,
+            "max": 3770.8,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.8286,
+          "macro_f1": 0.8652,
+          "weighted_f1": 0.8051,
+          "num_samples": 35,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 3752.3,
+          "p95_latency_ms": 4280.2,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0,
+          "oos_f1": 0.4444
+        },
+        "per_item_correct_s42": [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "interview_slu_gold": {
+        "summary": {
+          "accuracy": {
+            "mean": 0.6,
+            "std": 0.0,
+            "min": 0.6,
+            "max": 0.6,
+            "n_seeds": 3
+          },
+          "macro_f1": {
+            "mean": 0.6939,
+            "std": 0.0,
+            "min": 0.6939,
+            "max": 0.6939,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 4035.0333,
+            "std": 32.6696,
+            "min": 4000.4,
+            "max": 4065.3,
+            "n_seeds": 3
+          }
+        },
+        "seed_42": {
+          "accuracy": 0.6,
+          "macro_f1": 0.6939,
+          "weighted_f1": 0.5276,
+          "num_samples": 30,
+          "schema_valid_rate": 1.0,
+          "raw_valid_rate": 1.0,
+          "avg_latency_ms": 4065.3,
+          "p95_latency_ms": 4744.3,
+          "repaired_turns": 0,
+          "retried_turns": 0,
+          "asr_pre_repairs": 0
+        }
+      },
+      "interview_slu_asr_tiny_baseline": {
+        "accuracy": 0.5667,
+        "macro_f1": 0.6698,
+        "weighted_f1": 0.5069,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 4019.6,
+        "p95_latency_ms": 4549.0,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 1
+      },
+      "interview_slu_asr_small_improved": {
+        "accuracy": 0.5667,
+        "macro_f1": 0.6698,
+        "weighted_f1": 0.5069,
+        "num_samples": 30,
+        "schema_valid_rate": 1.0,
+        "raw_valid_rate": 1.0,
+        "avg_latency_ms": 4011.0,
+        "p95_latency_ms": 4570.8,
+        "repaired_turns": 0,
+        "retried_turns": 0,
+        "asr_pre_repairs": 0
+      },
+      "interview_rubric": {
+        "summary": {
+          "spearman_vs_tier": {
+            "mean": 0.4188,
+            "std": 0.0,
+            "min": 0.4188,
+            "max": 0.4188,
+            "n_seeds": 3
+          },
+          "mae_vs_expected_midpoint": {
+            "mean": 1.85,
+            "std": 0.0,
+            "min": 1.85,
+            "max": 1.85,
+            "n_seeds": 3
+          },
+          "raw_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "schema_valid_rate": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "n_seeds": 3
+          },
+          "avg_latency_ms": {
+            "mean": 67250.7667,
+            "std": 1137.0402,
+            "min": 66427.3,
+            "max": 68548.1,
+            "n_seeds": 3
+          }
+        },
+        "seed_42_scores": [
+          6.0,
+          7.0,
+          6.0,
+          4.0,
+          6.0,
+          6.0,
+          6.0,
+          4.0,
+          4.0,
+          6.0
+        ],
+        "spearman_vs_8b_ref": 1.0,
+        "mae_vs_8b_ref": 0.0
+      }
+    }
+  },
+  "paired_bootstrap": {
+    "qwen15b_repair_vs_raw_minds14_acc": {
+      "observed_improvement": 0.8571,
+      "ci_95_low": 0.7143,
+      "ci_95_high": 0.9643,
+      "p_value": 0.0
+    },
+    "qwen15b_repair_vs_raw_clinc_acc": {
+      "observed_improvement": 0.6571,
+      "ci_95_low": 0.4857,
+      "ci_95_high": 0.8,
+      "p_value": 0.0
+    },
+    "llama3b_repair_vs_raw_minds14_acc": {
+      "observed_improvement": 0.0,
+      "ci_95_low": 0.0,
+      "ci_95_high": 0.0,
+      "p_value": 1.0
+    },
+    "qwen3b_repair_vs_8b_ref_minds14_acc": {
+      "observed_improvement": -0.0357,
+      "ci_95_low": -0.1786,
+      "ci_95_high": 0.0714,
+      "p_value": 0.798
+    },
+    "qwen3b_repair_vs_8b_ref_clinc_acc": {
+      "observed_improvement": -0.0571,
+      "ci_95_low": -0.1429,
+      "ci_95_high": 0.0,
+      "p_value": 0.256
+    },
+    "qwen3b_repair_vs_rule_based_minds14_acc": {
+      "observed_improvement": 0.8929,
+      "ci_95_low": 0.7848,
+      "ci_95_high": 1.0,
+      "p_value": 0.0
+    }
+  },
+  "sample_counts": {
+    "minds14_test_stratified": 28,
+    "clinc_oos_test_stratified": 35,
+    "interview_qa_test": 30,
+    "interview_rubric_answers": 10
+  }
+}

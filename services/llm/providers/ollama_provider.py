@@ -142,14 +142,18 @@ class OllamaLLMProvider(ILanguageModelProvider):
         if not formatted_messages:
             formatted_messages.append({"role": "user", "content": "Hello"})
 
+        options: Dict[str, Any] = {
+            "temperature": temperature,
+            "num_predict": max_tokens,
+        }
+        if kwargs.get("seed") is not None:
+            options["seed"] = int(kwargs["seed"])
+
         payload: Dict[str, Any] = {
             "model": active_model,
             "messages": formatted_messages,
             "stream": False,
-            "options": {
-                "temperature": temperature,
-                "num_predict": max_tokens
-            }
+            "options": options,
         }
 
         if json_mode:
@@ -159,7 +163,7 @@ class OllamaLLMProvider(ILanguageModelProvider):
         for base in self._get_candidate_urls():
             url = f"{base}/api/chat"
             try:
-                resp = requests.post(url, json=payload, timeout=30.0)
+                resp = requests.post(url, json=payload, timeout=90.0)
                 if resp.status_code == 200:
                     data = resp.json()
                     content = data.get("message", {}).get("content", "")

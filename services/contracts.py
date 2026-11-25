@@ -47,6 +47,7 @@ class NLPResult(BaseModel):
     tool_calls: List[Dict[str, Any]] = Field(default_factory=list, description="Requested tool invocations")
     latency_sec: float = Field(default=0.0, description="Processing latency")
     provider: str = Field(description="Name of NLP engine (rule_based, llm_gemini, etc.)")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Schema validity, repair, and preprocessing diagnostics")
 
 
 class DialogueTurnResult(BaseModel):

@@ -4,7 +4,6 @@ Encapsulates Persona management and dual-mode Interviewer processing.
 Following SOLID: Single Responsibility, Open/Closed, and Dependency Inversion.
 """
 
-import json
 import time
 import re
 from typing import Dict, Any, List, Optional
@@ -13,6 +12,7 @@ from services.roles.role_contracts import (
 )
 from services.llm.gateway import llm_gateway
 from services.llm.llm_contracts import LLMMessage
+from services.llm.json_utils import repair_and_parse_with_retry
 from services.context import context_manager
 
 
@@ -170,7 +170,17 @@ class RoleService:
         }
     ]
 
-    def process_interviewer_turn(self, candidate_text: str, mode: Optional[str] = None) -> Dict[str, Any]:
+    def process_interviewer_turn(
+        self,
+        candidate_text: str,
+        mode: Optional[str] = None,
+        model_name: Optional[str] = None,
+        use_json_mode: bool = True,
+        enable_schema_repair: bool = True,
+        enable_repair_retry: bool = True,
+        seed: Optional[int] = None,
+        temperature: Optional[float] = None,
+    ) -> Dict[str, Any]:
         """
         Executes an interview evaluation turn under either 'solo' or 'copilot' mode.
         Leverages LLMGateway for real LLM reasoning with seamless fallback.
@@ -224,6 +234,13 @@ class RoleService:
         ]
 
         llm_model_used = "heuristic_baseline"
+        schema_diag: Dict[str, Any] = {
+            "raw_valid": True,
+            "schema_valid": True,
+            "repaired": False,
+            "retried": False,
+            "fixes": [],
+        }
 
         # Update Context Manager with current stage metadata
         context_manager.update_metadata(
@@ -257,14 +274,48 @@ Analyze the candidate's answer and produce ONLY a valid JSON object matching thi
 Return ONLY valid JSON."""
 
             llm_msg = LLMMessage(role="user", content=candidate_text)
-            llm_res = llm_gateway.generate(messages=[llm_msg], system_prompt=sys_prompt, json_mode=True, max_tokens=650)
-            
-            raw = llm_res.content.strip()
-            if raw.startswith("```"):
-                raw = re.sub(r"^```(?:json)?\s*", "", raw)
-                raw = re.sub(r"\s*```$", "", raw)
+            gen_kwargs: Dict[str, Any] = {}
+            if seed is not None:
+                gen_kwargs["seed"] = seed
+            llm_res = llm_gateway.generate(
+                messages=[llm_msg],
+                model=model_name,
+                temperature=temperature,
+                system_prompt=sys_prompt,
+                json_mode=use_json_mode,
+                max_tokens=650,
+                **gen_kwargs,
+            )
 
-            parsed = json.loads(raw)
+            def _retry_eval(raw_bad: str, keys):
+                r_prompt = f"Convert this interview evaluation into ONLY valid JSON with keys [{', '.join(keys)}]."
+                return llm_gateway.generate(
+                    messages=[LLMMessage(role="user", content=raw_bad[:1200])],
+                    model=model_name,
+                    temperature=0.0,
+                    system_prompt=r_prompt,
+                    json_mode=True,
+                    max_tokens=500,
+                    **gen_kwargs,
+                ).content
+
+            repair_out = repair_and_parse_with_retry(
+                llm_res.content,
+                expected_keys=("overall_score", "clarity_score", "depth_score", "system_design_score"),
+                enable_repair=enable_schema_repair,
+                retry_fn=_retry_eval if (enable_schema_repair and enable_repair_retry and not llm_res.fallback_used) else None,
+            )
+            schema_diag = {
+                "raw_valid": repair_out["raw_valid"],
+                "schema_valid": repair_out["schema_valid"],
+                "repaired": repair_out["repaired"],
+                "retried": repair_out["retried"],
+                "fixes": repair_out["fixes"],
+            }
+            parsed = repair_out["parsed"]
+            if parsed is None:
+                raise ValueError("Invalid interview JSON after schema repair")
+
             overall_score = int(parsed.get("overall_score", overall_score))
             clarity_score = int(parsed.get("clarity_score", clarity_score))
             depth_score = int(parsed.get("depth_score", depth_score))
@@ -286,6 +337,13 @@ Return ONLY valid JSON."""
 
         except Exception as e:
             llm_model_used = f"fallback ({str(e)[:30]})"
+            schema_diag = {
+                "raw_valid": False,
+                "schema_valid": False,
+                "repaired": False,
+                "retried": enable_schema_repair and enable_repair_retry,
+                "fixes": [],
+            }
 
         # Record Turn in Unified Context Manager
         context_manager.record_turn(
@@ -327,6 +385,7 @@ Return ONLY valid JSON."""
                 "next_stage": next_stage["stage_name"],
                 "turn_index": idx + 1,
                 "llm_engine": llm_model_used,
+                "schema_diagnostics": schema_diag,
                 "context": context_snapshot
             }
         else:
@@ -350,6 +409,7 @@ Return ONLY valid JSON."""
                 "suggested_probes": suggested_probes,
                 "turn_index": idx + 1,
                 "llm_engine": llm_model_used,
+                "schema_diagnostics": schema_diag,
                 "context": context_snapshot
             }
 

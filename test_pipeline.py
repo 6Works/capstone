@@ -1014,6 +1014,83 @@ class TestLayerAASRContextualBiasing:
         assert "sachin" in res.transcript.lower() and "fastapi" in res.transcript.lower()
 
 
+class TestLayerBSchemaRepairAndSLU:
+    """Session 6 tests for shared JSON schema repair, single-shot retry, ASR pre-repair, and RoleService integration."""
+
+    def test_extract_and_repair_json_edge_cases(self):
+        from services.llm import extract_and_repair_json, repair_and_parse_with_retry
+
+        # 1. Markdown fences + trailing comma + Python literals + unquoted key
+        dirty = 'Here is the JSON:\n```json\n{intent: "freeze", confidence: 0.92, valid: True, extra: None,}\n```\nHope that helps!'
+        parsed, repaired, fixes = extract_and_repair_json(dirty, expected_keys=("intent", "confidence"))
+        assert parsed is not None and repaired is True
+        assert parsed["intent"] == "freeze" and parsed["confidence"] == 0.92
+        assert parsed["valid"] is True and parsed["extra"] is None
+        assert "strip_markdown_fences" in fixes and "remove_trailing_commas" in fixes
+
+        # 2. Truncated object brace recovery
+        trunc = '{"intent": "balance", "confidence": 0.88'
+        parsed2, repaired2, fixes2 = extract_and_repair_json(trunc)
+        assert parsed2 is not None and repaired2 is True and parsed2["intent"] == "balance"
+
+        # 3. Raw mode disabled vs single-shot retry recovery
+        raw_bad = repair_and_parse_with_retry("No JSON here", expected_keys=("intent", "confidence"), enable_repair=False)
+        assert raw_bad["parsed"] is None and raw_bad["schema_valid"] is False
+
+        retried = repair_and_parse_with_retry(
+            "No JSON here",
+            expected_keys=("intent", "confidence"),
+            enable_repair=True,
+            retry_fn=lambda bad, keys: '{"intent": "pay_bill", "confidence": 0.91}',
+        )
+        assert retried["schema_valid"] is True and retried["retried"] is True
+        assert retried["parsed"]["intent"] == "pay_bill"
+
+    def test_nlp_asr_pre_repair_and_role_schema_diagnostics(self, monkeypatch):
+        from services.nlp import RuleBasedNLPService, LLMNLPService, preprocess_asr_transcript
+        from services.roles.role_service import RoleService
+        from services.llm.gateway import llm_gateway
+        from services.llm.llm_contracts import LLMResponse
+
+        cleaned, fixes = preprocess_asr_transcript(
+            "Such in please frieze my credit card balanse",
+            repair_lexicon=["Sachin", "freeze", "balance"],
+        )
+        assert "Sachin" in cleaned and "freeze" in cleaned and "balance" in cleaned and len(fixes) >= 3
+
+        # Rule-based + ASR pre-repair recovers mangled "kalo-cu-late" style/domain nouns cleanly
+        rb = RuleBasedNLPService(repair_lexicon=["goodbye", "architecture"])
+        rb_res = rb.parse("goodby for now")
+        assert rb_res.intent == "farewell"
+
+        # Mock gateway emitting dirty markdown JSON to prove zero duplication across NLP & RoleService
+        def fake_gen(*args, **kwargs):
+            sys_p = kwargs.get("system_prompt") or ""
+            if "Senior Staff Technical Interviewer" in sys_p:
+                return LLMResponse(
+                    content="```json\n{overall_score: 8, clarity_score: 8, depth_score: 8, system_design_score: 8,}\n```",
+                    provider="mock", model="tiny-slm", fallback_used=False,
+                )
+            return LLMResponse(
+                content="```json\n{\"intent\": \"freeze\", \"confidence\": 0.94,}\n```",
+                provider="mock", model="tiny-slm", fallback_used=False,
+            )
+
+        monkeypatch.setattr(llm_gateway, "generate", fake_gen)
+        nlp_svc = LLMNLPService(model_name="tiny-slm", repair_lexicon=["freeze"])
+        nlp_res = nlp_svc.parse("please phrase my card")
+        assert nlp_res.intent == "freeze"
+        assert nlp_res.metadata["repaired"] is True and nlp_res.metadata["schema_valid"] is True
+        assert nlp_res.metadata["raw_valid"] is False
+
+        role = RoleService()
+        turn = role.process_interviewer_turn("We used Redis shards and Kafka queues for reliability.", mode="solo")
+        assert turn["evaluation"]["overall_score"] == 8
+        assert turn["schema_diagnostics"]["repaired"] is True
+        assert turn["schema_diagnostics"]["schema_valid"] is True
+
+
+
 
 
 

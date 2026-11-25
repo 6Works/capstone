@@ -98,16 +98,14 @@ All remote manifests are fetched in **Session 4** via lightweight streaming slic
   3. Discovered and resolved 39M `tiny.en` prompt/hotword echo hallucination (`negative_results.tiny_unguarded_hotwords_v1`: WER `0.3292`, RTF `1.0014`) via capacity-gated hotwords (`hw=false` on tiny) + decoding guards + `hallucination_silence_threshold=0.4`.
 - **Status**: Verified `51 passed in 53.05s` in `test_pipeline.py`; `asr_tiny_improved` (`74.5 MB`, Peak `266.9 MB`, RTF `0.266`) beat `asr_small_baseline` (`463.6 MB`, Peak `718.4 MB`, RTF `0.608`) on domain entity recall (`R_entity=0.913` vs `0.7391`, `p=0.018`); `asr_small_improved` reached `WER=0.0435` (`-48.8%` vs baseline, `p<0.001`), `R_entity=0.9565` clean / `0.9783` @ `20 dB` / `0.913` @ `10 dB`, and `0.0306` clean LibriSpeech WER.
 
-### Session 6 — Layer B (Stage 3/4 SLU & Rubric) Quantized SLM Recovery & Cost Pareto — `Next`
-- **Files**: `services/nlp/nlp_services.py`, `services/roles/role_service.py`, `ml/configs/slu_*.json`, `ml/experiments/run_slu_ablation.py`, `ml/results/slu_ablation.json`.
+### Session 6 — Layer B (Stage 3/4 SLU & Rubric) Quantized SLM Recovery & Cost Pareto — `Done`
+- **Files**: `services/contracts.py`, `services/llm/__init__.py`, `services/llm/json_utils.py`, `services/llm/providers/ollama_provider.py`, `services/nlp/__init__.py`, `services/nlp/nlp_services.py`, `services/roles/role_service.py`, `ml/configs/slu_*.json`, `ml/experiments/run_slu_ablation.py`, `ml/results/slu_ablation.json`, `test_pipeline.py`.
 - **Implementation Spec**:
-  1. Extract ONE shared tiny helper `_extract_and_repair_json(raw_text, expected_keys)` (preventing duplication between `LLMNLPService` and `RoleService`) that strips markdown fences, fixes trailing commas / unquoted keys, and runs at most 1 constrained schema-repair retry if invalid.
-  2. Add optional **Phonetic ASR Error Pre-Repair** hook before LLM/Rule-Based parsing for corrupted transcripts fed from `asr_tiny_baseline` / `asr_small_improved`.
-  3. Evaluate 5 configurations across 3 seeds (`[42, 1337, 2026]`) on `MINDS-14` (gold + real ASR transcripts!), `CLINC-OOS`, and `Interview Stress` rubric alignment (vs `llama3.1:8b` judge):
-     - `RuleBasedNLPService`, `qwen2.5-coder:1.5b` (raw vs. +repair), `llama3.2:3b` (raw vs. +repair), `qwen2.5:3b` (+repair), and `llama3.1:latest` (8B ceiling).
-  4. Report `Macro-F1 (mean ± std)`, Schema Compliance %, Latency ms, Memory GB, Cost / 1k turns, Paired Bootstrap significance vs. `8B` ceiling!
+  1. Extracted shared `extract_and_repair_json` and `repair_and_parse_with_retry` in `services/llm/json_utils.py`, eliminating duplicated JSON parsing between `LLMNLPService` and `RoleService`.
+  2. Added `preprocess_asr_transcript` ASR pre-repair hook and evaluated 7 reproducible configs across 3 seeds (`[42, 1337, 2026]`) on `MINDS-14` (`28` balanced test items across gold + `asr_tiny_baseline` + `asr_small_improved`), `CLINC-OOS` (`35` items incl. `7 oos`), `Interview QA` (`30` items), and `Interview Rubric` (`10` stratified test answers).
+- **Status**: Verified `53 passed in 70.37s` in `test_pipeline.py`; `slu_qwen15b_repair` lifted MINDS-14 F1 `0.0 -> 0.8294 ± 0.0014` (`p=0.0`) & schema validity `0.0 -> 1.0`; `slu_llama3b_repair` lifted Interview Rubric schema validity `0.50 -> 1.0` & MINDS-14 F1 to `0.9262 ± 0.0`; `slu_qwen3b_repair` (`1.80 GB`, `2.23 GB VRAM`, `$0.0172 / 1k turns`) matched `llama3.1:8b` (`$0.1698 / 1k turns`) on MINDS-14 (`0.8667` vs `0.8619`, `p=0.798`) while beating 8B on Interview SLU (`0.7606` vs `0.6939`), Rubric Spearman rho (`0.6897` vs `0.4188`), and noisy `asr_tiny_baseline` (`0.9619` vs `0.9238` without pre-repair).
 
-### Session 7 — Layer C (Stage 5 TTS) Cloning Ablation & Multi-Modal Explainability
+### Session 7 — Layer C (Stage 5 TTS) Cloning Ablation & Multi-Modal Explainability — `Next`
 - **Files**: `ml/configs/tts_*.json`, `ml/experiments/run_tts_ablation.py`, `ml/experiments/explainability.py`, `ml/results/tts_ablation.json`, `ml/results/figures/`.
 - **Implementation Spec**:
   1. Benchmark across unseen LibriSpeech test speakers (`>=10` ref clips × held-out texts) over 3 seeds:
