@@ -266,14 +266,20 @@ class NeuralVoiceCloningTTSService(ITTSService):
             if not chunks:
                 raise RuntimeError("No audio chunks produced by neural model.")
 
-            raw_chunk = chunks[0]
+            first_chunk = chunks[0]
             temp_raw_path = output_path + ".raw.wav"
 
             with wave.open(temp_raw_path, "wb") as wf:
-                wf.setnchannels(raw_chunk.sample_channels)
-                wf.setsampwidth(raw_chunk.sample_width)
-                wf.setframerate(raw_chunk.sample_rate)
-                wf.writeframes(raw_chunk.audio_int16_bytes)
+                wf.setnchannels(first_chunk.sample_channels)
+                wf.setsampwidth(first_chunk.sample_width)
+                wf.setframerate(first_chunk.sample_rate)
+                for chunk in chunks:
+                    wf.writeframes(chunk.audio_int16_bytes)
+
+            all_phonemes = []
+            for chunk in chunks:
+                if hasattr(chunk, "phonemes") and chunk.phonemes:
+                    all_phonemes.extend(chunk.phonemes)
 
             # 4. Acoustic Timbre Conditioning for Cloned Speaker
             if profile:
@@ -299,7 +305,7 @@ class NeuralVoiceCloningTTSService(ITTSService):
                 metadata={
                     "normalized_text": processed_text,
                     "speaker_profile": profile.to_dict() if profile else {},
-                    "phonemes": raw_chunk.phonemes if hasattr(raw_chunk, "phonemes") else [],
+                    "phonemes": all_phonemes if all_phonemes else (first_chunk.phonemes if hasattr(first_chunk, "phonemes") else []),
                     "f0_hz": profile.fundamental_freq_f0 if profile else 175.0,
                     "spectral_centroid": profile.spectral_centroid if profile else 2000.0,
                     "gender": profile.gender_estimate if profile else "neutral"
