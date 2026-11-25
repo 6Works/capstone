@@ -526,6 +526,10 @@ class TextNormalizeRequest(BaseModel):
     text: str
 
 
+class VoiceRenameRequest(BaseModel):
+    name: str
+
+
 @app.get("/api/tts/voices")
 def get_tts_voices():
     """Lists available speaker profiles including zero-shot cloned voices."""
@@ -534,6 +538,44 @@ def get_tts_voices():
         "status": "success",
         "voices": voice_cloner.list_profiles()
     }
+
+
+@app.patch("/api/tts/voices/{profile_id}")
+def rename_voice_profile(profile_id: str, req: VoiceRenameRequest):
+    """Renames an existing voice profile and persists update to disk."""
+    from services.tts import voice_cloner
+    try:
+        updated = voice_cloner.rename_profile(profile_id, req.name)
+        if not updated:
+            raise HTTPException(status_code=404, detail=f"Voice profile '{profile_id}' not found")
+        return {
+            "status": "success",
+            "message": f"Successfully renamed voice profile to '{updated.name}'",
+            "profile": updated.to_dict()
+        }
+    except ValueError as val_err:
+        raise HTTPException(status_code=400, detail=str(val_err))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to rename profile: {str(e)}")
+
+
+@app.delete("/api/tts/voices/{profile_id}")
+def delete_voice_profile(profile_id: str):
+    """Deletes a custom cloned voice profile from persistent storage."""
+    from services.tts import voice_cloner
+    try:
+        deleted = voice_cloner.delete_profile(profile_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail=f"Voice profile '{profile_id}' not found")
+        return {
+            "status": "success",
+            "message": f"Successfully deleted voice profile '{profile_id}'",
+            "profile_id": profile_id
+        }
+    except ValueError as val_err:
+        raise HTTPException(status_code=400, detail=str(val_err))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete profile: {str(e)}")
 
 
 @app.post("/api/tts/normalize-text")
@@ -573,11 +615,12 @@ async def clone_voice_from_reference(
             shutil.copyfileobj(file.file, buffer)
 
         from services.tts import VoiceCloner, voice_cloner
-        profile = VoiceCloner.extract_acoustic_profile_from_wav(temp_path, profile_name=name or "Cloned Voice")
+        voice_name = (name or "").strip() or "Custom Cloned Voice"
+        profile = VoiceCloner.extract_acoustic_profile_from_wav(temp_path, profile_name=voice_name)
         voice_cloner.save_cloned_profile(profile)
         return {
             "status": "success",
-            "message": f"Successfully extracted acoustic profile and created cloned voice '{name}'",
+            "message": f"Successfully extracted acoustic profile and created cloned voice '{voice_name}'",
             "profile": profile.to_dict()
         }
     except Exception as e:
@@ -689,18 +732,26 @@ def morph_voices(req: VoiceMorphRequest):
     Module 5: Acoustic Latent Space Interpolation.
     Blends two speaker embedding vectors: z_blend = (1-a)*z_A + a*z_B.
     """
-    from services.tts import voice_cloner
-    morphed = voice_cloner.morph_profiles(
-        profile_id_a=req.profile_id_a,
-        profile_id_b=req.profile_id_b,
-        alpha=req.alpha,
-        custom_name=req.name
-    )
-    return {
-        "status": "success",
-        "message": f"Successfully morphed voices with alpha={req.alpha:.2f}",
-        "profile": morphed.to_dict()
-    }
+    try:
+        from services.tts import voice_cloner
+        morphed = voice_cloner.morph_profiles(
+            profile_id_a=req.profile_id_a,
+            profile_id_b=req.profile_id_b,
+            alpha=req.alpha,
+            custom_name=req.name
+        )
+        return {
+            "status": "success",
+            "message": f"Successfully morphed voices with alpha={req.alpha:.2f}",
+            "profile": morphed.to_dict()
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "detail": f"Voice morphing failed: {str(e)}"}
+        )
 
 
 @app.post("/api/tts/spectrogram")
