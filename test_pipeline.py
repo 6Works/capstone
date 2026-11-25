@@ -4,6 +4,7 @@ Verifies SOLID Principles: Dependency Inversion, Liskov Substitution, and Interf
 """
 
 import os
+import time
 import pytest
 
 from services.contracts import (
@@ -304,6 +305,22 @@ class TestStage5TTSService:
         # Mira is 218Hz, Alex is 124Hz -> 50/50 blend should be around 171Hz
         assert 160.0 <= morphed.fundamental_freq_f0 <= 180.0
 
+    def test_morph_voices_api_endpoint(self):
+        """Verifies POST /api/tts/morph-voices returns structured JSON and valid profile."""
+        from fastapi.testclient import TestClient
+        from server import app
+        client = TestClient(app)
+        resp = client.post("/api/tts/morph-voices", json={
+            "profile_id_a": "mira_neural",
+            "profile_id_b": "alex_interviewer",
+            "alpha": 0.5
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "success"
+        assert "profile" in data
+        assert data["profile"]["profile_id"].startswith("morph_")
+
     def test_neural_tts_multi_sentence_synthesis(self):
         """Verifies multi-sentence synthesis joins all chunks and preserves speech duration."""
         from services.tts import NeuralVoiceCloningTTSService
@@ -354,6 +371,49 @@ class TestStage5TTSService:
                     os.remove(temp_wav)
                 except Exception:
                     pass
+
+    def test_delete_and_rename_cloned_voice_api(self):
+        """Verifies deleting and renaming cloned voice profiles while protecting presets."""
+        from fastapi.testclient import TestClient
+        from server import app
+        from services.tts import voice_cloner, SpeakerProfile
+
+        client = TestClient(app)
+        test_id = f"test_delete_{int(time.time()*1000)}"
+        dummy_profile = SpeakerProfile(
+            profile_id=test_id,
+            name="Temporary Voice To Delete",
+            description="Testing deletion",
+            gender_estimate="male",
+            fundamental_freq_f0=130.0,
+            pitch_variability_std=15.0,
+            spectral_centroid=1800.0,
+            spectral_flatness=0.03,
+            pitch_shift_semitones=-1.8,
+            length_scale=1.0,
+            noise_scale=0.667,
+            noise_w_scale=0.8,
+            embedding_vector=[0.01] * 128
+        )
+        voice_cloner.save_cloned_profile(dummy_profile)
+        assert test_id in voice_cloner.profiles
+
+        # 1. Rename profile
+        rename_resp = client.patch(f"/api/tts/voices/{test_id}", json={"name": "Newly Renamed Voice"})
+        assert rename_resp.status_code == 200
+        assert rename_resp.json()["profile"]["name"] == "Newly Renamed Voice"
+        assert voice_cloner.get_profile(test_id).name == "Newly Renamed Voice"
+
+        # 2. Prevent deleting preset
+        preset_del_resp = client.delete("/api/tts/voices/mira_neural")
+        assert preset_del_resp.status_code == 400
+
+        # 3. Delete custom profile
+        del_resp = client.delete(f"/api/tts/voices/{test_id}")
+        assert del_resp.status_code == 200
+        assert test_id not in voice_cloner.profiles
+        file_path = os.path.join(voice_cloner.profiles_dir, f"{test_id}.json")
+        assert not os.path.exists(file_path)
 
 
 class TestStage6AudioOutputService:
