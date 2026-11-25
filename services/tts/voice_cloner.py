@@ -426,28 +426,71 @@ class VoiceCloner:
         return morphed_profile
 
     @classmethod
+    def _pitch_shift_wsola(cls, audio: np.ndarray, orig_sr: int, semitones: float) -> np.ndarray:
+        """
+        Shifts fundamental pitch by `semitones` while preserving time duration
+        using Waveform Similarity Overlap-Add (WSOLA).
+        """
+        if abs(semitones) < 0.2:
+            return audio
+        ratio = 2.0 ** (semitones / 12.0)
+        target_len = int(len(audio) / ratio)
+        if target_len < 512:
+            return audio
+        resampled = signal.resample(audio, target_len)
+
+        # Stretch or compress time back to original length
+        s = float(len(audio)) / float(len(resampled))
+        hop_out = 256
+        window_size = 1024
+        win = np.hanning(window_size).astype(np.float32)
+
+        out_len = len(audio)
+        output = np.zeros(out_len + window_size * 2, dtype=np.float32)
+        weights = np.zeros(out_len + window_size * 2, dtype=np.float32)
+
+        in_pos = 0.0
+        out_pos = 0
+        search_range = 64
+
+        while int(in_pos) + window_size + search_range < len(resampled) and out_pos + window_size < len(output):
+            nominal_in = int(in_pos)
+            best_offset = 0
+            if out_pos > 0:
+                ref = output[out_pos : out_pos + search_range]
+                cands = resampled[nominal_in : nominal_in + search_range * 2]
+                if len(ref) == search_range and len(cands) >= search_range:
+                    corr = np.correlate(cands, ref, mode='valid')
+                    if len(corr) > 0:
+                        best_offset = int(np.argmax(corr))
+
+            actual_in = nominal_in + best_offset
+            if actual_in + window_size <= len(resampled):
+                output[out_pos : out_pos + window_size] += resampled[actual_in : actual_in + window_size] * win
+                weights[out_pos : out_pos + window_size] += win
+
+            in_pos += hop_out / s
+            out_pos += hop_out
+
+        mask = weights > 1e-4
+        output[mask] /= weights[mask]
+        return output[:out_len]
+
+    @classmethod
     def apply_acoustic_timbre_conditioning(cls, wav_path: str, profile: SpeakerProfile, output_path: str) -> str:
         """
         Applies DSP vocal tract acoustic conditioning to match target speaker timbre:
-        - Pitch shift via polynomial rate resampling.
+        - Pitch shift via polynomial rate resampling + WSOLA time reconstruction.
         - Formant / Equalization filtering (bass warmth or high-frequency brilliance).
         """
         audio, orig_sr = cls.load_audio_signal(wav_path, target_sr=16000)
         channels = 1
 
-        # Semitone pitch shift ratio: r = 2^(semitones / 12)
         semitones = profile.pitch_shift_semitones
-        ratio = 2.0 ** (semitones / 12.0)
 
-        # Apply pitch shifting if significant difference (|semitones| > 0.5)
-        if abs(semitones) > 0.5:
-            target_len = int(len(audio) / ratio)
-            if target_len > 100:
-                # Resample time axis to shift fundamental pitch
-                resampled = signal.resample(audio, target_len)
-                # Resample back to original length to maintain speech duration (WSOLA concept)
-                # To maintain tempo while shifting pitch:
-                audio = signal.resample(resampled, len(audio))
+        # Apply WSOLA pitch shifting if significant difference (|semitones| > 0.4)
+        if abs(semitones) > 0.4:
+            audio = cls._pitch_shift_wsola(audio, orig_sr, semitones)
 
         # Equalization filter based on spectral centroid and gender
         nyquist = orig_sr / 2.0
