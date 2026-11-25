@@ -39,15 +39,15 @@ os.makedirs("storage/temp_audio", exist_ok=True)
 
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 
-# Active configuration state
+# Active configuration state (Pareto-validated Layer A/B/C defaults)
 active_config = {
-    "asr_provider": "whisper",
-    "tts_provider": "pyttsx3",
+    "asr_provider": os.getenv("CAPSTONE_ASR_PROVIDER", "whisper"),
+    "tts_provider": os.getenv("CAPSTONE_TTS_PROVIDER", "pocket_tts"),
     "nlp_provider": "llm",
     "dialogue_provider": "llm",
     "input_provider": "file",
     "output_provider": "web",
-    "bot_name": "Mira"
+    "bot_name": "Mira",
 }
 
 # Instantiate decoupled pipeline via factory
@@ -276,17 +276,13 @@ def test_stage2_asr(req: ASRTestRequest):
     """Executes live ASR testbench using specified provider (faster-whisper or Google)."""
     import time
     from services.contracts import AudioPayload
-    from services.asr import GoogleWebSpeechASR, WhisperTransformerASR, MockASR
 
     target_provider = req.provider or active_config.get("asr_provider", "whisper")
-    if target_provider in ["whisper", "whisper_small"]:
-        asr_svc = WhisperTransformerASR(model_size="small.en", compute_type="int8", initial_prompt=req.initial_prompt)
-    elif target_provider == "whisper_tiny":
-        asr_svc = WhisperTransformerASR(model_size="tiny.en", compute_type="int8", initial_prompt=req.initial_prompt)
-    elif target_provider == "google":
-        asr_svc = GoogleWebSpeechASR(language="en-US")
-    else:
-        asr_svc = MockASR(fixed_transcript=req.text or "Mock Speech")
+    asr_svc = PipelineFactory.build_asr_service(
+        asr_provider=target_provider,
+        initial_prompt=req.initial_prompt,
+        fixed_transcript=req.text or "Mock Speech",
+    )
 
     # Synthesize live acoustic waveform with pyttsx3 to exercise end-to-end Whisper inference
     temp_wav = os.path.join(tempfile.gettempdir(), f"asr_bench_{os.getpid()}_{int(time.time()*1000)}.wav")
@@ -330,7 +326,6 @@ async def transcribe_audio_file(
     """
     import time
     from services.contracts import AudioPayload
-    from services.asr import GoogleWebSpeechASR, WhisperTransformerASR, MockASR
 
     ext = os.path.splitext(file.filename)[1] or ".wav"
     temp_wav_path = os.path.join("storage/temp_audio", f"asr_live_{os.getpid()}_{int(time.time()*1000)}{ext}")
@@ -344,28 +339,14 @@ async def transcribe_audio_file(
         if file_size_bytes < 44:
             raise HTTPException(status_code=400, detail="Audio file too small or empty")
 
-        if provider in ["whisper", "whisper_small"]:
-            asr_svc = WhisperTransformerASR(
-                model_size="small.en",
-                compute_type="int8",
-                language=language,
-                vad_filter=vad_filter,
-                beam_size=beam_size,
-                initial_prompt=initial_prompt
-            )
-        elif provider == "whisper_tiny":
-            asr_svc = WhisperTransformerASR(
-                model_size="tiny.en",
-                compute_type="int8",
-                language=language,
-                vad_filter=vad_filter,
-                beam_size=beam_size,
-                initial_prompt=initial_prompt
-            )
-        elif provider == "google":
-            asr_svc = GoogleWebSpeechASR(language="en-US" if language == "en" else language)
-        else:
-            asr_svc = MockASR(fixed_transcript="Sample recognized audio transcription")
+        asr_svc = PipelineFactory.build_asr_service(
+            asr_provider=provider,
+            language=language,
+            vad_filter=vad_filter,
+            beam_size=beam_size,
+            initial_prompt=initial_prompt,
+            fixed_transcript="Sample recognized audio transcription",
+        )
 
         payload = AudioPayload(
             file_path=temp_wav_path,
@@ -400,7 +381,6 @@ def benchmark_asr_models(req: ASRBenchmarkRequest):
     """
     import time
     from services.contracts import AudioPayload
-    from services.asr import GoogleWebSpeechASR, WhisperTransformerASR, MockASR
     import pyttsx3
 
     temp_wav = os.path.join(tempfile.gettempdir(), f"asr_bench_race_{os.getpid()}_{int(time.time()*1000)}.wav")
@@ -411,20 +391,20 @@ def benchmark_asr_models(req: ASRBenchmarkRequest):
 
         results = []
         providers_to_test = req.providers or ["whisper_small", "whisper_tiny", "google", "mock"]
+        label_map = {
+            "whisper_small": "Whisper Small.en (INT8 + Hotwords/Repair)",
+            "whisper": "Whisper Small.en (INT8 + Hotwords/Repair)",
+            "whisper_tiny": "Whisper Tiny.en (INT8 + Capacity-Gated Guards)",
+            "google": "Google Web Speech (Cloud)",
+        }
 
         for pid in providers_to_test:
-            if pid in ["whisper_small", "whisper"]:
-                svc = WhisperTransformerASR(model_size="small.en", compute_type="int8", initial_prompt=req.initial_prompt)
-                label = "Whisper Small.en (INT8 - Name Optimized)"
-            elif pid == "whisper_tiny":
-                svc = WhisperTransformerASR(model_size="tiny.en", compute_type="int8", initial_prompt=req.initial_prompt)
-                label = "Whisper Tiny.en (INT8 - Fast)"
-            elif pid == "google":
-                svc = GoogleWebSpeechASR(language="en-US")
-                label = "Google Web Speech (Cloud)"
-            else:
-                svc = MockASR(fixed_transcript=req.text or "Sample")
-                label = "Mock ASR (Synthetic)"
+            svc = PipelineFactory.build_asr_service(
+                asr_provider=pid,
+                initial_prompt=req.initial_prompt,
+                fixed_transcript=req.text or "Sample",
+            )
+            label = label_map.get(pid, "Mock ASR (Synthetic)")
 
             payload = AudioPayload(file_path=temp_wav, source_type="benchmark", format="wav")
             res = svc.transcribe(payload)

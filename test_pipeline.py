@@ -1163,6 +1163,65 @@ class TestSession8EndToEndAblationMatrix:
             assert os.path.getsize(err_md) > 500
 
 
+class TestSession9ProductionHardening:
+    """Session 9 verification for winning Pareto presets, CI/Docker/ModelCards artifacts, and API soak."""
+
+    def test_pipeline_factory_pareto_presets_and_cards(self):
+        from orchestrator.factory import PipelineFactory
+        from services.asr import WhisperTransformerASR
+        from services.nlp import LLMNLPService
+        from services.tts import PocketTTSCloningService
+
+        full_pipe = PipelineFactory.create_preset("full")
+        assert isinstance(full_pipe.asr, WhisperTransformerASR) and full_pipe.asr.model_size == "small.en"
+        assert full_pipe.asr.hotwords and full_pipe.asr.repair_lexicon
+        assert isinstance(full_pipe.nlp, LLMNLPService) and full_pipe.nlp.enable_schema_repair is True
+        assert full_pipe.nlp.repair_lexicon is not None
+        assert isinstance(full_pipe.tts, PocketTTSCloningService)
+
+        edge_pipe = PipelineFactory.create_preset("edge")
+        assert isinstance(edge_pipe.asr, WhisperTransformerASR) and edge_pipe.asr.model_size == "tiny.en"
+        assert edge_pipe.asr.hotwords is None
+        assert edge_pipe.asr.condition_on_previous_text is False
+        assert edge_pipe.asr.repetition_penalty == 1.1
+        assert edge_pipe.asr.no_repeat_ngram_size == 4
+        assert edge_pipe.asr.hallucination_silence_threshold == 0.4
+
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        for rel_path in (".github/workflows/ci.yml", "Dockerfile", ".dockerignore", "ml/cards/model_cards.md"):
+            p = os.path.join(root_dir, rel_path)
+            assert os.path.exists(p) and os.path.getsize(p) > 80
+
+    def test_fastapi_live_endpoints_soak(self):
+        from fastapi.testclient import TestClient
+        from server import app, active_config
+
+        assert active_config["tts_provider"] == os.getenv("CAPSTONE_TTS_PROVIDER", "pocket_tts")
+        client = TestClient(app)
+
+        assert client.get("/api/health").status_code == 200
+        assert client.get("/api/tts/engines").json()["status"] == "success"
+        assert len(client.get("/api/tts/voices").json()["voices"]) >= 4
+        assert client.get("/api/llm/status").status_code == 200
+        assert client.get("/").status_code == 200
+        assert client.get("/tts").status_code == 200
+
+        # Live uploaded-audio endpoint soak when local benchmark sample is cached
+        wav_p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "storage", "benchmarks", "interview_stress_v1", "pn_00.wav")
+        if os.path.exists(wav_p):
+            with open(wav_p, "rb") as f:
+                r = client.post(
+                    "/api/asr/transcribe-file",
+                    files={"file": ("pn_00.wav", f, "audio/wav")},
+                    data={"provider": "whisper_tiny"},
+                )
+            assert r.status_code == 200
+            body = r.json()
+            assert "sachin" in body.get("transcript", "").lower()
+            assert "fastapi" in body.get("transcript", "").lower()
+
+
+
 
 
 

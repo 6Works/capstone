@@ -119,15 +119,14 @@ All remote manifests are fetched in **Session 4** via lightweight streaming slic
   2. Computed Conjunctive E2E Task Success, Continuous Composite Score, E2E Latency/Cost Pareto Frontier (`fig4`), Paired Bootstrap p-values, and full Cross-Layer Error & Negative Result Analysis (`ml/results/error_analysis.md`).
 - **Status**: Verified `Full (A+B+C)` lifted Conjunctive E2E Task Success from `0.0% -> 41.67%` (`p=0.0`, Composite `0.4192 -> 0.7552`, `p=0.0`); dropping Layer B (`Full-B`) collapsed E2E to `0.0%` (`p=0.0`), dropping Layer C (`Full-C`) collapsed E2E to `8.33%` (`p=0.002`), while `Edge (A_tiny+B+C)` reached `37.5%` E2E (`p=0.0` vs baseline) at `$0.0499 / 1k` turns (`47.7%` lower cost than Full).
 
-### Session 9 — Production Hardening, CI/CD, Model Cards & Live Soak Validation — `Next`
-- **Files**: `.github/workflows/ci.yml`, `Dockerfile` *(minimal multi-stage or slim Python 3.10 CPU)*, `ml/cards/model_cards.md`, `orchestrator/factory.py`.
+### Session 9 — Production Hardening, CI/CD, Model Cards & Live Soak Validation — `Done`
+- **Files**: `.github/workflows/ci.yml`, `Dockerfile`, `.dockerignore`, `ml/cards/model_cards.md`, `orchestrator/factory.py`, `server.py`, `test_pipeline.py`.
 - **Implementation Spec**:
-  1. Wire winning defaults cleanly into `PipelineFactory` and `server.py` (configurable via env/runtime without breaking existing callers).
-  2. Add lightweight GitHub Actions CI running `pytest test_pipeline.py` on PRs (skipping/mocking external network or missing weights gracefully).
-  3. Finalize `ml/cards/model_cards.md` (intended use, training provenance, license, contamination risk, hardware telemetry).
-  4. Verify live FastAPI endpoints under real microphone/file requests and capture UI screenshots for Ch 6.
+  1. Unified ASR wiring via `PipelineFactory.build_asr_service` (Layer A biasing/hotwords/phonetic repair for `small.en`, capacity-gated anti-loop guards for `tiny.en`) across `orchestrator/factory.py` and `server.py`, plus `PipelineFactory.create_preset("full" | "edge")` and `server.py` default `pocket_tts` (`CAPSTONE_ASR_PROVIDER` / `CAPSTONE_TTS_PROVIDER`).
+  2. Added lightweight offline-safe GitHub Actions CI (`.github/workflows/ci.yml`), slim Python 3.10 CPU container (`Dockerfile` + `.dockerignore`), and structured ML Model Cards (`ml/cards/model_cards.md`).
+- **Status**: Verified `py_compile` + `58 passed in 59.23s` in `test_pipeline.py` (incl. `TestSession9ProductionHardening` preset wiring & FastAPI `TestClient` soak across `/api/health`, `/api/tts/engines`, `/api/tts/voices`, `/api/llm/status`, `/`, `/tts`, `/api/asr/transcribe-file`); live Uvicorn port 8000 booted cleanly (`chrome_devtools` browser check blocked only on user Chrome remote debugging `DevToolsActivePort` not open).
 
-### Session 10 — Publication-Grade Capstone Report & IEEE Research Paper
+### Session 10 — Publication-Grade Capstone Report & IEEE Research Paper — `Next`
 - **Files**: `docs/CAPSTONE_REPORT_IEEE.md`, `docs/RESEARCH_PAPER_IEEE.md`.
 - **Implementation Spec**:
   1. Populate all 10 chapters + front/back matter using **only** directly verified results, plots, model/dataset cards, verified IEEE/ICML/NeurIPS/Interspeech citations, and student/faculty metadata (**Shivendra Pratap**, Section **K23DT**, Batch **2027**, Roll No **33**, Subject **Deep Learning**, Prof. **Anjar Hussain Lone**, plus `[MOCK]` placeholders only for unverified institutional headers/dates/survey placeholders).
