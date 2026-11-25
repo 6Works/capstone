@@ -17,7 +17,14 @@ from services.audio_input import MicrophoneAudioInput, FileAudioInput, Synthetic
 from services.asr import GoogleWebSpeechASR, WhisperTransformerASR, MockASR
 from services.nlp import RuleBasedNLPService, LLMNLPService
 from services.dialogue import ModularDialogueManager, LLMDialogueManager
-from services.tts import Pyttsx3TTSService, GTTSService, ElevenLabsTTSService, NeuralVoiceCloningTTSService
+from services.tts import (
+    Pyttsx3TTSService,
+    GTTSService,
+    EdgeTTSService,
+    ElevenLabsTTSService,
+    NeuralVoiceCloningTTSService,
+    PocketTTSCloningService,
+)
 from services.audio_output import SystemSpeakerOutput, WebStreamAudioOutput
 from .pipeline import DecoupledVoicePipeline
 
@@ -34,7 +41,8 @@ class PipelineFactory:
         input_provider: str = "microphone",
         output_provider: str = "speaker",
         bot_name: str = "Mira",
-        elevenlabs_api_key: Optional[str] = None
+        elevenlabs_api_key: Optional[str] = None,
+        speaker_profile_id: str = "mira_neural"
     ) -> DecoupledVoicePipeline:
         
         # 1. Resolve Audio Input
@@ -68,10 +76,14 @@ class PipelineFactory:
             dialogue = ModularDialogueManager(bot_name=bot_name)
 
         # 5. Resolve TTS
-        if tts_provider in ["neural_vits", "neural", "cloned", "voice_cloning"]:
-            tts: ITTSService = NeuralVoiceCloningTTSService()
+        if tts_provider in ["pocket_tts", "pocket", "zero_shot"]:
+            tts: ITTSService = PocketTTSCloningService(speaker_profile_id=speaker_profile_id)
+        elif tts_provider in ["edge_tts", "azure"]:
+            tts = EdgeTTSService()
+        elif tts_provider in ["neural_vits", "neural", "cloned", "voice_cloning"]:
+            tts = NeuralVoiceCloningTTSService(speaker_profile_id=speaker_profile_id)
         elif tts_provider == "elevenlabs":
-            tts: ITTSService = ElevenLabsTTSService(api_key=elevenlabs_api_key)
+            tts = ElevenLabsTTSService(api_key=elevenlabs_api_key)
         elif tts_provider == "gtts":
             tts = GTTSService()
         else:

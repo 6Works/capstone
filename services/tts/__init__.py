@@ -3,7 +3,8 @@ from .tts_services import (
     GTTSService,
     EdgeTTSService,
     ElevenLabsTTSService,
-    NeuralVoiceCloningTTSService
+    NeuralVoiceCloningTTSService,
+    PocketTTSCloningService
 )
 from .text_normalizer import TextNormalizer, G2PPhonemizer, HomographDisambiguator
 from .voice_cloner import VoiceCloner, voice_cloner, SpeakerProfile
@@ -16,6 +17,7 @@ __all__ = [
     "EdgeTTSService",
     "ElevenLabsTTSService",
     "NeuralVoiceCloningTTSService",
+    "PocketTTSCloningService",
     "TextNormalizer",
     "G2PPhonemizer",
     "HomographDisambiguator",

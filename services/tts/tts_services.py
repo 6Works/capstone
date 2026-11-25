@@ -473,3 +473,170 @@ class NeuralVoiceCloningTTSService(ITTSService):
             res.provider = f"pyttsx3_fallback ({active_profile_id})"
             res.metadata = {"fallback_reason": str(e), "normalized_text": processed_text}
             return res
+
+
+class PocketTTSCloningService(ITTSService):
+    """
+    Offline Zero-Shot Neural Voice Cloning Service using Kyutai Pocket TTS INT8 (ONNX CPU).
+    Weights: CC-BY-4.0 (zero-shot user reference mode); Runtime: sherpa-onnx Apache-2.0.
+    Falls back seamlessly to NeuralVoiceCloningTTSService when weights or reference WAV are unavailable.
+    """
+
+    DEFAULT_MODEL_DIR = "models/pocket_tts/sherpa-onnx-pocket-tts-int8-2026-01-26"
+    _cached_tts = None
+    _cached_model_dir = None
+
+    def __init__(
+        self,
+        model_dir: str = DEFAULT_MODEL_DIR,
+        speaker_profile_id: str = "mira_neural",
+        num_steps: int = 5,
+        speed: float = 1.0,
+        with_normalization: bool = True,
+    ):
+        self.model_dir = model_dir
+        self.speaker_profile_id = speaker_profile_id
+        self.num_steps = max(1, int(num_steps))
+        self.speed = float(speed)
+        self.with_normalization = with_normalization
+        self.fallback = NeuralVoiceCloningTTSService(
+            speaker_profile_id=speaker_profile_id,
+            with_normalization=with_normalization,
+        )
+
+    @classmethod
+    def resolve_model_dir(cls, model_dir: str = DEFAULT_MODEL_DIR) -> Optional[str]:
+        """Resolves directory containing Pocket TTS ONNX components."""
+        if os.path.exists(os.path.join(model_dir, "lm_flow.int8.onnx")):
+            return model_dir
+        parent = os.path.dirname(model_dir)
+        if os.path.isdir(parent):
+            for entry in sorted(os.listdir(parent)):
+                cand = os.path.join(parent, entry)
+                if os.path.isfile(os.path.join(cand, "lm_flow.int8.onnx")):
+                    return cand
+        return None
+
+    @classmethod
+    def get_or_load_tts(cls, model_dir: str = DEFAULT_MODEL_DIR):
+        """Lazy-loads and caches sherpa_onnx.OfflineTts for Pocket TTS INT8."""
+        resolved = cls.resolve_model_dir(model_dir)
+        if not resolved:
+            return None
+        if cls._cached_tts is not None and cls._cached_model_dir == resolved:
+            return cls._cached_tts
+
+        import sherpa_onnx
+        p_cfg = sherpa_onnx.OfflineTtsPocketModelConfig(
+            lm_flow=os.path.join(resolved, "lm_flow.int8.onnx"),
+            lm_main=os.path.join(resolved, "lm_main.int8.onnx"),
+            encoder=os.path.join(resolved, "encoder.onnx"),
+            decoder=os.path.join(resolved, "decoder.int8.onnx"),
+            text_conditioner=os.path.join(resolved, "text_conditioner.onnx"),
+            vocab_json=os.path.join(resolved, "vocab.json"),
+            token_scores_json=os.path.join(resolved, "token_scores.json"),
+            voice_embedding_cache_capacity=50,
+        )
+        cfg = sherpa_onnx.OfflineTtsConfig(
+            model=sherpa_onnx.OfflineTtsModelConfig(
+                pocket=p_cfg, num_threads=4, debug=False, provider="cpu"
+            )
+        )
+        if not cfg.validate():
+            return None
+        cls._cached_tts = sherpa_onnx.OfflineTts(cfg)
+        cls._cached_model_dir = resolved
+        return cls._cached_tts
+
+    def synthesize(
+        self,
+        text: str,
+        output_path: Optional[str] = None,
+        speaker_profile_id: Optional[str] = None,
+    ) -> TTSResult:
+        start_time = time.time()
+        if not text or not text.strip():
+            return TTSResult(file_path="", provider="pocket_tts", status="skipped", latency_sec=0.0)
+
+        active_profile_id = speaker_profile_id or self.speaker_profile_id
+        profile = voice_cloner.get_profile(active_profile_id)
+        ref_path = profile.ref_audio_path if profile else None
+        if not ref_path and profile:
+            cand = os.path.join(voice_cloner.profiles_dir, f"{profile.profile_id}_ref.wav")
+            if os.path.exists(cand):
+                ref_path = cand
+
+        processed_text = TextNormalizer.normalize(text)["normalized_text"] if self.with_normalization else text
+        if not output_path:
+            output_path = os.path.join(tempfile.gettempdir(), f"pocket_tts_{int(time.time()*1000)}.wav")
+
+        # Require both Pocket TTS ONNX weights and a target speaker reference WAV
+        tts = None
+        if ref_path and os.path.exists(ref_path):
+            try:
+                tts = self.get_or_load_tts(self.model_dir)
+            except Exception as load_err:
+                print(f"[PocketTTS] Load failed: {load_err}")
+
+        if tts is None or not ref_path or not os.path.exists(ref_path):
+            res = self.fallback.synthesize(text, output_path=output_path, speaker_profile_id=active_profile_id)
+            res.metadata = dict(res.metadata or {})
+            res.metadata["pocket_fallback_reason"] = (
+                "No reference audio WAV for selected profile"
+                if not (ref_path and os.path.exists(ref_path))
+                else "Pocket TTS ONNX weights unavailable"
+            )
+            return res
+
+        try:
+            import numpy as np
+            import sherpa_onnx
+
+            ref_audio, ref_sr = VoiceCloner.load_audio_signal(ref_path, target_sr=24000)
+            max_ref_samples = int(ref_sr * 10)  # Cap conditioning prompt at 10s for bounded latency
+            if len(ref_audio) > max_ref_samples:
+                ref_audio = ref_audio[:max_ref_samples]
+
+            gen_cfg = sherpa_onnx.GenerationConfig()
+            gen_cfg.reference_audio = ref_audio.astype(np.float32)
+            gen_cfg.reference_sample_rate = int(ref_sr)
+            gen_cfg.num_steps = self.num_steps
+            gen_cfg.speed = self.speed
+
+            audio_out = tts.generate(processed_text, config=gen_cfg)
+            samples = np.asarray(audio_out.samples, dtype=np.float32)
+            if samples.size == 0:
+                raise RuntimeError("Pocket TTS returned empty audio buffer.")
+
+            peak = float(np.max(np.abs(samples)))
+            if peak > 0.98:
+                samples = samples * (0.95 / peak)
+
+            sherpa_onnx.write_wave(output_path, samples, int(audio_out.sample_rate))
+            elapsed = round(time.time() - start_time, 3)
+            audio_dur = round(float(samples.size) / float(audio_out.sample_rate), 3)
+
+            return TTSResult(
+                file_path=output_path,
+                audio_format="wav",
+                latency_sec=elapsed,
+                sample_rate=int(audio_out.sample_rate),
+                provider=f"pocket_tts_{active_profile_id}",
+                status="success",
+                metadata={
+                    "normalized_text": processed_text,
+                    "speaker_profile": profile.to_dict() if profile else {},
+                    "reference_audio": ref_path,
+                    "num_steps": self.num_steps,
+                    "audio_duration_sec": audio_dur,
+                    "rtf": round(elapsed / max(audio_dur, 1e-4), 3),
+                    "f0_hz": profile.fundamental_freq_f0 if profile else 175.0,
+                    "spectral_centroid": profile.spectral_centroid if profile else 2000.0,
+                },
+            )
+        except Exception as e:
+            print(f"[PocketTTS] Synthesis failed ({e}); falling back to Piper VITS...")
+            res = self.fallback.synthesize(text, output_path=output_path, speaker_profile_id=active_profile_id)
+            res.metadata = dict(res.metadata or {})
+            res.metadata["pocket_fallback_reason"] = str(e)
+            return res
