@@ -36,6 +36,8 @@ class SpeakerProfile:
     noise_scale: float                  # Vocal fold jitter / breathiness (0.4 - 0.9)
     noise_w_scale: float                # Phoneme duration stochasticity (0.6 - 1.0)
     embedding_vector: List[float]       # 128-D acoustic latent representation
+    ref_audio_path: Optional[str] = None # Path to original recorded reference sample
+    eleven_voice_id: Optional[str] = None # Cloned voice ID on ElevenLabs if synced
     created_at: float = field(default_factory=time.time)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -43,6 +45,8 @@ class SpeakerProfile:
         # Summarize embedding vector for lightweight serialization
         d["embedding_dim"] = len(self.embedding_vector)
         d["embedding_preview"] = [round(x, 4) for x in self.embedding_vector[:8]]
+        d["has_reference_audio"] = bool(self.ref_audio_path and os.path.exists(self.ref_audio_path))
+        d["has_elevenlabs_clone"] = bool(self.eleven_voice_id)
         return d
 
 
@@ -158,6 +162,12 @@ class VoiceCloner:
                         calibrated_shift = round(float(12.0 * math.log2(max(50.0, f0) / base_ref_f0)), 2)
                         calibrated_shift = max(-4.0, min(4.0, calibrated_shift))
 
+                        ref_wav = data.get("ref_audio_path")
+                        if not ref_wav:
+                            candidate_wav = os.path.join(self.profiles_dir, f"{data['profile_id']}_ref.wav")
+                            if os.path.exists(candidate_wav):
+                                ref_wav = candidate_wav
+
                         prof = SpeakerProfile(
                             profile_id=data["profile_id"],
                             name=data["name"],
@@ -172,6 +182,8 @@ class VoiceCloner:
                             noise_scale=data.get("noise_scale", 0.667),
                             noise_w_scale=data.get("noise_w_scale", 0.8),
                             embedding_vector=data["embedding_vector"],
+                            ref_audio_path=ref_wav,
+                            eleven_voice_id=data.get("eleven_voice_id"),
                             created_at=data.get("created_at", time.time())
                         )
                         self.profiles[prof.profile_id] = prof
@@ -200,16 +212,29 @@ class VoiceCloner:
         if profile_id not in self.profiles:
             return False
 
+        prof = self.profiles[profile_id]
+
         # Remove from in-memory registry
         del self.profiles[profile_id]
 
-        # Remove persistent JSON file from storage
+        # Remove persistent JSON and reference audio file from storage
         path = os.path.join(self.profiles_dir, f"{profile_id}.json")
-        if os.path.exists(path):
+        ref_path = os.path.join(self.profiles_dir, f"{profile_id}_ref.wav")
+        for p in (path, ref_path):
+            if os.path.exists(p):
+                try:
+                    os.remove(p)
+                except Exception as e:
+                    print(f"[VoiceCloner] Error removing file {p}: {e}")
+
+        # If ElevenLabs clone existed, clean it up if API key is in environment
+        if prof and prof.eleven_voice_id and os.getenv("ELEVENLABS_API_KEY"):
             try:
-                os.remove(path)
-            except Exception as e:
-                print(f"[VoiceCloner] Error removing profile file {path}: {e}")
+                from .tts_services import ElevenLabsTTSService
+                ElevenLabsTTSService.delete_voice(os.getenv("ELEVENLABS_API_KEY"), prof.eleven_voice_id)
+            except Exception as el_err:
+                print(f"[VoiceCloner] Notice: could not remove remote ElevenLabs voice: {el_err}")
+
         return True
 
     def rename_profile(self, profile_id: str, new_name: str) -> Optional[SpeakerProfile]:
@@ -288,11 +313,18 @@ class VoiceCloner:
             raise ValueError(f"Unable to decode audio from {audio_path}: {e}")
 
     @classmethod
-    def extract_acoustic_profile_from_wav(cls, wav_path: str, profile_name: str = "Cloned Voice") -> SpeakerProfile:
+    def extract_acoustic_profile_from_wav(
+        cls,
+        wav_path: str,
+        profile_name: str = "Cloned Voice",
+        profile_id: Optional[str] = None,
+        save_ref_dir: Optional[str] = None
+    ) -> SpeakerProfile:
         """
-        Analyzes a reference audio recording using acoustic DSP and psychocoustics.
+        Analyzes a reference audio recording using acoustic DSP and psychoacoustics.
         Extracts fundamental frequency F0, pitch contour, spectral centroid,
         and generates a 128-D acoustic speaker embedding vector.
+        Persists reference audio if save_ref_dir is supplied.
         Supports WAV, WebM, MP3, OGG, and other audio formats.
         """
         audio, sample_rate = cls.load_audio_signal(wav_path, target_sr=16000)
@@ -353,14 +385,14 @@ class VoiceCloner:
         base_ref_f0 = 145.0 if gender_est == "male" else 218.0
         semitones = float(12.0 * math.log2(max(50.0, f0_mean) / base_ref_f0))
 
-        # Clamp semitones to safe natural limits (-4 to +4 semitones)
-        semitones = max(-4.0, min(4.0, semitones))
+        # Clamp semitones to safe natural limits (-3.0 to +3.0 semitones)
+        semitones = max(-3.0, min(3.0, semitones))
 
         # 4. Cadence & Stochastic Variability
         length_scale = float(1.0 - (semitones * 0.015))  # Higher pitch speakers tend to speak slightly faster
-        length_scale = max(0.85, min(1.25, length_scale))
-        noise_scale = float(max(0.45, min(0.85, 0.667 + spectral_flatness * 2.0)))
-        noise_w_scale = float(max(0.65, min(0.95, 0.8 + (f0_std / 100.0))))
+        length_scale = max(0.90, min(1.15, length_scale))
+        noise_scale = float(max(0.50, min(0.80, 0.667 + spectral_flatness * 1.5)))
+        noise_w_scale = float(max(0.70, min(0.90, 0.8 + (f0_std / 120.0))))
 
         # 5. Extract 128-D Speaker Embedding
         # Project 64 mel-spaced spectral log energies into 128 dimensions
@@ -374,9 +406,27 @@ class VoiceCloner:
         else:
             embedding = [0.0] * 128
 
-        profile_id = f"clone_{int(time.time())}"
+        final_pid = profile_id or f"clone_{int(time.time()*1000)}"
+
+        # Persist reference audio if target directory requested
+        ref_path = None
+        if save_ref_dir:
+            os.makedirs(save_ref_dir, exist_ok=True)
+            ref_path = os.path.join(save_ref_dir, f"{final_pid}_ref.wav")
+            try:
+                # Save as clean 16kHz mono WAV
+                out_pcm = (audio * 32767.0).astype(np.int16)
+                with wave.open(ref_path, "wb") as wf:
+                    wf.setnchannels(1)
+                    wf.setsampwidth(2)
+                    wf.setframerate(sample_rate)
+                    wf.writeframes(out_pcm.tobytes())
+            except Exception as ref_err:
+                print(f"[VoiceCloner] Warning: Failed to persist reference audio: {ref_err}")
+                ref_path = None
+
         return SpeakerProfile(
-            profile_id=profile_id,
+            profile_id=final_pid,
             name=profile_name,
             description=f"Cloned voice from audio ({gender_est}, F0: {f0_mean:.1f}Hz, Centroid: {spectral_centroid:.0f}Hz)",
             gender_estimate=gender_est,
@@ -388,7 +438,8 @@ class VoiceCloner:
             length_scale=round(length_scale, 2),
             noise_scale=round(noise_scale, 3),
             noise_w_scale=round(noise_w_scale, 3),
-            embedding_vector=embedding
+            embedding_vector=embedding,
+            ref_audio_path=ref_path
         )
 
     @classmethod
@@ -539,37 +590,42 @@ class VoiceCloner:
     @classmethod
     def apply_acoustic_timbre_conditioning(cls, wav_path: str, profile: SpeakerProfile, output_path: str) -> str:
         """
-        Applies DSP vocal tract acoustic conditioning to match target speaker timbre:
-        - Fine pitch tuning via polynomial rate resampling.
-        - Formant / Equalization filtering (bass warmth or high-frequency brilliance).
+        Applies gentle vocal tract conditioning to match target speaker timbre:
+        - For built-in presets (mira, alex, sarah, david), preserves pure neural audio untouched.
+        - For custom clones, uses high-quality WSOLA overlap-add to preserve natural cadence and phoneme timing.
+        - Subtle presence / warmth equalization without artificial distortion.
         """
+        # Built-in presets are calibrated neural models; pass through untouched
+        if profile.profile_id in cls.PRESET_IDS:
+            if wav_path != output_path:
+                import shutil
+                shutil.copyfile(wav_path, output_path)
+            return output_path
+
         audio, orig_sr = cls.load_audio_signal(wav_path, target_sr=16000)
         channels = 1
 
         target_f0 = profile.fundamental_freq_f0
         base_ref_f0 = 145.0 if (profile.gender_estimate == "male" or target_f0 < 155.0) else 218.0
         semitones = float(12.0 * math.log2(max(50.0, target_f0) / base_ref_f0))
-        semitones = max(-4.0, min(4.0, semitones))
+        semitones = max(-2.5, min(2.5, semitones))
 
-        # Apply pitch shift if difference is perceptible (|semitones| > 0.3)
-        if abs(semitones) > 0.3:
-            ratio = 2.0 ** (semitones / 12.0)
-            target_len = int(len(audio) / ratio)
-            if target_len > 100:
-                audio = signal.resample(audio, target_len)
+        # Use WSOLA overlap-add (maintains duration and phoneme speed)
+        if abs(semitones) > 0.4:
+            audio = cls._pitch_shift_wsola(audio, orig_sr, semitones)
 
         # Equalization filter based on spectral centroid and gender
         nyquist = orig_sr / 2.0
         if profile.gender_estimate == "male" or profile.fundamental_freq_f0 < 155.0:
-            # Low-frequency chest resonance boost (140-220 Hz)
-            boost_freq = min(180.0, nyquist - 50)
-            b, a = signal.iirpeak(boost_freq, Q=1.8, fs=orig_sr)
-            audio = audio + 0.25 * signal.lfilter(b, a, audio)
+            # Low-frequency chest resonance warmth (160 Hz)
+            boost_freq = min(160.0, nyquist - 50)
+            b, a = signal.iirpeak(boost_freq, Q=2.0, fs=orig_sr)
+            audio = audio + 0.15 * signal.lfilter(b, a, audio)
         elif profile.gender_estimate == "female" or profile.fundamental_freq_f0 > 185.0:
-            # Upper-mid vocal presence and breath air boost (2.8 kHz - 4.0 kHz)
+            # Upper-mid vocal presence (3.2 kHz)
             air_freq = min(3200.0, nyquist - 50)
-            b, a = signal.iirpeak(air_freq, Q=1.8, fs=orig_sr)
-            audio = audio + 0.25 * signal.lfilter(b, a, audio)
+            b, a = signal.iirpeak(air_freq, Q=2.0, fs=orig_sr)
+            audio = audio + 0.15 * signal.lfilter(b, a, audio)
 
         # Normalize and prevent clipping
         max_val = np.max(np.abs(audio))

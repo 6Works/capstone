@@ -1,6 +1,7 @@
 from .tts_services import (
     Pyttsx3TTSService,
     GTTSService,
+    EdgeTTSService,
     ElevenLabsTTSService,
     NeuralVoiceCloningTTSService
 )
@@ -12,6 +13,7 @@ from .formant_synthesizer import FormantSynthesizer
 __all__ = [
     "Pyttsx3TTSService",
     "GTTSService",
+    "EdgeTTSService",
     "ElevenLabsTTSService",
     "NeuralVoiceCloningTTSService",
     "TextNormalizer",
