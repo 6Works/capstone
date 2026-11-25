@@ -1076,14 +1076,26 @@
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         cloneAudioChunks = [];
-        cloneMediaRecorder = new MediaRecorder(stream);
+        
+        let mime = 'audio/webm';
+        if (typeof MediaRecorder !== 'undefined') {
+          const supportedTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+          for (const t of supportedTypes) {
+            if (MediaRecorder.isTypeSupported(t)) {
+              mime = t;
+              break;
+            }
+          }
+        }
+        cloneMediaRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
 
         cloneMediaRecorder.ondataavailable = e => {
           if (e.data.size > 0) cloneAudioChunks.push(e.data);
         };
 
         cloneMediaRecorder.onstop = () => {
-          recordedBlob = new Blob(cloneAudioChunks, { type: 'audio/wav' });
+          const actualMime = cloneMediaRecorder.mimeType || mime || 'audio/webm';
+          recordedBlob = new Blob(cloneAudioChunks, { type: actualMime });
           clearInterval(cloneTimerInterval);
           btn.innerText = 'Record 5s Sample';
           document.getElementById('cloneStatusMsg').innerText = '5-second sample captured! Ready to extract embeddings.';
@@ -1119,7 +1131,8 @@
       if (fileInput.files && fileInput.files[0]) {
         audioFile = fileInput.files[0];
       } else if (recordedBlob) {
-        audioFile = new File([recordedBlob], 'voice_sample.wav', { type: 'audio/wav' });
+        const ext = recordedBlob.type.includes('webm') ? '.webm' : (recordedBlob.type.includes('ogg') ? '.ogg' : (recordedBlob.type.includes('mp4') ? '.mp4' : '.wav'));
+        audioFile = new File([recordedBlob], `voice_sample${ext}`, { type: recordedBlob.type });
       }
 
       if (!audioFile) {
@@ -1140,10 +1153,17 @@
           body: formData
         });
 
-        const data = await resp.json();
+        const rawText = await resp.text();
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (parseErr) {
+          throw new Error(`Server returned non-JSON response (${resp.status}): ${rawText.substring(0, 120)}`);
+        }
+
         btnText.innerText = 'Extract Acoustic Embeddings & Clone Voice';
 
-        if (data.status === 'success') {
+        if (resp.ok && data.status === 'success') {
           statusEl.innerText = `Voice '${name}' successfully cloned!`;
           renderExtractedProfile(data.profile);
           refreshProfilesList();
@@ -1154,7 +1174,9 @@
           audBtn.classList.add('bg-rose-600', 'hover:bg-rose-700');
           audBtn.dataset.profileId = data.profile.profile_id;
         } else {
-          statusEl.innerText = 'Cloning error: ' + (data.detail || 'Failed to extract profile');
+          const errMsg = data.detail || data.message || 'Failed to extract profile';
+          statusEl.innerText = 'Cloning error: ' + errMsg;
+          alert('Voice cloning failed: ' + errMsg);
         }
       } catch (err) {
         btnText.innerText = 'Extract Acoustic Embeddings & Clone Voice';
