@@ -942,6 +942,79 @@ class TestBenchmarkDatasetsAndLeakage:
                 assert info.frames > 0 and info.samplerate > 0
 
 
+class TestLayerAASRContextualBiasing:
+    """Session 5 unit and integration tests for Layer A prompt biasing, hotwords, word timestamps, and phonetic repair."""
+
+    def test_dynamic_prompt_and_phonetic_repair_logic(self):
+        from services.asr import build_dynamic_bias_prompt, phonetic_repair
+
+        prompt = build_dynamic_bias_prompt(
+            role_terms=["FastAPI", "LoRA", "FastAPI"],
+            candidate_names=["Sachin", "Bablu"],
+        )
+        assert prompt.startswith("Interview dialogue and technical terms:")
+        assert prompt.count("FastAPI") == 1
+        assert "Sachin" in prompt and "Bablu" in prompt
+
+        # Confidence-gated bigram + hyphenated + Soundex unigram repair
+        words_meta = [
+            {"word": "Such", "probability": 0.45},
+            {"word": "in", "probability": 0.60},
+            {"word": "built", "probability": 0.99},
+            {"word": "fast", "probability": 0.52},
+            {"word": "API", "probability": 0.72},
+            {"word": "with", "probability": 0.99},
+            {"word": "Babyl", "probability": 0.25},
+            {"word": "using", "probability": 0.99},
+            {"word": "Laura", "probability": 0.30},
+        ]
+        repaired, repairs = phonetic_repair(
+            "Such in built fast API with Babyl-optimized using Laura.",
+            lexicon=["Sachin", "FastAPI", "Bablu", "LoRA"],
+            words_meta=words_meta,
+            confidence_threshold=0.85,
+        )
+        assert "Sachin" in repaired
+        assert "FastAPI" in repaired
+        assert "Bablu-optimized" in repaired
+        assert "LoRA." in repaired
+        assert "built" in repaired and "using" in repaired
+        assert len(repairs) >= 4
+
+    def test_whisper_hotwords_and_word_timestamps_live(self):
+        from services.asr import WhisperTransformerASR, build_dynamic_bias_prompt
+        from services.contracts import AudioPayload
+
+        wav_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "storage", "benchmarks", "interview_stress_v1", "pn_00.wav",
+        )
+        if not os.path.exists(wav_path):
+            pytest.skip("Benchmark pn_00.wav not cached locally")
+
+        lex = ["Sachin", "FastAPI", "Redis"]
+        asr = WhisperTransformerASR(
+            model_size="tiny.en",
+            compute_type="int8",
+            vad_filter=True,
+            initial_prompt=build_dynamic_bias_prompt(lex),
+            hotwords=" ".join(lex),
+            word_timestamps=True,
+            repair_lexicon=lex,
+            condition_on_previous_text=False,
+            repetition_penalty=1.1,
+            no_repeat_ngram_size=4,
+            hallucination_silence_threshold=0.4,
+        )
+        res = asr.transcribe(AudioPayload(source_type="file_upload", file_path=wav_path))
+        assert res.status == "success"
+        assert res.metadata.get("hotwords_active") is True
+        words = res.metadata.get("words") or []
+        assert len(words) > 0 and "probability" in words[0]
+        assert "sachin" in res.transcript.lower() and "fastapi" in res.transcript.lower()
+
+
+
 
 
 

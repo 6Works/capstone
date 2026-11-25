@@ -1,0 +1,19 @@
+{
+  "experiment_id": "asr_tiny_improved",
+  "description": "Layer A capacity-gated tiny.en: Silero VAD + dynamic OOV role/candidate prompt + repetition/ngram loop guards + confidence-gated Soundex/fuzzy repair (hotwords gated off below small.en capacity).",
+  "model_size": "tiny.en",
+  "device": "cpu",
+  "compute_type": "int8",
+  "vad_filter": true,
+  "beam_size": 5,
+  "prompt_mode": "dynamic",
+  "hotwords_enabled": false,
+  "word_timestamps": true,
+  "phonetic_repair_enabled": true,
+  "repair_confidence_threshold": 0.85,
+  "condition_on_previous_text": false,
+  "repetition_penalty": 1.1,
+  "no_repeat_ngram_size": 4,
+  "hallucination_silence_threshold": 0.4,
+  "seed": 42
+}

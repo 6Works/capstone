@@ -90,20 +90,15 @@ All remote manifests are fetched in **Session 4** via lightweight streaming slic
   2. Write `ml/cards/dataset_card.md` covering collection, splits, leakage checks (`0` cross-split `text_hash` collisions), noise protocol, and ethical/bias notes.
 - **Status**: Verified `49 passed in 50.65s` in `test_pipeline.py`; total local audio cache `37.70 MB` across 265 files (`0` cross-split collisions across all 4 manifests).
 
-### Session 5 — Layer A (Stage 2 ASR) Baseline + Contextual Logit Biasing & Phonetic Repair — `Next`
-- **Files**: `services/asr/asr_services.py`, `ml/configs/asr_*.json`, `ml/experiments/run_asr_ablation.py`, `ml/results/asr_ablation.json`.
+### Session 5 — Layer A (Stage 2 ASR) Baseline + Contextual Logit Biasing & Phonetic Repair — `Done`
+- **Files**: `services/asr/__init__.py`, `services/asr/asr_services.py`, `ml/configs/asr_*.json`, `ml/experiments/run_asr_ablation.py`, `ml/results/asr_ablation.json`, `test_pipeline.py`.
 - **Implementation Spec**:
-  1. Upgrade `WhisperTransformerASR` minimally without bloat:
-     - Expose `hotwords: Optional[str] = None` (passed to `model.transcribe(..., hotwords=...)`) and `word_timestamps: bool = False` (returning word `{word, start, end, probability}` in `ASRResult.metadata["words"]`).
-     - Add clean `build_dynamic_bias_prompt(role_terms, candidate_names)` helper + optional lightweight `phonetic_repair(transcript, lexicon)` post-processor using `rapidfuzz.fuzz.ratio` / normalized Soundex/edit distance on domain terms when word confidence `< threshold`.
-  2. Run 4 reproducible configs across clean, `20 dB`, `10 dB`, `MINDS-14` accents, and `Interview Stress`:
-     - `asr_tiny_baseline.json` (`tiny.en`, `vad=false`, no prompt, no hotwords)
-     - `asr_small_baseline.json` (`small.en`, `vad=true`, static prompt)
-     - `asr_tiny_improved.json` (`tiny.en` + dynamic `initial_prompt` + `hotwords` + phonetic repair)
-     - `asr_small_improved.json` (`small.en` + dynamic `initial_prompt` + `hotwords` + phonetic repair)
-  3. Record WER, CER, $R_{\text{entity}}$, RTF, Latency ms, Peak RSS, and **Paired Bootstrap $p$-values** + failure examples.
+  1. Upgraded `WhisperTransformerASR` minimally without bloat: exposed `hotwords`, `word_timestamps` (`ASRResult.metadata["words"]`), `condition_on_previous_text`, `repetition_penalty`, `no_repeat_ngram_size`, `hallucination_silence_threshold`, plus `build_dynamic_bias_prompt` and confidence-gated `phonetic_repair` (Soundex + Rapidfuzz + bigram join).
+  2. Evaluated 4 configs across `interview_stress_v1` (50 clean + 20 `20dB` + 20 `10dB`), `minds14_en_140` (70 test), and `librispeech_60` (36 clean + 12 `20dB` + 12 `10dB`).
+  3. Discovered and resolved 39M `tiny.en` prompt/hotword echo hallucination (`negative_results.tiny_unguarded_hotwords_v1`: WER `0.3292`, RTF `1.0014`) via capacity-gated hotwords (`hw=false` on tiny) + decoding guards + `hallucination_silence_threshold=0.4`.
+- **Status**: Verified `51 passed in 53.05s` in `test_pipeline.py`; `asr_tiny_improved` (`74.5 MB`, Peak `266.9 MB`, RTF `0.266`) beat `asr_small_baseline` (`463.6 MB`, Peak `718.4 MB`, RTF `0.608`) on domain entity recall (`R_entity=0.913` vs `0.7391`, `p=0.018`); `asr_small_improved` reached `WER=0.0435` (`-48.8%` vs baseline, `p<0.001`), `R_entity=0.9565` clean / `0.9783` @ `20 dB` / `0.913` @ `10 dB`, and `0.0306` clean LibriSpeech WER.
 
-### Session 6 — Layer B (Stage 3/4 SLU & Rubric) Quantized SLM Recovery & Cost Pareto
+### Session 6 — Layer B (Stage 3/4 SLU & Rubric) Quantized SLM Recovery & Cost Pareto — `Next`
 - **Files**: `services/nlp/nlp_services.py`, `services/roles/role_service.py`, `ml/configs/slu_*.json`, `ml/experiments/run_slu_ablation.py`, `ml/results/slu_ablation.json`.
 - **Implementation Spec**:
   1. Extract ONE shared tiny helper `_extract_and_repair_json(raw_text, expected_keys)` (preventing duplication between `LLMNLPService` and `RoleService`) that strips markdown fences, fixes trailing commas / unquoted keys, and runs at most 1 constrained schema-repair retry if invalid.

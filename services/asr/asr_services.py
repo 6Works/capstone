@@ -5,10 +5,12 @@ Implements IASRService following Open/Closed Principle.
 """
 
 import os
+import re
 import time
 import math
 import speech_recognition as sr
-from typing import Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple
+import numpy as np
 from ..contracts import IASRService, AudioPayload, ASRResult
 
 
@@ -75,12 +77,208 @@ class GoogleWebSpeechASR(IASRService):
 _WHISPER_CACHE = {}
 
 
+def _soundex(word: str) -> str:
+    """Computes 4-character American Soundex code for phonetic similarity matching."""
+    clean = re.sub(r"[^a-z]", "", (word or "").lower())
+    if not clean:
+        return ""
+    mapping = {
+        "b": "1", "f": "1", "p": "1", "v": "1",
+        "c": "2", "g": "2", "j": "2", "k": "2", "q": "2", "s": "2", "x": "2", "z": "2",
+        "d": "3", "t": "3",
+        "l": "4",
+        "m": "5", "n": "5",
+        "r": "6",
+    }
+    first = clean[0].upper()
+    digits: List[str] = []
+    prev_code = mapping.get(clean[0], "")
+    for ch in clean[1:]:
+        code = mapping.get(ch, "")
+        if code and code != prev_code:
+            digits.append(code)
+        prev_code = code if code else ("" if ch not in "hw" else prev_code)
+    return (first + "".join(digits) + "000")[:4]
+
+
+def build_dynamic_bias_prompt(
+    role_terms: Optional[Sequence[str]] = None,
+    candidate_names: Optional[Sequence[str]] = None,
+    base_context: str = "Interview dialogue and technical terms:",
+) -> str:
+    """Builds a concise deduplicated contextual prompt from role keywords and candidate names."""
+    seen = set()
+    ordered: List[str] = []
+    for term in list(candidate_names or []) + list(role_terms or []):
+        t = (term or "").strip()
+        low = t.lower()
+        if t and low not in seen:
+            seen.add(low)
+            ordered.append(t)
+    if not ordered:
+        return WhisperTransformerASR.DEFAULT_PROMPT
+    return f"{base_context} {', '.join(ordered)}."
+
+
+def phonetic_repair(
+    transcript: str,
+    lexicon: Sequence[str],
+    words_meta: Optional[Sequence[Dict[str, Any]]] = None,
+    confidence_threshold: float = 0.85,
+) -> Tuple[str, List[Dict[str, Any]]]:
+    """
+    Applies confidence-gated Soundex + fuzzy edit repair on domain lexicon terms.
+    Targets low-confidence ASR tokens and split compound terms without disturbing high-confidence prose.
+    """
+    if not transcript or not lexicon:
+        return transcript, []
+
+    from rapidfuzz import fuzz
+
+    lex_entries: List[Tuple[str, str, str]] = []
+    exact_set = set()
+    for term in lexicon:
+        t = (term or "").strip()
+        low = re.sub(r"[^a-z0-9]", "", t.lower())
+        if len(low) >= 3 and low not in exact_set:
+            exact_set.add(low)
+            lex_entries.append((t, low, _soundex(low)))
+
+    def _split_punct(tok: str) -> Tuple[str, str, str]:
+        m = re.match(r"^([^A-Za-z0-9]*)(.*?)([^A-Za-z0-9]*)$", tok)
+        return (m.group(1), m.group(2), m.group(3)) if m else ("", tok, "")
+
+    word_probs = []
+    for w in (words_meta or []):
+        w_norm = re.sub(r"[^a-z0-9]", "", (w.get("word") or "").lower())
+        if w_norm:
+            word_probs.append((w_norm, float(w.get("probability", 1.0))))
+
+    cursor = 0
+
+    def _next_prob(norm: str) -> float:
+        nonlocal cursor
+        if not word_probs:
+            return 0.65
+        for idx in range(cursor, min(cursor + 4, len(word_probs))):
+            if word_probs[idx][0] == norm or norm in word_probs[idx][0] or word_probs[idx][0] in norm:
+                cursor = idx + 1
+                return word_probs[idx][1]
+        return 0.65
+
+    def _best_candidate(norm: str, require_strict: bool = False) -> Optional[Tuple[str, str, float]]:
+        if not norm or (not require_strict and norm in exact_set):
+            return None
+        snd = _soundex(norm)
+        best = None
+        best_score = 0.0
+        for orig_term, low_term, term_snd in lex_entries:
+            if abs(len(norm) - len(low_term)) > max(3, len(low_term) // 2):
+                continue
+            if norm == low_term:
+                return (orig_term, "exact_join", 100.0)
+            ratio = float(fuzz.ratio(norm, low_term))
+            snd_eq = bool(snd and term_snd and snd == term_snd)
+            if require_strict:
+                ok = (snd_eq and ratio >= 72.0) or (ratio >= 86.0 and norm[0] == low_term[0])
+            else:
+                ok = (snd_eq and ratio >= 64.0) or (ratio >= 84.0 and abs(len(norm) - len(low_term)) <= 2 and norm[0] == low_term[0])
+            if ok and ratio > best_score:
+                best_score = ratio
+                best = (orig_term, "soundex+fuzz" if snd_eq else "fuzzy_edit", round(ratio, 1))
+        return best
+
+    raw_tokens = transcript.split()
+    out_tokens: List[str] = []
+    repairs: List[Dict[str, Any]] = []
+    i = 0
+    while i < len(raw_tokens):
+        pre, core, post = _split_punct(raw_tokens[i])
+        norm = re.sub(r"[^a-z0-9]", "", core.lower())
+        prob = _next_prob(norm)
+
+        # Pass 1: Adjacent bigram merge (e.g., "Such in" -> "Sachin", "fast API" -> "FastAPI")
+        merged = False
+        if i + 1 < len(raw_tokens) and not post and "-" not in core:
+            pre2, core2, post2 = _split_punct(raw_tokens[i + 1])
+            if not pre2:
+                norm2 = re.sub(r"[^a-z0-9]", "", core2.lower())
+                joined = norm + norm2
+                if len(joined) >= 5 and norm not in exact_set:
+                    p2 = _next_prob(norm2) if word_probs else 0.65
+                    # Do not over-consume word_probs cursor if bigram isn't merged
+                    if word_probs and p2 != 0.65:
+                        cursor = max(0, cursor - 1)
+                    if min(prob, p2) < confidence_threshold:
+                        cand = _best_candidate(joined, require_strict=True)
+                        if cand is not None:
+                            if word_probs:
+                                _next_prob(norm2)
+                            repaired_tok = f"{pre}{cand[0]}{post2}"
+                            repairs.append({
+                                "original": f"{raw_tokens[i]} {raw_tokens[i + 1]}",
+                                "repaired": repaired_tok,
+                                "method": f"bigram_{cand[1]}",
+                                "score": cand[2],
+                                "probability": round(min(prob, p2), 3),
+                            })
+                            out_tokens.append(repaired_tok)
+                            i += 2
+                            merged = True
+        if merged:
+            continue
+
+        # Pass 2: Unigram confidence-gated repair (handles hyphenated prefixes like "Babyl-optimized")
+        if "-" in core and norm not in exact_set and prob < confidence_threshold:
+            parts = core.split("-")
+            changed = False
+            new_parts = []
+            for p_part in parts:
+                p_norm = re.sub(r"[^a-z0-9]", "", p_part.lower())
+                cand = _best_candidate(p_norm) if len(p_norm) >= 4 else None
+                if cand is not None:
+                    repairs.append({
+                        "original": p_part,
+                        "repaired": cand[0],
+                        "method": cand[1],
+                        "score": cand[2],
+                        "probability": round(prob, 3),
+                    })
+                    new_parts.append(cand[0])
+                    changed = True
+                else:
+                    new_parts.append(p_part)
+            if changed:
+                out_tokens.append(f"{pre}{'-'.join(new_parts)}{post}")
+                i += 1
+                continue
+
+        if len(norm) >= 4 and norm not in exact_set and prob < confidence_threshold:
+            cand = _best_candidate(norm)
+            if cand is not None:
+                repaired_tok = f"{pre}{cand[0]}{post}"
+                repairs.append({
+                    "original": raw_tokens[i],
+                    "repaired": repaired_tok,
+                    "method": cand[1],
+                    "score": cand[2],
+                    "probability": round(prob, 3),
+                })
+                out_tokens.append(repaired_tok)
+                i += 1
+                continue
+
+        out_tokens.append(raw_tokens[i])
+        i += 1
+
+    return " ".join(out_tokens), repairs
+
+
 class WhisperTransformerASR(IASRService):
     """
     High-Performance Offline Whisper Transformer ASR Service powered by faster-whisper (CTranslate2).
-    Supports INT8 CPU quantization, Silero Voice Activity Detection (VAD), and Acoustic Vocabulary Biasing
-    for accurate proper noun and South Asian name recognition (Sachin, Nandu, Bablu, Rahul, Aradhya, etc.).
-    Adheres strictly to SOLID: Open for extension with any CTranslate2/Whisper model size, closed for modification.
+    Supports INT8 CPU quantization, Silero VAD, dynamic prompt/hotword logit biasing, word timestamps,
+    and confidence-gated Soundex + fuzzy phonetic repair on proper nouns and technical vocabulary.
     """
 
     DEFAULT_PROMPT = (
@@ -99,7 +297,15 @@ class WhisperTransformerASR(IASRService):
         language: str = "en",
         vad_filter: bool = True,
         beam_size: int = 5,
-        initial_prompt: Optional[str] = None
+        initial_prompt: Optional[str] = None,
+        hotwords: Optional[str] = None,
+        word_timestamps: bool = False,
+        repair_lexicon: Optional[Sequence[str]] = None,
+        repair_confidence_threshold: float = 0.85,
+        condition_on_previous_text: bool = True,
+        repetition_penalty: float = 1.0,
+        no_repeat_ngram_size: int = 0,
+        hallucination_silence_threshold: Optional[float] = None,
     ):
         self.model_size = model_size
         self.device = device
@@ -108,6 +314,14 @@ class WhisperTransformerASR(IASRService):
         self.vad_filter = vad_filter
         self.beam_size = beam_size
         self.initial_prompt = initial_prompt if initial_prompt is not None else self.DEFAULT_PROMPT
+        self.hotwords = hotwords
+        self.word_timestamps = word_timestamps
+        self.repair_lexicon = list(repair_lexicon) if repair_lexicon else None
+        self.repair_confidence_threshold = repair_confidence_threshold
+        self.condition_on_previous_text = condition_on_previous_text
+        self.repetition_penalty = repetition_penalty
+        self.no_repeat_ngram_size = no_repeat_ngram_size
+        self.hallucination_silence_threshold = hallucination_silence_threshold
         self.model = None
         self._is_initialized = False
 
@@ -131,7 +345,7 @@ class WhisperTransformerASR(IASRService):
             _WHISPER_CACHE[cache_key] = model
             self.model = model
             self._is_initialized = True
-        except Exception as e:
+        except Exception:
             # Pluggable fallback to openai-whisper if present
             try:
                 import whisper
@@ -147,7 +361,13 @@ class WhisperTransformerASR(IASRService):
         start_time = time.time()
         self._lazy_init()
 
-        if not payload.file_path or not os.path.exists(payload.file_path):
+        audio_input: Any = None
+        if payload.file_path and os.path.exists(payload.file_path):
+            audio_input = payload.file_path
+        elif payload.raw_bytes and payload.metadata.get("audio_dtype") == "float32":
+            audio_input = np.frombuffer(payload.raw_bytes, dtype=np.float32).copy()
+
+        if audio_input is None:
             return ASRResult(
                 transcript="",
                 confidence=0.0,
@@ -162,24 +382,41 @@ class WhisperTransformerASR(IASRService):
             try:
                 import faster_whisper
                 if isinstance(self.model, faster_whisper.WhisperModel):
-                    # faster-whisper CTranslate2 inference with optional VAD
                     lang_param = None if self.model_size.endswith(".en") else self.language
-                    # Determine initial prompt from payload metadata or default instance prompt
-                    prompt = payload.metadata.get("initial_prompt") if payload.metadata else None
-                    if prompt is None:
-                        prompt = self.initial_prompt
+                    req_meta = payload.metadata or {}
+                    prompt = req_meta.get("initial_prompt", self.initial_prompt)
+                    hw = req_meta.get("hotwords", self.hotwords)
+                    use_words = bool(req_meta.get("word_timestamps", self.word_timestamps))
+                    lexicon = req_meta.get("repair_lexicon", self.repair_lexicon)
 
-                    segments, info = self.model.transcribe(
-                        payload.file_path,
-                        language=lang_param,
-                        beam_size=self.beam_size,
-                        vad_filter=self.vad_filter,
-                        initial_prompt=prompt
-                    )
-                    
+                    transcribe_kwargs: Dict[str, Any] = {
+                        "language": lang_param,
+                        "beam_size": self.beam_size,
+                        "vad_filter": self.vad_filter,
+                        "initial_prompt": prompt or None,
+                        "word_timestamps": use_words or bool(lexicon),
+                        "condition_on_previous_text": bool(
+                            req_meta.get("condition_on_previous_text", self.condition_on_previous_text)
+                        ),
+                        "repetition_penalty": float(
+                            req_meta.get("repetition_penalty", self.repetition_penalty)
+                        ),
+                        "no_repeat_ngram_size": int(
+                            req_meta.get("no_repeat_ngram_size", self.no_repeat_ngram_size)
+                        ),
+                    }
+                    hst = req_meta.get("hallucination_silence_threshold", self.hallucination_silence_threshold)
+                    if hst is not None:
+                        transcribe_kwargs["hallucination_silence_threshold"] = float(hst)
+                    if hw:
+                        transcribe_kwargs["hotwords"] = hw
+
+                    segments, info = self.model.transcribe(audio_input, **transcribe_kwargs)
+
                     text_parts = []
                     probs = []
                     segments_list = []
+                    words_list: List[Dict[str, Any]] = []
                     for seg in segments:
                         txt = seg.text.strip()
                         if txt:
@@ -191,17 +428,41 @@ class WhisperTransformerASR(IASRService):
                                 "end": round(seg.end, 2),
                                 "text": txt
                             })
+                        if transcribe_kwargs["word_timestamps"] and getattr(seg, "words", None):
+                            for w in seg.words:
+                                words_list.append({
+                                    "word": (w.word or "").strip(),
+                                    "start": round(float(w.start), 2),
+                                    "end": round(float(w.end), 2),
+                                    "probability": round(float(w.probability), 3),
+                                })
 
-                    full_transcript = " ".join(text_parts).strip()
+                    raw_transcript = " ".join(text_parts).strip()
+                    full_transcript = raw_transcript
+                    repairs: List[Dict[str, Any]] = []
+                    if lexicon and raw_transcript:
+                        full_transcript, repairs = phonetic_repair(
+                            raw_transcript,
+                            lexicon=lexicon,
+                            words_meta=words_list,
+                            confidence_threshold=self.repair_confidence_threshold,
+                        )
+
                     avg_confidence = round(sum(probs) / len(probs), 2) if probs else 0.95
                     elapsed = round(time.time() - start_time, 3)
 
-                    meta = {
+                    meta: Dict[str, Any] = {
                         "segments": segments_list,
                         "beam_size": self.beam_size,
                         "vad_filter": self.vad_filter,
-                        "language_probability": round(float(getattr(info, "language_probability", 1.0)), 3)
+                        "hotwords_active": bool(hw),
+                        "language_probability": round(float(getattr(info, "language_probability", 1.0)), 3),
                     }
+                    if use_words:
+                        meta["words"] = words_list
+                    if repairs:
+                        meta["raw_transcript"] = raw_transcript
+                        meta["phonetic_repairs"] = repairs
 
                     return ASRResult(
                         transcript=full_transcript,
@@ -214,7 +475,7 @@ class WhisperTransformerASR(IASRService):
                     )
                 else:
                     # Fallback to standard OpenAI Whisper
-                    result = self.model.transcribe(payload.file_path, language=self.language)
+                    result = self.model.transcribe(audio_input, language=self.language)
                     elapsed = round(time.time() - start_time, 3)
                     return ASRResult(
                         transcript=result.get("text", "").strip(),

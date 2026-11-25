@@ -1,0 +1,14 @@
+{
+  "experiment_id": "asr_tiny_baseline",
+  "description": "Stage 2 ASR lower baseline: Whisper tiny.en INT8 without Silero VAD, prompt, hotwords, or phonetic repair.",
+  "model_size": "tiny.en",
+  "device": "cpu",
+  "compute_type": "int8",
+  "vad_filter": false,
+  "beam_size": 5,
+  "prompt_mode": "none",
+  "hotwords_enabled": false,
+  "word_timestamps": false,
+  "phonetic_repair_enabled": false,
+  "seed": 42
+}

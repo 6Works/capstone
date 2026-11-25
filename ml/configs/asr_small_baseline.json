@@ -1,0 +1,14 @@
+{
+  "experiment_id": "asr_small_baseline",
+  "description": "Stage 2 ASR production baseline: Whisper small.en INT8 with Silero VAD and static DEFAULT_PROMPT.",
+  "model_size": "small.en",
+  "device": "cpu",
+  "compute_type": "int8",
+  "vad_filter": true,
+  "beam_size": 5,
+  "prompt_mode": "static",
+  "hotwords_enabled": false,
+  "word_timestamps": false,
+  "phonetic_repair_enabled": false,
+  "seed": 42
+}
