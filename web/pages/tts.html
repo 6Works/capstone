@@ -360,9 +360,12 @@
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="space-y-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Cloned Voice Name:</label>
-                <input type="text" id="cloneVoiceName" value="Interview Candidate Voice" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800 font-semibold focus:outline-hidden focus:ring-2 focus:ring-rose-500">
+              <div class="bg-rose-50/70 p-3.5 rounded-xl border border-rose-200/80 space-y-1.5">
+                <label class="block text-xs font-bold text-slate-800 flex items-center justify-between">
+                  <span><i class="fa-solid fa-tag text-rose-600 mr-1.5"></i>Name Your Cloned Voice:</span>
+                  <span class="text-[10px] text-slate-500 font-normal">Custom identifier</span>
+                </label>
+                <input type="text" id="cloneVoiceName" placeholder="e.g. My Voice, Sachin, Rahul, Technical Interviewer" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 font-bold focus:outline-hidden focus:ring-2 focus:ring-rose-500 shadow-2xs">
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1240,6 +1243,8 @@
       await synthesizeSpeech();
     }
 
+    let cachedVoices = [];
+
     // Voice Morphing Engine
     function updateMorphPreview() {
       const alpha = parseInt(document.getElementById('morphSlider').value) / 100.0;
@@ -1255,6 +1260,9 @@
         'sarah_executive': 238.0,
         'david_architect': 98.0
       };
+      cachedVoices.forEach(v => {
+        if (v && v.profile_id) f0Map[v.profile_id] = v.fundamental_freq_f0;
+      });
 
       const f0A = f0Map[profA] || 175.0;
       const f0B = f0Map[profB] || 175.0;
@@ -1282,15 +1290,30 @@
           })
         });
 
-        const data = await resp.json();
+        const rawText = await resp.text();
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (parseErr) {
+          throw new Error(`Server returned non-JSON (${resp.status}): ${rawText.substring(0, 100)}`);
+        }
+
         btn.innerText = 'Create Hybrid Voice Profile';
 
-        if (data.status === 'success') {
+        if (resp.ok && data.status === 'success') {
           alert(`Successfully created hybrid voice '${data.profile.name}'!`);
-          await refreshProfilesList();
+          await refreshProfilesList(data.profile.profile_id);
           switchTab('synthesis');
           document.getElementById('voiceProfileSelect').value = data.profile.profile_id;
-          synthesizeSpeech();
+          const engineSelect = document.getElementById('ttsEngineSelect');
+          if (engineSelect) {
+            engineSelect.value = 'neural_vits';
+            onEngineChange();
+          }
+          await synthesizeSpeech();
+        } else {
+          const errMsg = data.detail || data.message || 'Failed to create morphed voice';
+          alert('Voice morphing failed: ' + errMsg);
         }
       } catch (err) {
         btn.innerText = 'Create Hybrid Voice Profile';
@@ -1386,6 +1409,7 @@
       try {
         const resp = await fetch('/api/tts/voices');
         const data = await resp.json();
+        cachedVoices = data.voices || [];
         
         // Select in Tab 1
         const select = document.getElementById('voiceProfileSelect');
@@ -1403,24 +1427,72 @@
           select.value = currentVal;
         }
 
+        // Selects in Tab 4 (Morphing)
+        const selectA = document.getElementById('morphSelectA');
+        const selectB = document.getElementById('morphSelectB');
+        if (selectA && selectB) {
+          const valA = selectA.value || 'mira_neural';
+          const valB = selectB.value || 'alex_interviewer';
+          selectA.innerHTML = '';
+          selectB.innerHTML = '';
+          data.voices.forEach(v => {
+            const optA = document.createElement('option');
+            optA.value = v.profile_id;
+            optA.innerText = `${v.name} (${v.fundamental_freq_f0}Hz)`;
+            selectA.appendChild(optA);
+
+            const optB = document.createElement('option');
+            optB.value = v.profile_id;
+            optB.innerText = `${v.name} (${v.fundamental_freq_f0}Hz)`;
+            selectB.appendChild(optB);
+          });
+          if (data.voices.some(v => v.profile_id === valA)) selectA.value = valA;
+          if (data.voices.some(v => v.profile_id === valB)) selectB.value = valB;
+          updateMorphPreview();
+        }
+
         // Table in Tab 3
         const tbody = document.getElementById('profilesTableBody');
         tbody.innerHTML = '';
         data.voices.forEach(v => {
           const tr = document.createElement('tr');
           tr.className = "hover:bg-slate-50 transition";
+
+          const safeName = (v.name || '').replace(/'/g, "\\'");
+          let actionBtns = `
+            <button onclick="selectProfileForSynthesis('${v.profile_id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg transition text-[10px] inline-flex items-center">
+              <i class="fa-solid fa-play mr-1"></i> Audition
+            </button>
+          `;
+
+          if (!v.is_preset) {
+            actionBtns += `
+              <button onclick="promptRenameProfile('${v.profile_id}', '${safeName}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg transition text-[10px] inline-flex items-center ml-1">
+                <i class="fa-solid fa-pen mr-1"></i> Rename
+              </button>
+              <button onclick="deleteProfile('${v.profile_id}', '${safeName}')" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-lg transition text-[10px] inline-flex items-center ml-1">
+                <i class="fa-solid fa-trash-can mr-1"></i> Delete
+              </button>
+            `;
+          }
+
+          const badge = v.is_preset
+            ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-500 font-mono">PRESET</span>`
+            : `<span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-700 font-mono">CLONED</span>`;
+
           tr.innerHTML = `
             <td class="p-3 font-mono text-slate-500 font-bold">${v.profile_id}</td>
-            <td class="p-3 font-bold text-slate-900">${v.name}</td>
+            <td class="p-3 font-bold text-slate-900">
+              <div class="flex items-center space-x-1.5">
+                <span>${v.name}</span>
+                ${badge}
+              </div>
+            </td>
             <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${v.gender_estimate === 'female' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}">${(v.gender_estimate || 'neutral').toUpperCase()}</span></td>
             <td class="p-3 font-mono text-sky-600 font-bold">${v.fundamental_freq_f0} Hz</td>
             <td class="p-3 font-mono text-amber-600">${Math.round(v.spectral_centroid)} Hz</td>
             <td class="p-3 font-mono text-slate-700">${v.pitch_shift_semitones > 0 ? '+' : ''}${v.pitch_shift_semitones} st</td>
-            <td class="p-3">
-              <button onclick="selectProfileForSynthesis('${v.profile_id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg transition text-[10px]">
-                <i class="fa-solid fa-play mr-1"></i> Audition
-              </button>
-            </td>
+            <td class="p-3 whitespace-nowrap">${actionBtns}</td>
           `;
           tbody.appendChild(tr);
         });
@@ -1440,6 +1512,52 @@
         onEngineChange();
       }
       await synthesizeSpeech();
+    }
+
+    async function promptRenameProfile(profileId, currentName) {
+      const newName = prompt(`Enter new custom name for '${currentName}':`, currentName);
+      if (!newName || !newName.trim() || newName.trim() === currentName) return;
+
+      try {
+        const resp = await fetch(`/api/tts/voices/${profileId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName.trim() })
+        });
+        const data = await resp.json();
+        if (resp.ok && data.status === 'success') {
+          await refreshProfilesList(profileId);
+        } else {
+          alert('Rename failed: ' + (data.detail || 'Could not rename profile'));
+        }
+      } catch (err) {
+        alert('Rename failed: ' + err.message);
+      }
+    }
+
+    async function deleteProfile(profileId, voiceName) {
+      if (!confirm(`Are you sure you want to delete the cloned voice '${voiceName}'?\nThis action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const resp = await fetch(`/api/tts/voices/${profileId}`, {
+          method: 'DELETE'
+        });
+        const data = await resp.json();
+        if (resp.ok && data.status === 'success') {
+          // If deleted profile was currently selected, reset select to mira_neural
+          const select = document.getElementById('voiceProfileSelect');
+          if (select && select.value === profileId) {
+            select.value = 'mira_neural';
+          }
+          await refreshProfilesList();
+        } else {
+          alert('Delete failed: ' + (data.detail || 'Could not delete profile'));
+        }
+      } catch (err) {
+        alert('Delete failed: ' + err.message);
+      }
     }
 
     // Benchmark Arena Race
