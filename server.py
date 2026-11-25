@@ -477,11 +477,18 @@ def test_stage5_tts(req: TTSTestRequest):
             ElevenLabsTTSService,
             GTTSService,
             NeuralVoiceCloningTTSService,
+            PocketTTSCloningService,
             voice_cloner
         )
         if req.provider in ["edge_tts", "azure", "cloud_neural"]:
             voice = req.voice or ("en-IN-PrabhatNeural" if "prabhat" in (req.profile_id or "") else "en-US-GuyNeural")
             service = EdgeTTSService(voice=voice)
+            res = service.synthesize(req.text or "")
+        elif req.provider in ["pocket_tts", "pocket", "zero_shot"]:
+            service = PocketTTSCloningService(
+                speaker_profile_id=req.profile_id or "mira_neural",
+                with_normalization=req.with_normalization if req.with_normalization is not None else True
+            )
             res = service.synthesize(req.text or "")
         elif req.provider == "elevenlabs":
             eleven_vid = req.voice or "21m00Tcm4TlvDq8ikWAM"
@@ -551,8 +558,9 @@ class VoiceRenameRequest(BaseModel):
 @app.get("/api/tts/engines")
 def get_tts_engines():
     """Returns available TTS engines, capabilities, and active configuration."""
-    from services.tts import EdgeTTSService
+    from services.tts import EdgeTTSService, PocketTTSCloningService
     has_eleven = bool(os.getenv("ELEVENLABS_API_KEY"))
+    has_pocket = bool(PocketTTSCloningService.resolve_model_dir())
     return {
         "status": "success",
         "engines": [
@@ -564,6 +572,13 @@ def get_tts_engines():
                 "is_default": True,
                 "description": "Microsoft Azure neural voices with natural prosody and breathing pauses. 100% free, 0 API key required.",
                 "voices": list(EdgeTTSService.VOICE_CATALOG.values())
+            },
+            {
+                "id": "pocket_tts",
+                "name": "Kyutai Pocket TTS INT8 (Offline Zero-Shot Cloner)",
+                "type": "local_neural_cloner",
+                "is_available": has_pocket,
+                "description": "Local ONNX zero-shot voice cloner conditioned on recorded reference audio (CC-BY-4.0 weights, RTF < 0.5 CPU)."
             },
             {
                 "id": "elevenlabs",
