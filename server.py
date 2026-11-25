@@ -468,46 +468,54 @@ def test_stage4_dialogue(req: DialogueTestRequest):
 
 @app.post("/api/test/stage5-tts")
 def test_stage5_tts(req: TTSTestRequest):
-    from services.tts import (
-        Pyttsx3TTSService,
-        ElevenLabsTTSService,
-        GTTSService,
-        NeuralVoiceCloningTTSService
-    )
-    if req.provider in ["neural_vits", "neural", "cloned"]:
-        service = NeuralVoiceCloningTTSService(
-            speaker_profile_id=req.profile_id or "mira_neural",
-            speech_rate=req.speech_rate or 175,
-            with_human_pauses=req.with_pauses if req.with_pauses is not None else True,
-            with_normalization=req.with_normalization if req.with_normalization is not None else True
+    try:
+        from services.tts import (
+            Pyttsx3TTSService,
+            ElevenLabsTTSService,
+            GTTSService,
+            NeuralVoiceCloningTTSService
         )
-    elif req.provider == "elevenlabs":
-        service = ElevenLabsTTSService()
-    elif req.provider == "gtts":
-        service = GTTSService()
-    else:
-        service = Pyttsx3TTSService(speech_rate=req.speech_rate or 175)
+        if req.provider in ["neural_vits", "neural", "cloned"]:
+            service = NeuralVoiceCloningTTSService(
+                speaker_profile_id=req.profile_id or "mira_neural",
+                speech_rate=req.speech_rate or 175,
+                with_human_pauses=req.with_pauses if req.with_pauses is not None else True,
+                with_normalization=req.with_normalization if req.with_normalization is not None else True
+            )
+        elif req.provider == "elevenlabs":
+            service = ElevenLabsTTSService()
+        elif req.provider == "gtts":
+            service = GTTSService()
+        else:
+            service = Pyttsx3TTSService(speech_rate=req.speech_rate or 175)
 
-    res = service.synthesize(req.text)
-    audio_url = None
-    spectrogram_data = None
-    if res.file_path and os.path.exists(res.file_path):
-        filename = os.path.basename(res.file_path)
-        dest = os.path.join("storage/temp_audio", filename)
-        shutil.copyfile(res.file_path, dest)
-        audio_url = f"/api/pipeline/audio/{filename}"
+        res = service.synthesize(req.text or "")
+        audio_url = None
+        spectrogram_data = None
+        if res.file_path and os.path.exists(res.file_path):
+            filename = os.path.basename(res.file_path)
+            dest = os.path.join("storage/temp_audio", filename)
+            shutil.copyfile(res.file_path, dest)
+            audio_url = f"/api/pipeline/audio/{filename}"
 
-        # Module 1: Automatically compute 80-band Mel-Spectrogram & F0 Contour
-        try:
-            from services.tts import AcousticAnalyzer
-            spectrogram_data = AcousticAnalyzer.analyze_wav(dest)
-        except Exception as spec_err:
-            print(f"[AcousticAnalyzer] Spectrogram extraction skipped: {spec_err}")
+            # Module 1: Automatically compute 80-band Mel-Spectrogram & F0 Contour
+            try:
+                from services.tts import AcousticAnalyzer
+                spectrogram_data = AcousticAnalyzer.analyze_wav(dest)
+            except Exception as spec_err:
+                print(f"[AcousticAnalyzer] Spectrogram extraction skipped: {spec_err}")
 
-    data = res.model_dump()
-    data["audio_url"] = audio_url
-    data["spectrogram"] = spectrogram_data
-    return data
+        data = res.model_dump()
+        data["audio_url"] = audio_url
+        data["spectrogram"] = spectrogram_data
+        return data
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "detail": f"TTS synthesis failed: {str(e)}"}
+        )
 
 
 # ============================================================================
