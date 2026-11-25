@@ -304,6 +304,39 @@ class TestStage5TTSService:
         # Mira is 218Hz, Alex is 124Hz -> 50/50 blend should be around 171Hz
         assert 160.0 <= morphed.fundamental_freq_f0 <= 180.0
 
+    def test_clone_voice_api_endpoint(self):
+        """Verifies POST /api/tts/clone-voice handles file upload and returns JSON response."""
+        from fastapi.testclient import TestClient
+        from server import app
+        import tempfile, wave, numpy as np
+
+        client = TestClient(app)
+        sr = 16000
+        audio = (0.5 * np.sin(2 * np.pi * 210 * np.linspace(0, 0.5, int(sr * 0.5))) * 32767).astype(np.int16)
+        temp_wav = os.path.join(tempfile.gettempdir(), f"test_api_clone_{int(np.random.randint(9999))}.wav")
+        try:
+            with wave.open(temp_wav, "wb") as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(sr)
+                wf.writeframes(audio.tobytes())
+
+            with open(temp_wav, "rb") as f:
+                resp = client.post("/api/tts/clone-voice", files={"file": ("sample.wav", f, "audio/wav")}, data={"name": "Test Cloned Person"})
+
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["status"] == "success"
+            assert "profile" in data
+            assert data["profile"]["name"] == "Test Cloned Person"
+            assert len(data["profile"]["embedding_vector"]) == 128
+        finally:
+            if os.path.exists(temp_wav):
+                try:
+                    os.remove(temp_wav)
+                except Exception:
+                    pass
+
 
 class TestStage6AudioOutputService:
     def test_web_stream_audio_sink(self):
