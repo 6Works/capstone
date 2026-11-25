@@ -243,9 +243,11 @@ class NLPTestRequest(BaseModel):
 
 class TTSTestRequest(BaseModel):
     text: str
-    provider: Optional[str] = "neural_vits"
+    provider: Optional[str] = "edge_tts"
     speech_rate: Optional[int] = 175
     profile_id: Optional[str] = "mira_neural"
+    voice: Optional[str] = None
+    api_key: Optional[str] = None
     with_pauses: Optional[bool] = True
     with_normalization: Optional[bool] = True
 
@@ -471,25 +473,41 @@ def test_stage5_tts(req: TTSTestRequest):
     try:
         from services.tts import (
             Pyttsx3TTSService,
+            EdgeTTSService,
             ElevenLabsTTSService,
             GTTSService,
-            NeuralVoiceCloningTTSService
+            NeuralVoiceCloningTTSService,
+            voice_cloner
         )
-        if req.provider in ["neural_vits", "neural", "cloned"]:
+        if req.provider in ["edge_tts", "azure", "cloud_neural"]:
+            voice = req.voice or ("en-IN-PrabhatNeural" if "prabhat" in (req.profile_id or "") else "en-US-GuyNeural")
+            service = EdgeTTSService(voice=voice)
+            res = service.synthesize(req.text or "")
+        elif req.provider == "elevenlabs":
+            eleven_vid = req.voice or "21m00Tcm4TlvDq8ikWAM"
+            if req.profile_id:
+                prof = voice_cloner.get_profile(req.profile_id)
+                if prof and prof.eleven_voice_id:
+                    eleven_vid = prof.eleven_voice_id
+            service = ElevenLabsTTSService(
+                api_key=req.api_key or os.getenv("ELEVENLABS_API_KEY"),
+                voice_id=eleven_vid
+            )
+            res = service.synthesize(req.text or "")
+        elif req.provider in ["neural_vits", "neural", "cloned"]:
             service = NeuralVoiceCloningTTSService(
                 speaker_profile_id=req.profile_id or "mira_neural",
                 speech_rate=req.speech_rate or 175,
                 with_human_pauses=req.with_pauses if req.with_pauses is not None else True,
                 with_normalization=req.with_normalization if req.with_normalization is not None else True
             )
-        elif req.provider == "elevenlabs":
-            service = ElevenLabsTTSService()
+            res = service.synthesize(req.text or "")
         elif req.provider == "gtts":
             service = GTTSService()
+            res = service.synthesize(req.text or "")
         else:
             service = Pyttsx3TTSService(speech_rate=req.speech_rate or 175)
-
-        res = service.synthesize(req.text or "")
+            res = service.synthesize(req.text or "")
         audio_url = None
         spectrogram_data = None
         if res.file_path and os.path.exists(res.file_path):
@@ -530,6 +548,49 @@ class VoiceRenameRequest(BaseModel):
     name: str
 
 
+@app.get("/api/tts/engines")
+def get_tts_engines():
+    """Returns available TTS engines, capabilities, and active configuration."""
+    from services.tts import EdgeTTSService
+    has_eleven = bool(os.getenv("ELEVENLABS_API_KEY"))
+    return {
+        "status": "success",
+        "engines": [
+            {
+                "id": "edge_tts",
+                "name": "Azure Neural (Free Studio Quality)",
+                "type": "cloud_free",
+                "is_available": True,
+                "is_default": True,
+                "description": "Microsoft Azure neural voices with natural prosody and breathing pauses. 100% free, 0 API key required.",
+                "voices": list(EdgeTTSService.VOICE_CATALOG.values())
+            },
+            {
+                "id": "elevenlabs",
+                "name": "ElevenLabs (Studio Zero-Shot Neural Cloner)",
+                "type": "cloud_api",
+                "is_available": has_eleven,
+                "has_key": has_eleven,
+                "description": "Gold-standard zero-shot voice cloning. Produces 100% human realism matching your uploaded voice sample."
+            },
+            {
+                "id": "neural_vits",
+                "name": "Piper Neural VITS (Local Fast)",
+                "type": "local_neural",
+                "is_available": True,
+                "description": "Local ONNX neural vocoder running on CPU without internet. Sub-100ms latency."
+            },
+            {
+                "id": "pyttsx3",
+                "name": "Windows SAPI5 Offline (Concatenative)",
+                "type": "local_offline",
+                "is_available": True,
+                "description": "Native Windows speech engine. Zero dependencies."
+            }
+        ]
+    }
+
+
 @app.get("/api/tts/voices")
 def get_tts_voices():
     """Lists available speaker profiles including zero-shot cloned voices."""
@@ -538,6 +599,25 @@ def get_tts_voices():
         "status": "success",
         "voices": voice_cloner.list_profiles()
     }
+
+
+@app.get("/api/tts/voices/{profile_id}/reference")
+def get_voice_reference_audio(profile_id: str):
+    """Serves the original reference audio WAV for a cloned voice profile."""
+    from services.tts import voice_cloner
+    prof = voice_cloner.get_profile(profile_id)
+    if not prof:
+        raise HTTPException(status_code=404, detail=f"Voice profile '{profile_id}' not found")
+    
+    ref_path = prof.ref_audio_path
+    if not ref_path or not os.path.exists(ref_path):
+        candidate = os.path.join(voice_cloner.profiles_dir, f"{profile_id}_ref.wav")
+        if os.path.exists(candidate):
+            ref_path = candidate
+        else:
+            raise HTTPException(status_code=404, detail=f"No reference audio available for '{profile_id}'")
+            
+    return FileResponse(ref_path, media_type="audio/wav", filename=f"{profile_id}_reference.wav")
 
 
 @app.patch("/api/tts/voices/{profile_id}")
@@ -599,12 +679,14 @@ def normalize_and_phonemize_text(req: TextNormalizeRequest):
 @app.post("/api/tts/clone-voice")
 async def clone_voice_from_reference(
     file: UploadFile = File(...),
-    name: Optional[str] = Form("Custom Cloned Voice")
+    name: Optional[str] = Form("Custom Cloned Voice"),
+    eleven_api_key: Optional[str] = Form(None)
 ):
     """
     Chapter 4 Zero-Shot Voice Cloning:
     Extracts acoustic speaker profile (F0, spectral centroid, 128-D embedding) from audio.
-    Supports any audio container: WAV, WebM (browser mic), MP3, OGG, Opus, AAC.
+    Persists original reference sample in storage/cloned_voices/{profile_id}_ref.wav.
+    Seamlessly creates a cloud neural clone on ElevenLabs if API key is supplied.
     """
     os.makedirs("storage/temp_audio", exist_ok=True)
     ext = os.path.splitext(file.filename or "")[1] or ".audio"
@@ -614,14 +696,39 @@ async def clone_voice_from_reference(
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        from services.tts import VoiceCloner, voice_cloner
+        from services.tts import VoiceCloner, voice_cloner, ElevenLabsTTSService
         voice_name = (name or "").strip() or "Custom Cloned Voice"
-        profile = VoiceCloner.extract_acoustic_profile_from_wav(temp_path, profile_name=voice_name)
+        profile_id = f"clone_{int(time.time()*1000)}"
+
+        # Extract acoustic profile and persist reference WAV sample
+        profile = VoiceCloner.extract_acoustic_profile_from_wav(
+            temp_path,
+            profile_name=voice_name,
+            profile_id=profile_id,
+            save_ref_dir=voice_cloner.profiles_dir
+        )
+
+        # Check for ElevenLabs key (from form or environment)
+        effective_key = (eleven_api_key or "").strip() or os.getenv("ELEVENLABS_API_KEY")
+        if effective_key and profile.ref_audio_path and os.path.exists(profile.ref_audio_path):
+            try:
+                cloned_vid = ElevenLabsTTSService.clone_voice(
+                    api_key=effective_key,
+                    name=voice_name,
+                    reference_audio_path=profile.ref_audio_path,
+                    description=f"Capstone Zero-Shot Clone of {voice_name}"
+                )
+                if cloned_vid:
+                    profile.eleven_voice_id = cloned_vid
+            except Exception as el_err:
+                print(f"[CloneVoice] Warning: ElevenLabs cloud sync skipped: {el_err}")
+
         voice_cloner.save_cloned_profile(profile)
         return {
             "status": "success",
             "message": f"Successfully extracted acoustic profile and created cloned voice '{voice_name}'",
-            "profile": profile.to_dict()
+            "profile": profile.to_dict(),
+            "ref_audio_url": f"/api/tts/voices/{profile.profile_id}/reference"
         }
     except Exception as e:
         import traceback
