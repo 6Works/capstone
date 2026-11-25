@@ -73,16 +73,10 @@ All remote manifests are fetched in **Session 4** via lightweight streaming slic
 ### Session 1 — Foundation (`Done`, Commits `01934c6`, `c2089c5`)
 - **Completed**: Installed `sherpa-onnx==2.0.3`, `jiwer==4.0.0`, `soundfile==0.14.0`, `pystoi==0.4.1`, `scikit-learn==1.6.1`; built `ml/metrics/eval_metrics.py` & `ml/configs/baseline_pipeline.json`; verified `45 passed` tests.
 
-### Session 2 — Neural Speaker Encoder (`WeSpeaker CAM++ LM` ONNX)
-- **Files**: `services/tts/voice_cloner.py`, `ml/experiments/eval_speaker_encoder.py`, `ml/configs/speaker_encoder_campp.json`, `test_pipeline.py`.
-- **Implementation Spec**:
-  1. Download `wespeaker_en_voxceleb_CAM++_LM.onnx` (27.9 MB) into gitignored `models/speaker/`.
-  2. Add lazy-cached `_get_speaker_extractor()` in `VoiceCloner` wrapping `sherpa_onnx.SpeakerEmbeddingExtractor` + `_extract_neural_embedding(audio_float32, sr)` feeding 16 kHz mono samples (`stream.accept_waveform(sr, audio); stream.input_finished(); emb = extractor.compute(stream)`), L2-normalized. Keep `_compute_mel_energies` heuristic fallback *only* when the ONNX file is absent (ensuring CI never breaks without downloading 28 MB weights).
-  3. Update `SpeakerProfile` field metadata cleanly (`embedding_dim`: variable e.g. `192` or `512` from `extractor.dim()`, `encoder_backend`: `"wespeaker_campp_lm"` vs `"random_proj_baseline"`).
-- **Experiment (`eval_speaker_encoder.py`)**: Measure Same-Speaker vs. Different-Speaker cosine distributions + threshold Equal Error Rate (EER) and inference ms on synthetic/sample speakers (`RandomProj-128D` vs `WeSpeaker-CAM++`).
-- **Exit Gate**: Unit test asserts same-speaker similarity > different-speaker similarity with CAM++, all `test_pipeline.py` tests pass.
+### Session 2 — Neural Speaker Encoder (`WeSpeaker CAM++ LM` ONNX) — `Done`
+- **Status**: Verified `46 passed` in `test_pipeline.py`; WeSpeaker CAM++ LM (`27.93 MB`, `512-D`) active in `VoiceCloner`; benchmark saved in `ml/results/speaker_encoder_eval.json`.
 
-### Session 3 — True Zero-Shot Neural Voice Cloning (`Kyutai Pocket TTS INT8`)
+### Session 3 — True Zero-Shot Neural Voice Cloning (`Kyutai Pocket TTS INT8`) — `Next`
 - **Files**: `services/tts/tts_services.py`, `services/tts/__init__.py`, `orchestrator/factory.py`, `server.py`, `web/pages/tts.html`, `test_pipeline.py`.
 - **Implementation Spec**:
   1. Download & extract `sherpa-onnx-pocket-tts-int8-2026-01-26.tar.bz2` (93.8 MB) into gitignored `models/pocket_tts/`; auto-discover `.onnx` & `.json` files via deterministic globbing for `OfflineTtsPocketModelConfig`.

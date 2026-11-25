@@ -35,9 +35,10 @@ class SpeakerProfile:
     length_scale: float                 # Cadence duration scaling (0.8 fast -> 1.2 slow)
     noise_scale: float                  # Vocal fold jitter / breathiness (0.4 - 0.9)
     noise_w_scale: float                # Phoneme duration stochasticity (0.6 - 1.0)
-    embedding_vector: List[float]       # 128-D acoustic latent representation
+    embedding_vector: List[float]       # Acoustic or neural speaker embedding (512-D CAM++ or 128-D baseline)
     ref_audio_path: Optional[str] = None # Path to original recorded reference sample
     eleven_voice_id: Optional[str] = None # Cloned voice ID on ElevenLabs if synced
+    encoder_backend: str = "random_proj_baseline" # "wespeaker_campp_lm" or "random_proj_baseline"
     created_at: float = field(default_factory=time.time)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -59,6 +60,9 @@ class VoiceCloner:
 
     PRESET_IDS = {"mira_neural", "alex_interviewer", "sarah_executive", "david_architect"}
     BASE_F0 = 175.0  # Base reference pitch of default Lessac model (Hz)
+    DEFAULT_SPEAKER_ENCODER_PATH = "models/speaker/wespeaker_en_voxceleb_CAM++_LM.onnx"
+    _cached_speaker_extractor = None
+    _cached_speaker_model_path = None
 
     def __init__(self, profiles_dir: str = "storage/cloned_voices"):
         self.profiles_dir = profiles_dir
@@ -184,6 +188,7 @@ class VoiceCloner:
                             embedding_vector=data["embedding_vector"],
                             ref_audio_path=ref_wav,
                             eleven_voice_id=data.get("eleven_voice_id"),
+                            encoder_backend=data.get("encoder_backend", "random_proj_baseline"),
                             created_at=data.get("created_at", time.time())
                         )
                         self.profiles[prof.profile_id] = prof
@@ -394,17 +399,15 @@ class VoiceCloner:
         noise_scale = float(max(0.50, min(0.80, 0.667 + spectral_flatness * 1.5)))
         noise_w_scale = float(max(0.70, min(0.90, 0.8 + (f0_std / 120.0))))
 
-        # 5. Extract 128-D Speaker Embedding
-        # Project 64 mel-spaced spectral log energies into 128 dimensions
-        mel_filters = cls._compute_mel_energies(freqs, psd, n_mels=64)
-        rng = np.random.RandomState(int(f0_mean * 100) % 99999)
-        projection_matrix = rng.randn(64, 128)
-        embedding_raw = np.dot(mel_filters, projection_matrix)
-        norm = np.linalg.norm(embedding_raw)
-        if norm > 0:
-            embedding = (embedding_raw / norm).tolist()
-        else:
-            embedding = [0.0] * 128
+        # 5. Extract Speaker Embedding (WeSpeaker CAM++ LM neural encoder if available, else 128-D baseline)
+        embedding, encoder_backend = cls.extract_speaker_embedding(
+            audio,
+            sample_rate=sample_rate,
+            use_neural=True,
+            freqs=freqs,
+            psd=psd,
+            f0_mean=f0_mean
+        )
 
         final_pid = profile_id or f"clone_{int(time.time()*1000)}"
 
@@ -439,8 +442,66 @@ class VoiceCloner:
             noise_scale=round(noise_scale, 3),
             noise_w_scale=round(noise_w_scale, 3),
             embedding_vector=embedding,
-            ref_audio_path=ref_path
+            ref_audio_path=ref_path,
+            encoder_backend=encoder_backend
         )
+
+    @classmethod
+    def _get_speaker_extractor(cls, model_path: Optional[str] = None):
+        """Lazy-loads and caches the sherpa-onnx WeSpeaker CAM++ speaker embedding extractor."""
+        target_path = model_path or cls.DEFAULT_SPEAKER_ENCODER_PATH
+        if not os.path.exists(target_path):
+            return None
+        if cls._cached_speaker_extractor is not None and cls._cached_speaker_model_path == target_path:
+            return cls._cached_speaker_extractor
+        try:
+            import sherpa_onnx
+            cfg = sherpa_onnx.SpeakerEmbeddingExtractorConfig(
+                model=target_path, num_threads=2, debug=False, provider="cpu"
+            )
+            if not cfg.validate():
+                return None
+            cls._cached_speaker_extractor = sherpa_onnx.SpeakerEmbeddingExtractor(cfg)
+            cls._cached_speaker_model_path = target_path
+            return cls._cached_speaker_extractor
+        except Exception as e:
+            print(f"[VoiceCloner] Neural speaker extractor unavailable ({e}); using baseline.")
+            return None
+
+    @classmethod
+    def extract_speaker_embedding(
+        cls,
+        audio: np.ndarray,
+        sample_rate: int = 16000,
+        use_neural: bool = True,
+        freqs: Optional[np.ndarray] = None,
+        psd: Optional[np.ndarray] = None,
+        f0_mean: float = 160.0
+    ) -> Tuple[List[float], str]:
+        """Extracts unit-normalized speaker embedding using WeSpeaker CAM++ LM ONNX or 128-D Mel baseline."""
+        audio_1d = np.asarray(audio, dtype=np.float32).reshape(-1)
+        if use_neural:
+            extractor = cls._get_speaker_extractor()
+            if extractor is not None and audio_1d.size > 0:
+                stream = extractor.create_stream()
+                stream.accept_waveform(int(sample_rate), audio_1d)
+                stream.input_finished()
+                if extractor.is_ready(stream):
+                    raw_emb = np.asarray(extractor.compute(stream), dtype=np.float32)
+                    norm = float(np.linalg.norm(raw_emb))
+                    if norm > 1e-12:
+                        raw_emb = raw_emb / norm
+                    return raw_emb.tolist(), "wespeaker_campp_lm"
+
+        if freqs is None or psd is None:
+            freqs, psd = signal.welch(audio_1d, fs=sample_rate, nperseg=min(max(len(audio_1d), 8), 2048))
+        mel_filters = cls._compute_mel_energies(freqs, psd, n_mels=64)
+        rng = np.random.RandomState(int(f0_mean * 100) % 99999)
+        projection_matrix = rng.randn(64, 128)
+        embedding_raw = np.dot(mel_filters, projection_matrix)
+        norm = float(np.linalg.norm(embedding_raw))
+        embedding = (embedding_raw / norm).tolist() if norm > 0 else [0.0] * 128
+        return embedding, "random_proj_baseline"
 
     @classmethod
     def _compute_mel_energies(cls, freqs: np.ndarray, psd: np.ndarray, n_mels: int = 64) -> np.ndarray:
@@ -503,13 +564,23 @@ class VoiceCloner:
         noise = (1.0 - alpha) * prof_a.noise_scale + alpha * prof_b.noise_scale
         noise_w = (1.0 - alpha) * prof_a.noise_w_scale + alpha * prof_b.noise_w_scale
 
-        # 2. Spherical normalized interpolation of 128-D embedding vectors
+        # 2. Spherical normalized interpolation of embedding vectors (dimension-safe across 128-D & 512-D)
         va = np.array(prof_a.embedding_vector, dtype=np.float32)
         vb = np.array(prof_b.embedding_vector, dtype=np.float32)
+        if va.size != vb.size:
+            max_dim = max(va.size, vb.size)
+            va = np.pad(va, (0, max_dim - va.size))
+            vb = np.pad(vb, (0, max_dim - vb.size))
         v_blend = (1.0 - alpha) * va + alpha * vb
         norm = np.linalg.norm(v_blend)
         if norm > 0:
             v_blend = v_blend / norm
+
+        encoder_backend = (
+            prof_a.encoder_backend
+            if prof_a.encoder_backend == prof_b.encoder_backend
+            else "hybrid_morphed"
+        )
 
         gender = "female" if f0 > 180.0 else ("male" if f0 < 145.0 else "neutral")
         pct_b = int(alpha * 100)
@@ -530,7 +601,8 @@ class VoiceCloner:
             length_scale=round(float(length), 2),
             noise_scale=round(float(noise), 3),
             noise_w_scale=round(float(noise_w), 3),
-            embedding_vector=[float(x) for x in v_blend]
+            embedding_vector=[float(x) for x in v_blend],
+            encoder_backend=encoder_backend
         )
 
         self.save_cloned_profile(morphed_profile)

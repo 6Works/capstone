@@ -222,7 +222,7 @@ class TestStage5TTSService:
             profile = VoiceCloner.extract_acoustic_profile_from_wav(temp_wav, profile_name="Unit Test Clone")
             assert profile.fundamental_freq_f0 > 150.0
             assert profile.spectral_centroid > 200.0
-            assert len(profile.embedding_vector) == 128
+            assert len(profile.embedding_vector) in (128, 512)
             assert -8.0 <= profile.pitch_shift_semitones <= 8.0
         finally:
             if os.path.exists(temp_wav):
@@ -301,7 +301,7 @@ class TestStage5TTSService:
         """Verifies interpolating speaker embeddings and acoustic profiles."""
         morphed = voice_cloner.morph_profiles("mira_neural", "alex_interviewer", alpha=0.5)
         assert morphed.profile_id.startswith("morph_")
-        assert len(morphed.embedding_vector) == 128
+        assert len(morphed.embedding_vector) in (128, 512)
         # Mira is 218Hz, Alex is 124Hz -> 50/50 blend should be around 171Hz
         assert 160.0 <= morphed.fundamental_freq_f0 <= 180.0
 
@@ -364,7 +364,7 @@ class TestStage5TTSService:
             assert data["status"] == "success"
             assert "profile" in data
             assert data["profile"]["name"] == "Test Cloned Person"
-            assert len(data["profile"]["embedding_vector"]) == 128
+            assert len(data["profile"]["embedding_vector"]) in (128, 512)
         finally:
             if os.path.exists(temp_wav):
                 try:
@@ -757,6 +757,55 @@ class TestMLEvaluationMetrics:
         finally:
             if os.path.exists(p1):
                 os.remove(p1)
+
+    def test_campp_neural_speaker_encoder_and_morph_compat(self):
+        """Verifies WeSpeaker CAM++ 512-D embeddings discriminate distinct voices and morph safely with 128-D presets."""
+        from services.tts import VoiceCloner, NeuralVoiceCloningTTSService, voice_cloner
+        from ml.metrics import compute_speaker_similarity
+
+        if not os.path.exists(VoiceCloner.DEFAULT_SPEAKER_ENCODER_PATH):
+            pytest.skip("WeSpeaker CAM++ ONNX weights not present locally")
+
+        tts_f = NeuralVoiceCloningTTSService(speaker_profile_id="mira_neural")
+        tts_m = NeuralVoiceCloningTTSService(speaker_profile_id="alex_interviewer")
+        f_res1 = tts_f.synthesize("Testing consistent voice verification sample one.")
+        f_res2 = tts_f.synthesize("Another spoken sentence in the same female voice.")
+        m_res = tts_m.synthesize("Deep baritone technical interviewer speaker sample.")
+
+        paths = [r.file_path for r in (f_res1, f_res2, m_res) if r.file_path]
+        try:
+            a1, sr1 = VoiceCloner.load_audio_signal(f_res1.file_path, target_sr=16000)
+            a2, sr2 = VoiceCloner.load_audio_signal(f_res2.file_path, target_sr=16000)
+            am, srm = VoiceCloner.load_audio_signal(m_res.file_path, target_sr=16000)
+
+            e_f1, b_f1 = VoiceCloner.extract_speaker_embedding(a1, sr1, use_neural=True)
+            e_f2, b_f2 = VoiceCloner.extract_speaker_embedding(a2, sr2, use_neural=True)
+            e_m, b_m = VoiceCloner.extract_speaker_embedding(am, srm, use_neural=True)
+
+            assert b_f1 == "wespeaker_campp_lm" and len(e_f1) == 512
+            assert b_f2 == "wespeaker_campp_lm" and b_m == "wespeaker_campp_lm"
+
+            sim_same = compute_speaker_similarity(e_f1, e_f2)
+            sim_diff = compute_speaker_similarity(e_f1, e_m)
+            assert sim_same > sim_diff, f"Expected same-speaker ({sim_same}) > diff-speaker ({sim_diff})"
+
+            # Also verify 512-D extracted profile morphs cleanly with 128-D preset without shape mismatch
+            prof_cam = VoiceCloner.extract_acoustic_profile_from_wav(f_res1.file_path, profile_name="Temp CAM++")
+            assert prof_cam.encoder_backend == "wespeaker_campp_lm"
+            assert len(prof_cam.embedding_vector) == 512
+            voice_cloner.save_cloned_profile(prof_cam)
+            morphed = voice_cloner.morph_profiles("mira_neural", prof_cam.profile_id, alpha=0.5)
+            assert len(morphed.embedding_vector) == 512
+            voice_cloner.delete_profile(prof_cam.profile_id)
+            voice_cloner.delete_profile(morphed.profile_id)
+        finally:
+            for p in paths:
+                if os.path.exists(p):
+                    try:
+                        os.remove(p)
+                    except Exception:
+                        pass
+
 
 
 

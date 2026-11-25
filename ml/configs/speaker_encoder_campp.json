@@ -1,0 +1,12 @@
+{
+  "experiment_id": "speaker_encoder_campp_v1",
+  "description": "Evaluates WeSpeaker CAM++ LM ONNX (512-D) vs baseline random Mel projection (128-D) on held-out LibriSpeech speakers.",
+  "encoder_model_path": "models/speaker/wespeaker_en_voxceleb_CAM++_LM.onnx",
+  "dataset_source": "openslr/librispeech_asr",
+  "dataset_config": "clean",
+  "dataset_split": "test",
+  "num_speakers": 4,
+  "utts_per_speaker": 3,
+  "noise_snr_db": 20.0,
+  "seed": 42
+}
