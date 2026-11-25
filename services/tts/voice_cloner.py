@@ -178,29 +178,65 @@ class VoiceCloner:
         return self.profiles.get(profile_id)
 
     @classmethod
+    def load_audio_signal(cls, audio_path: str, target_sr: int = 16000) -> Tuple[np.ndarray, int]:
+        """
+        Loads any audio file (WAV, WebM, MP3, OGG, Opus, AAC, FLAC) into normalized mono float32 array.
+        Seamlessly falls back to PyAV for non-standard or compressed formats (e.g. browser MediaRecorder).
+        """
+        try:
+            with wave.open(audio_path, "rb") as wf:
+                channels = wf.getnchannels()
+                sample_width = wf.getsampwidth()
+                sample_rate = wf.getframerate()
+                n_frames = wf.getnframes()
+                raw_bytes = wf.readframes(n_frames)
+
+            if sample_width == 2:
+                audio = np.frombuffer(raw_bytes, dtype=np.int16).astype(np.float32) / 32768.0
+            elif sample_width == 4:
+                audio = np.frombuffer(raw_bytes, dtype=np.int32).astype(np.float32) / 2147483648.0
+            else:
+                audio = np.frombuffer(raw_bytes, dtype=np.uint8).astype(np.float32) / 128.0 - 1.0
+
+            if channels > 1:
+                audio = audio.reshape(-1, channels).mean(axis=1)
+
+            if sample_rate != target_sr:
+                target_len = int(len(audio) * target_sr / sample_rate)
+                audio = signal.resample(audio, target_len)
+                sample_rate = target_sr
+
+            return audio, sample_rate
+        except Exception:
+            pass
+
+        # Fallback to PyAV for WebM (Opus), MP3, OGG, AAC
+        try:
+            import av
+            container = av.open(audio_path)
+            resampler = av.AudioResampler(format="fltp", layout="mono", rate=target_sr)
+            chunks = []
+            for frame in container.decode(audio=0):
+                for r in resampler.resample(frame):
+                    chunks.append(r.to_ndarray()[0])
+
+            if chunks:
+                audio = np.concatenate(chunks, axis=0)
+            else:
+                audio = np.zeros(target_sr, dtype=np.float32)
+            return audio, target_sr
+        except Exception as e:
+            raise ValueError(f"Unable to decode audio from {audio_path}: {e}")
+
+    @classmethod
     def extract_acoustic_profile_from_wav(cls, wav_path: str, profile_name: str = "Cloned Voice") -> SpeakerProfile:
         """
-        Analyzes a reference WAV recording using acoustic DSP and psychocoustics.
+        Analyzes a reference audio recording using acoustic DSP and psychocoustics.
         Extracts fundamental frequency F0, pitch contour, spectral centroid,
         and generates a 128-D acoustic speaker embedding vector.
+        Supports WAV, WebM, MP3, OGG, and other audio formats.
         """
-        with wave.open(wav_path, "rb") as wf:
-            channels = wf.getnchannels()
-            sample_width = wf.getsampwidth()
-            sample_rate = wf.getframerate()
-            n_frames = wf.getnframes()
-            raw_bytes = wf.readframes(n_frames)
-
-        # Convert to mono float32 normalized between -1.0 and 1.0
-        if sample_width == 2:
-            audio = np.frombuffer(raw_bytes, dtype=np.int16).astype(np.float32) / 32768.0
-        elif sample_width == 4:
-            audio = np.frombuffer(raw_bytes, dtype=np.int32).astype(np.float32) / 2147483648.0
-        else:
-            audio = np.frombuffer(raw_bytes, dtype=np.uint8).astype(np.float32) / 128.0 - 1.0
-
-        if channels > 1:
-            audio = audio.reshape(-1, channels).mean(axis=1)
+        audio, sample_rate = cls.load_audio_signal(wav_path, target_sr=16000)
 
         # Remove DC offset
         audio = audio - np.mean(audio)
@@ -396,13 +432,8 @@ class VoiceCloner:
         - Pitch shift via polynomial rate resampling.
         - Formant / Equalization filtering (bass warmth or high-frequency brilliance).
         """
-        with wave.open(wav_path, "rb") as wf:
-            channels = wf.getnchannels()
-            sample_width = wf.getsampwidth()
-            orig_sr = wf.getframerate()
-            raw = wf.readframes(wf.getnframes())
-
-        audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+        audio, orig_sr = cls.load_audio_signal(wav_path, target_sr=16000)
+        channels = 1
 
         # Semitone pitch shift ratio: r = 2^(semitones / 12)
         semitones = profile.pitch_shift_semitones

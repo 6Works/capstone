@@ -59,24 +59,12 @@ class AcousticAnalyzer:
     @classmethod
     def analyze_wav(cls, wav_path: str, max_frames: int = 160) -> Dict[str, Any]:
         """
-        Extracts 80-band Mel-Spectrogram and Pitch F0(t) from a WAV audio file.
+        Extracts 80-band Mel-Spectrogram and Pitch F0(t) from an audio file.
+        Supports WAV, WebM, MP3, OGG, and other formats.
         Returns visualizable telemetry for real-time frontend canvas rendering.
         """
-        with wave.open(wav_path, "rb") as wf:
-            channels = wf.getnchannels()
-            sample_width = wf.getsampwidth()
-            sr = wf.getframerate()
-            raw = wf.readframes(wf.getnframes())
-
-        if sample_width == 2:
-            audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
-        elif sample_width == 4:
-            audio = np.frombuffer(raw, dtype=np.int32).astype(np.float32) / 2147483648.0
-        else:
-            audio = np.frombuffer(raw, dtype=np.uint8).astype(np.float32) / 128.0 - 1.0
-
-        if channels > 1:
-            audio = audio.reshape(-1, channels).mean(axis=1)
+        from .voice_cloner import VoiceCloner
+        audio, sr = VoiceCloner.load_audio_signal(wav_path, target_sr=16000)
 
         # Remove DC offset
         audio = audio - np.mean(audio)
