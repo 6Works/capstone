@@ -877,5 +877,71 @@ class TestMLEvaluationMetrics:
                         pass
 
 
+class TestBenchmarkDatasetsAndLeakage:
+    """Session 4 tests enforcing benchmark manifest integrity, zero split leakage, and AWGN SNR calibration."""
+
+    def test_benchmark_manifests_and_zero_split_leakage(self):
+        from ml.datasets import load_manifest, text_sha256
+
+        expected_specs = {
+            "librispeech_60": (60, {"enroll": 12, "val": 12, "test": 36}),
+            "minds14_en_140": (140, {"dev": 42, "val": 28, "test": 70}),
+            "clinc_oos_200": (200, {"val": 100, "test": 100}),
+            "interview_stress_v1": (65, {"val": 15, "test": 50}),
+        }
+
+        for name, (exp_total, exp_splits) in expected_specs.items():
+            manifest = load_manifest(name)
+            items = manifest["items"]
+            assert len(items) == exp_total, f"{name}: expected {exp_total}, got {len(items)}"
+            assert manifest["split_counts"] == exp_splits
+
+            split_hashes = {}
+            for item in items:
+                assert item["text_hash"] == text_sha256(item["text"])
+                split_hashes.setdefault(item["split"], set()).add(item["text_hash"])
+
+            keys = list(split_hashes.keys())
+            for i in range(len(keys)):
+                for j in range(i + 1, len(keys)):
+                    overlap = split_hashes[keys[i]] & split_hashes[keys[j]]
+                    assert not overlap, f"{name}: leakage between {keys[i]} and {keys[j]}: {overlap}"
+
+        assert load_manifest("librispeech_60")["num_speakers"] == 12
+        assert load_manifest("minds14_en_140")["num_intents"] == 14
+        assert load_manifest("clinc_oos_200")["num_intents"] == 15
+
+    def test_benchmark_audio_files_and_awgn_snr(self):
+        import numpy as np
+        import soundfile as sf
+        from ml.datasets import load_manifest, add_awgn
+
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Deterministic AWGN calibration check (20 dB and 10 dB)
+        t = np.linspace(0, 1.0, 16000, dtype=np.float32)
+        clean = 0.25 * np.sin(2 * np.pi * 440.0 * t).astype(np.float32)
+        for target_snr in (20.0, 10.0):
+            noisy_a = add_awgn(clean, snr_db=target_snr, seed=42)
+            noisy_b = add_awgn(clean, snr_db=target_snr, seed=42)
+            assert np.array_equal(noisy_a, noisy_b)
+            err = noisy_a - clean
+            empirical_snr = 10.0 * np.log10((np.mean(clean ** 2) + 1e-12) / (np.mean(err ** 2) + 1e-12))
+            assert abs(empirical_snr - target_snr) < 0.5, f"SNR {empirical_snr:.2f} != {target_snr}"
+
+        # Validate local audio cache when present (gitignored storage/benchmarks/ may be absent in fresh CI checkout)
+        if not os.path.exists(os.path.join(root_dir, "storage", "benchmarks", "interview_stress_v1")):
+            pytest.skip("Benchmark audio cache not downloaded locally")
+
+        for name in ("librispeech_60", "minds14_en_140", "interview_stress_v1"):
+            manifest = load_manifest(name)
+            for item in manifest["items"]:
+                abs_path = os.path.join(root_dir, item["audio_path"])
+                assert os.path.exists(abs_path), f"Missing cached benchmark audio: {abs_path}"
+                info = sf.info(abs_path)
+                assert info.frames > 0 and info.samplerate > 0
+
+
+
 
 

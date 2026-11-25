@@ -1,0 +1,555 @@
+{
+  "name": "librispeech_60",
+  "source": "openslr/librispeech_asr (clean/test)",
+  "license": "CC-BY-4.0",
+  "seed": 42,
+  "total_items": 60,
+  "num_speakers": 12,
+  "split_counts": {
+    "enroll": 12,
+    "val": 12,
+    "test": 36
+  },
+  "items": [
+    {
+      "id": "1320-122617-0000",
+      "speaker_id": "1320",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_1320_1320-122617-0000.flac",
+      "text": "NOTWITHSTANDING THE HIGH RESOLUTION OF HAWKEYE HE FULLY COMPREHENDED ALL THE DIFFICULTIES AND DANGER HE WAS ABOUT TO INCUR",
+      "text_hash": "3da3fcc050b6d0a0",
+      "duration_sec": 7.83
+    },
+    {
+      "id": "1320-122617-0001",
+      "speaker_id": "1320",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_1320_1320-122617-0001.flac",
+      "text": "IN HIS RETURN TO THE CAMP HIS ACUTE AND PRACTISED INTELLECTS WERE INTENTLY ENGAGED IN DEVISING MEANS TO COUNTERACT A WATCHFULNESS AND SUSPICION ON THE PART OF HIS ENEMIES THAT HE KNEW WERE IN NO DEGREE INFERIOR TO HIS OWN",
+      "text_hash": "1fe4eac2db1370b6",
+      "duration_sec": 14.05
+    },
+    {
+      "id": "1320-122617-0002",
+      "speaker_id": "1320",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_1320_1320-122617-0002.flac",
+      "text": "IN OTHER WORDS WHILE HE HAD IMPLICIT FAITH IN THE ABILITY OF BALAAM'S ASS TO SPEAK HE WAS SOMEWHAT SKEPTICAL ON THE SUBJECT OF A BEAR'S SINGING AND YET HE HAD BEEN ASSURED OF THE LATTER ON THE TESTIMONY OF HIS OWN EXQUISITE ORGANS",
+      "text_hash": "c4709d11daa2e520",
+      "duration_sec": 13.59
+    },
+    {
+      "id": "1320-122617-0003",
+      "speaker_id": "1320",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_1320_1320-122617-0003.flac",
+      "text": "THERE WAS SOMETHING IN HIS AIR AND MANNER THAT BETRAYED TO THE SCOUT THE UTTER CONFUSION OF THE STATE OF HIS MIND",
+      "text_hash": "80077767e7280d02",
+      "duration_sec": 6.29
+    },
+    {
+      "id": "1320-122617-0004",
+      "speaker_id": "1320",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_1320_1320-122617-0004.flac",
+      "text": "THE INGENIOUS HAWKEYE WHO RECALLED THE HASTY MANNER IN WHICH THE OTHER HAD ABANDONED HIS POST AT THE BEDSIDE OF THE SICK WOMAN WAS NOT WITHOUT HIS SUSPICIONS CONCERNING THE SUBJECT OF SO MUCH SOLEMN DELIBERATION",
+      "text_hash": "ccd9184e90db443e",
+      "duration_sec": 12.26
+    },
+    {
+      "id": "2094-142345-0000",
+      "speaker_id": "2094",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2094_2094-142345-0000.flac",
+      "text": "IT IS A VERY FINE OLD PLACE OF RED BRICK SOFTENED BY A PALE POWDERY LICHEN WHICH HAS DISPERSED ITSELF WITH HAPPY IRREGULARITY SO AS TO BRING THE RED BRICK INTO TERMS OF FRIENDLY COMPANIONSHIP WITH THE LIMESTONE ORNAMENTS SURROUNDING THE THREE GABLES THE WINDOWS AND THE DOOR PLACE",
+      "text_hash": "54d2352a562f3d59",
+      "duration_sec": 22.57
+    },
+    {
+      "id": "2094-142345-0001",
+      "speaker_id": "2094",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2094_2094-142345-0001.flac",
+      "text": "BUT THE WINDOWS ARE PATCHED WITH WOODEN PANES AND THE DOOR I THINK IS LIKE THE GATE IT IS NEVER OPENED",
+      "text_hash": "443918689e87278e",
+      "duration_sec": 8.03
+    },
+    {
+      "id": "2094-142345-0002",
+      "speaker_id": "2094",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2094_2094-142345-0002.flac",
+      "text": "FOR IT IS A SOLID HEAVY HANDSOME DOOR AND MUST ONCE HAVE BEEN IN THE HABIT OF SHUTTING WITH A SONOROUS BANG BEHIND A LIVERIED LACKEY WHO HAD JUST SEEN HIS MASTER AND MISTRESS OFF THE GROUNDS IN A CARRIAGE AND PAIR",
+      "text_hash": "550b5f8022be439f",
+      "duration_sec": 15.52
+    },
+    {
+      "id": "2094-142345-0003",
+      "speaker_id": "2094",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2094_2094-142345-0003.flac",
+      "text": "A LARGE OPEN FIREPLACE WITH RUSTY DOGS IN IT AND A BARE BOARDED FLOOR AT THE FAR END FLEECES OF WOOL STACKED UP IN THE MIDDLE OF THE FLOOR SOME EMPTY CORN BAGS",
+      "text_hash": "a648e6a26677c5d1",
+      "duration_sec": 14.68
+    },
+    {
+      "id": "2094-142345-0004",
+      "speaker_id": "2094",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2094_2094-142345-0004.flac",
+      "text": "AND WHAT THROUGH THE LEFT HAND WINDOW",
+      "text_hash": "f30f90013f12b06a",
+      "duration_sec": 2.64
+    },
+    {
+      "id": "260-123440-0000",
+      "speaker_id": "260",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_260_260-123440-0000.flac",
+      "text": "AND HOW ODD THE DIRECTIONS WILL LOOK",
+      "text_hash": "cf58f5927aa2258f",
+      "duration_sec": 2.17
+    },
+    {
+      "id": "260-123440-0001",
+      "speaker_id": "260",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_260_260-123440-0001.flac",
+      "text": "POOR ALICE",
+      "text_hash": "129ea614a51118dd",
+      "duration_sec": 1.74
+    },
+    {
+      "id": "260-123440-0002",
+      "speaker_id": "260",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_260_260-123440-0002.flac",
+      "text": "IT WAS THE WHITE RABBIT RETURNING SPLENDIDLY DRESSED WITH A PAIR OF WHITE KID GLOVES IN ONE HAND AND A LARGE FAN IN THE OTHER HE CAME TROTTING ALONG IN A GREAT HURRY MUTTERING TO HIMSELF AS HE CAME OH THE DUCHESS THE DUCHESS",
+      "text_hash": "986e80630ce4d47e",
+      "duration_sec": 14.71
+    },
+    {
+      "id": "260-123440-0003",
+      "speaker_id": "260",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_260_260-123440-0003.flac",
+      "text": "OH WON'T SHE BE SAVAGE IF I'VE KEPT HER WAITING",
+      "text_hash": "e7c767d84ba121c8",
+      "duration_sec": 3.58
+    },
+    {
+      "id": "260-123440-0004",
+      "speaker_id": "260",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_260_260-123440-0004.flac",
+      "text": "ALICE TOOK UP THE FAN AND GLOVES AND AS THE HALL WAS VERY HOT SHE KEPT FANNING HERSELF ALL THE TIME SHE WENT ON TALKING DEAR DEAR HOW QUEER EVERYTHING IS TO DAY",
+      "text_hash": "14311bdd229240a9",
+      "duration_sec": 12.02
+    },
+    {
+      "id": "2961-960-0000",
+      "speaker_id": "2961",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2961_2961-960-0000.flac",
+      "text": "HE PASSES ABRUPTLY FROM PERSONS TO IDEAS AND NUMBERS AND FROM IDEAS AND NUMBERS TO PERSONS FROM THE HEAVENS TO MAN FROM ASTRONOMY TO PHYSIOLOGY HE CONFUSES OR RATHER DOES NOT DISTINGUISH SUBJECT AND OBJECT FIRST AND FINAL CAUSES AND IS DREAMING OF GEOMETRICAL FIGURES LOST IN A FLUX OF SENSE",
+      "text_hash": "c9e064abd18fca0f",
+      "duration_sec": 27.18
+    },
+    {
+      "id": "2961-960-0001",
+      "speaker_id": "2961",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2961_2961-960-0001.flac",
+      "text": "THE INFLUENCE WITH THE TIMAEUS HAS EXERCISED UPON POSTERITY IS DUE PARTLY TO A MISUNDERSTANDING",
+      "text_hash": "51e4f80e5fe00759",
+      "duration_sec": 8.25
+    },
+    {
+      "id": "2961-960-0002",
+      "speaker_id": "2961",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2961_2961-960-0002.flac",
+      "text": "IN THE SUPPOSED DEPTHS OF THIS DIALOGUE THE NEO PLATONISTS FOUND HIDDEN MEANINGS AND CONNECTIONS WITH THE JEWISH AND CHRISTIAN SCRIPTURES AND OUT OF THEM THEY ELICITED DOCTRINES QUITE AT VARIANCE WITH THE SPIRIT OF PLATO",
+      "text_hash": "1e1a7de260899290",
+      "duration_sec": 15.35
+    },
+    {
+      "id": "2961-960-0003",
+      "speaker_id": "2961",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2961_2961-960-0003.flac",
+      "text": "THEY WERE ABSORBED IN HIS THEOLOGY AND WERE UNDER THE DOMINION OF HIS NAME WHILE THAT WHICH WAS TRULY GREAT AND TRULY CHARACTERISTIC IN HIM HIS EFFORT TO REALIZE AND CONNECT ABSTRACTIONS WAS NOT UNDERSTOOD BY THEM AT ALL",
+      "text_hash": "2ad12187bd4de676",
+      "duration_sec": 17.32
+    },
+    {
+      "id": "2961-960-0004",
+      "speaker_id": "2961",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_2961_2961-960-0004.flac",
+      "text": "THERE IS NO DANGER OF THE MODERN COMMENTATORS ON THE TIMAEUS FALLING INTO THE ABSURDITIES OF THE NEO PLATONISTS",
+      "text_hash": "013ee33e04f9c589",
+      "duration_sec": 8.22
+    },
+    {
+      "id": "3575-170457-0000",
+      "speaker_id": "3575",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_3575_3575-170457-0000.flac",
+      "text": "AND OFTEN HAS MY MOTHER SAID WHILE ON HER LAP I LAID MY HEAD SHE FEARED FOR TIME I WAS NOT MADE BUT FOR ETERNITY",
+      "text_hash": "fde46490c3abb9d7",
+      "duration_sec": 8.23
+    },
+    {
+      "id": "3575-170457-0001",
+      "speaker_id": "3575",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_3575_3575-170457-0001.flac",
+      "text": "WHY ARE WE TO BE DENIED EACH OTHER'S SOCIETY",
+      "text_hash": "72d07dc2a735e50b",
+      "duration_sec": 2.99
+    },
+    {
+      "id": "3575-170457-0002",
+      "speaker_id": "3575",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_3575_3575-170457-0002.flac",
+      "text": "WHY ARE WE TO BE DIVIDED",
+      "text_hash": "d5343f8f2c446759",
+      "duration_sec": 2.11
+    },
+    {
+      "id": "3575-170457-0003",
+      "speaker_id": "3575",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_3575_3575-170457-0003.flac",
+      "text": "SURELY IT MUST BE BECAUSE WE ARE IN DANGER OF LOVING EACH OTHER TOO WELL OF LOSING SIGHT OF THE CREATOR IN IDOLATRY OF THE CREATURE",
+      "text_hash": "134ff44acbc251d5",
+      "duration_sec": 7.59
+    },
+    {
+      "id": "3575-170457-0004",
+      "speaker_id": "3575",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_3575_3575-170457-0004.flac",
+      "text": "WE USED TO DISPUTE ABOUT POLITICS AND RELIGION",
+      "text_hash": "101d7ddb6662659f",
+      "duration_sec": 3.1
+    },
+    {
+      "id": "5639-40744-0000",
+      "speaker_id": "5639",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_5639_5639-40744-0000.flac",
+      "text": "ELEVEN O'CLOCK HAD STRUCK IT WAS A FINE CLEAR NIGHT THEY WERE THE ONLY PERSONS ON THE ROAD AND THEY SAUNTERED LEISURELY ALONG TO AVOID PAYING THE PRICE OF FATIGUE FOR THE RECREATION PROVIDED FOR THE TOLEDANS IN THEIR VALLEY OR ON THE BANKS OF THEIR RIVER",
+      "text_hash": "2a2904f7725b25d2",
+      "duration_sec": 15.77
+    },
+    {
+      "id": "5639-40744-0001",
+      "speaker_id": "5639",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_5639_5639-40744-0001.flac",
+      "text": "SECURE AS HE THOUGHT IN THE CAREFUL ADMINISTRATION OF JUSTICE IN THAT CITY AND THE CHARACTER OF ITS WELL DISPOSED INHABITANTS THE GOOD HIDALGO WAS FAR FROM THINKING THAT ANY DISASTER COULD BEFAL HIS FAMILY",
+      "text_hash": "e0d7761af352073f",
+      "duration_sec": 12.44
+    },
+    {
+      "id": "5639-40744-0002",
+      "speaker_id": "5639",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_5639_5639-40744-0002.flac",
+      "text": "RODOLFO AND HIS COMPANIONS WITH THEIR FACES MUFFLED IN THEIR CLOAKS STARED RUDELY AND INSOLENTLY AT THE MOTHER THE DAUGHTER AND THE SERVANT MAID",
+      "text_hash": "5e868dc52b6b5742",
+      "duration_sec": 8.91
+    },
+    {
+      "id": "5639-40744-0003",
+      "speaker_id": "5639",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_5639_5639-40744-0003.flac",
+      "text": "IN A MOMENT HE COMMUNICATED HIS THOUGHTS TO HIS COMPANIONS AND IN THE NEXT MOMENT THEY RESOLVED TO TURN BACK AND CARRY HER OFF TO PLEASE RODOLFO FOR THE RICH WHO ARE OPEN HANDED ALWAYS FIND PARASITES READY TO ENCOURAGE THEIR BAD PROPENSITIES AND THUS TO CONCEIVE THIS WICKED DESIGN TO COMMUNICATE IT APPROVE IT RESOLVE ON RAVISHING LEOCADIA AND TO CARRY THAT DESIGN INTO EFFECT WAS THE WORK OF A MOMENT",
+      "text_hash": "9dd9c51af2018157",
+      "duration_sec": 27.12
+    },
+    {
+      "id": "5639-40744-0004",
+      "speaker_id": "5639",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_5639_5639-40744-0004.flac",
+      "text": "THEY DREW THEIR SWORDS HID THEIR FACES IN THE FLAPS OF THEIR CLOAKS TURNED BACK AND SOON CAME IN FRONT OF THE LITTLE PARTY WHO HAD NOT YET DONE GIVING THANKS TO GOD FOR THEIR ESCAPE FROM THOSE AUDACIOUS MEN",
+      "text_hash": "653cc7c9cb1b424a",
+      "duration_sec": 12.47
+    },
+    {
+      "id": "6930-75918-0000",
+      "speaker_id": "6930",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_6930_6930-75918-0000.flac",
+      "text": "CONCORD RETURNED TO ITS PLACE AMIDST THE TENTS",
+      "text_hash": "8437505e8ba7a00c",
+      "duration_sec": 3.5
+    },
+    {
+      "id": "6930-75918-0001",
+      "speaker_id": "6930",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_6930_6930-75918-0001.flac",
+      "text": "THE ENGLISH FORWARDED TO THE FRENCH BASKETS OF FLOWERS OF WHICH THEY HAD MADE A PLENTIFUL PROVISION TO GREET THE ARRIVAL OF THE YOUNG PRINCESS THE FRENCH IN RETURN INVITED THE ENGLISH TO A SUPPER WHICH WAS TO BE GIVEN THE NEXT DAY",
+      "text_hash": "585f1077f1906aac",
+      "duration_sec": 14.22
+    },
+    {
+      "id": "6930-75918-0002",
+      "speaker_id": "6930",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_6930_6930-75918-0002.flac",
+      "text": "CONGRATULATIONS WERE POURED IN UPON THE PRINCESS EVERYWHERE DURING HER JOURNEY",
+      "text_hash": "7cdd8fd321ca7f47",
+      "duration_sec": 5.03
+    },
+    {
+      "id": "6930-75918-0003",
+      "speaker_id": "6930",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_6930_6930-75918-0003.flac",
+      "text": "FROM THE RESPECT PAID HER ON ALL SIDES SHE SEEMED LIKE A QUEEN AND FROM THE ADORATION WITH WHICH SHE WAS TREATED BY TWO OR THREE SHE APPEARED AN OBJECT OF WORSHIP THE QUEEN MOTHER GAVE THE FRENCH THE MOST AFFECTIONATE RECEPTION FRANCE WAS HER NATIVE COUNTRY AND SHE HAD SUFFERED TOO MUCH UNHAPPINESS IN ENGLAND FOR ENGLAND TO HAVE MADE HER FORGET FRANCE",
+      "text_hash": "39ed6085027ff205",
+      "duration_sec": 23.32
+    },
+    {
+      "id": "6930-75918-0004",
+      "speaker_id": "6930",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_6930_6930-75918-0004.flac",
+      "text": "SHE TAUGHT HER DAUGHTER THEN BY HER OWN AFFECTION FOR IT THAT LOVE FOR A COUNTRY WHERE THEY HAD BOTH BEEN HOSPITABLY RECEIVED AND WHERE A BRILLIANT FUTURE OPENED BEFORE THEM",
+      "text_hash": "199f7d654f5466a6",
+      "duration_sec": 11.06
+    },
+    {
+      "id": "7127-75947-0000",
+      "speaker_id": "7127",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7127_7127-75947-0000.flac",
+      "text": "EVERY ONE COULD OBSERVE HIS AGITATION AND PROSTRATION A PROSTRATION WHICH WAS INDEED THE MORE REMARKABLE SINCE PEOPLE WERE NOT ACCUSTOMED TO SEE HIM WITH HIS ARMS HANGING LISTLESSLY BY HIS SIDE HIS HEAD BEWILDERED AND HIS EYES WITH ALL THEIR BRIGHT INTELLIGENCE BEDIMMED",
+      "text_hash": "886916d6a13de5de",
+      "duration_sec": 17.97
+    },
+    {
+      "id": "7127-75947-0001",
+      "speaker_id": "7127",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7127_7127-75947-0001.flac",
+      "text": "UPON THIS MADAME DEIGNED TO TURN HER EYES LANGUISHINGLY TOWARDS THE COMTE OBSERVING",
+      "text_hash": "68b4cd7f1902c01d",
+      "duration_sec": 6.64
+    },
+    {
+      "id": "7127-75947-0002",
+      "speaker_id": "7127",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7127_7127-75947-0002.flac",
+      "text": "DO YOU THINK SO SHE REPLIED WITH INDIFFERENCE",
+      "text_hash": "06048fca36d2789f",
+      "duration_sec": 3.23
+    },
+    {
+      "id": "7127-75947-0003",
+      "speaker_id": "7127",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7127_7127-75947-0003.flac",
+      "text": "YES THE CHARACTER WHICH YOUR ROYAL HIGHNESS ASSUMED IS IN PERFECT HARMONY WITH YOUR OWN",
+      "text_hash": "1ccd764fdcb5dce9",
+      "duration_sec": 5.98
+    },
+    {
+      "id": "7127-75947-0004",
+      "speaker_id": "7127",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7127_7127-75947-0004.flac",
+      "text": "EXPLAIN YOURSELF",
+      "text_hash": "6b7459281cbc36ab",
+      "duration_sec": 1.91
+    },
+    {
+      "id": "7176-92135-0000",
+      "speaker_id": "7176",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7176_7176-92135-0000.flac",
+      "text": "HE IS A WELCOME FIGURE AT THE GARDEN PARTIES OF THE ELECT WHO ARE ALWAYS READY TO ENCOURAGE HIM BY ACCEPTING FREE SEATS FOR HIS PLAY ACTOR MANAGERS NOD TO HIM EDITORS ALLOW HIM TO CONTRIBUTE WITHOUT CHARGE TO A SYMPOSIUM ON THE PRICE OF GOLF BALLS",
+      "text_hash": "5a1e4f38e3337aa9",
+      "duration_sec": 14.44
+    },
+    {
+      "id": "7176-92135-0001",
+      "speaker_id": "7176",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7176_7176-92135-0001.flac",
+      "text": "IN SHORT HE BECOMES A PROMINENT FIGURE IN LONDON SOCIETY AND IF HE IS NOT CAREFUL SOMEBODY WILL SAY SO",
+      "text_hash": "c6ccb83c8ef1d320",
+      "duration_sec": 7.56
+    },
+    {
+      "id": "7176-92135-0002",
+      "speaker_id": "7176",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7176_7176-92135-0002.flac",
+      "text": "BUT EVEN THE UNSUCCESSFUL DRAMATIST HAS HIS MOMENTS",
+      "text_hash": "3da20789d416d5db",
+      "duration_sec": 3.42
+    },
+    {
+      "id": "7176-92135-0003",
+      "speaker_id": "7176",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7176_7176-92135-0003.flac",
+      "text": "YOUR PLAY MUST BE NOT MERELY A GOOD PLAY BUT A SUCCESSFUL ONE",
+      "text_hash": "3cf4b917873d29e3",
+      "duration_sec": 3.96
+    },
+    {
+      "id": "7176-92135-0004",
+      "speaker_id": "7176",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7176_7176-92135-0004.flac",
+      "text": "FRANKLY I CANNOT ALWAYS SAY",
+      "text_hash": "ee5b4cc41953cc85",
+      "duration_sec": 2.42
+    },
+    {
+      "id": "7729-102255-0000",
+      "speaker_id": "7729",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7729_7729-102255-0000.flac",
+      "text": "THE BOGUS LEGISLATURE NUMBERED THIRTY SIX MEMBERS",
+      "text_hash": "aabba5ad72df143b",
+      "duration_sec": 3.29
+    },
+    {
+      "id": "7729-102255-0001",
+      "speaker_id": "7729",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7729_7729-102255-0001.flac",
+      "text": "THIS WAS AT THE MARCH ELECTION EIGHTEEN FIFTY FIVE",
+      "text_hash": "4559ceac05d2bd4b",
+      "duration_sec": 3.45
+    },
+    {
+      "id": "7729-102255-0002",
+      "speaker_id": "7729",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7729_7729-102255-0002.flac",
+      "text": "THAT SUMMER'S EMIGRATION HOWEVER BEING MAINLY FROM THE FREE STATES GREATLY CHANGED THE RELATIVE STRENGTH OF THE TWO PARTIES",
+      "text_hash": "879ac27ddb49771d",
+      "duration_sec": 8.3
+    },
+    {
+      "id": "7729-102255-0003",
+      "speaker_id": "7729",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7729_7729-102255-0003.flac",
+      "text": "FOR GENERAL SERVICE THEREFORE REQUIRING NO SPECIAL EFFORT THE NUMERICAL STRENGTH OF THE FACTIONS WAS ABOUT EQUAL WHILE ON EXTRAORDINARY OCCASIONS THE TWO THOUSAND BORDER RUFFIAN RESERVE LYING A LITTLE FARTHER BACK FROM THE STATE LINE COULD AT ANY TIME EASILY TURN THE SCALE",
+      "text_hash": "0456df2ddfb4462d",
+      "duration_sec": 19.81
+    },
+    {
+      "id": "7729-102255-0004",
+      "speaker_id": "7729",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_7729_7729-102255-0004.flac",
+      "text": "THE FREE STATE MEN HAD ONLY THEIR CONVICTIONS THEIR INTELLIGENCE THEIR COURAGE AND THE MORAL SUPPORT OF THE NORTH THE CONSPIRACY HAD ITS SECRET COMBINATION THE TERRITORIAL OFFICIALS THE LEGISLATURE THE BOGUS LAWS THE COURTS THE MILITIA OFFICERS THE PRESIDENT AND THE ARMY",
+      "text_hash": "c1a72b7b54a44bb3",
+      "duration_sec": 20.16
+    },
+    {
+      "id": "8230-279154-0000",
+      "speaker_id": "8230",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8230_8230-279154-0000.flac",
+      "text": "THE ANALYSIS OF KNOWLEDGE WILL OCCUPY US UNTIL THE END OF THE THIRTEENTH LECTURE AND IS THE MOST DIFFICULT PART OF OUR WHOLE ENTERPRISE",
+      "text_hash": "c6fb79d600264257",
+      "duration_sec": 8.8
+    },
+    {
+      "id": "8230-279154-0001",
+      "speaker_id": "8230",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8230_8230-279154-0001.flac",
+      "text": "WHAT IS CALLED PERCEPTION DIFFERS FROM SENSATION BY THE FACT THAT THE SENSATIONAL INGREDIENTS BRING UP HABITUAL ASSOCIATES IMAGES AND EXPECTATIONS OF THEIR USUAL CORRELATES ALL OF WHICH ARE SUBJECTIVELY INDISTINGUISHABLE FROM THE SENSATION",
+      "text_hash": "eb798dfd9b13f975",
+      "duration_sec": 17.38
+    },
+    {
+      "id": "8230-279154-0002",
+      "speaker_id": "8230",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8230_8230-279154-0002.flac",
+      "text": "WHETHER OR NOT THIS PRINCIPLE IS LIABLE TO EXCEPTIONS EVERYONE WOULD AGREE THAT IS HAS A BROAD MEASURE OF TRUTH THOUGH THE WORD EXACTLY MIGHT SEEM AN OVERSTATEMENT AND IT MIGHT SEEM MORE CORRECT TO SAY THAT IDEAS APPROXIMATELY REPRESENT IMPRESSIONS",
+      "text_hash": "fac530037cd2189e",
+      "duration_sec": 16.48
+    },
+    {
+      "id": "8230-279154-0003",
+      "speaker_id": "8230",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8230_8230-279154-0003.flac",
+      "text": "AND WHAT SORT OF EVIDENCE IS LOGICALLY POSSIBLE",
+      "text_hash": "df3d2ef9df32d6c9",
+      "duration_sec": 3.19
+    },
+    {
+      "id": "8230-279154-0004",
+      "speaker_id": "8230",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8230_8230-279154-0004.flac",
+      "text": "THERE IS NO LOGICAL IMPOSSIBILITY IN THE HYPOTHESIS THAT THE WORLD SPRANG INTO BEING FIVE MINUTES AGO EXACTLY AS IT THEN WAS WITH A POPULATION THAT REMEMBERED A WHOLLY UNREAL PAST",
+      "text_hash": "a8fa86ec6b1f366c",
+      "duration_sec": 14.06
+    },
+    {
+      "id": "8463-287645-0000",
+      "speaker_id": "8463",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8463_8463-287645-0000.flac",
+      "text": "THIS WAS WHAT DID THE MISCHIEF SO FAR AS THE RUNNING AWAY WAS CONCERNED",
+      "text_hash": "94976f8c6df2e0db",
+      "duration_sec": 4.73
+    },
+    {
+      "id": "8463-287645-0001",
+      "speaker_id": "8463",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8463_8463-287645-0001.flac",
+      "text": "IT IS HARDLY NECESSARY TO SAY MORE OF THEM HERE",
+      "text_hash": "b20c17d568bc77e6",
+      "duration_sec": 3.54
+    },
+    {
+      "id": "8463-287645-0002",
+      "speaker_id": "8463",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8463_8463-287645-0002.flac",
+      "text": "FROM THE MANNER IN WHICH HE EXPRESSED HIMSELF WITH REGARD TO ROBERT HOLLAN NO MAN IN THE WHOLE RANGE OF HIS RECOLLECTIONS WILL BE LONGER REMEMBERED THAN HE HIS ENTHRALMENT WHILE UNDER HOLLAN WILL HARDLY EVER BE FORGOTTEN",
+      "text_hash": "aee5e767e1d68383",
+      "duration_sec": 12.92
+    },
+    {
+      "id": "8463-287645-0003",
+      "speaker_id": "8463",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8463_8463-287645-0003.flac",
+      "text": "OF THIS PARTY EDWARD A BOY OF SEVENTEEN CALLED FORTH MUCH SYMPATHY HE TOO WAS CLAIMED BY HOLLAN",
+      "text_hash": "bb8a42b33b80e442",
+      "duration_sec": 7.91
+    },
+    {
+      "id": "8463-287645-0004",
+      "speaker_id": "8463",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_60/spk_8463_8463-287645-0004.flac",
+      "text": "JOHN WESLEY COMBASH JACOB TAYLOR AND THOMAS EDWARD SKINNER",
+      "text_hash": "08b2d095c45ca50e",
+      "duration_sec": 6.1
+    }
+  ]
+}

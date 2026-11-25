@@ -1,0 +1,1017 @@
+{
+  "name": "interview_stress_v1",
+  "source": "Synthetic domain corpus rendered via held-out Azure EdgeTTS (en-IN / en-US)",
+  "license": "MIT",
+  "seed": 42,
+  "total_items": 65,
+  "subset_counts": {
+    "proper_nouns": 25,
+    "interview_qa": 40
+  },
+  "split_counts": {
+    "val": 15,
+    "test": 50
+  },
+  "items": [
+    {
+      "id": "pn_00",
+      "subset": "proper_nouns",
+      "split": "val",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_00.wav",
+      "text": "Sachin built our FastAPI gateway with Redis caching.",
+      "text_hash": "f117232317290155",
+      "target_terms": [
+        "Sachin",
+        "FastAPI",
+        "Redis"
+      ],
+      "duration_sec": 4.68
+    },
+    {
+      "id": "pn_01",
+      "subset": "proper_nouns",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_01.wav",
+      "text": "Aradhya fine tuned PyTorch transformers using LoRA adapters.",
+      "text_hash": "09b661416e371b5d",
+      "target_terms": [
+        "Aradhya",
+        "PyTorch",
+        "LoRA"
+      ],
+      "duration_sec": 5.5
+    },
+    {
+      "id": "pn_02",
+      "subset": "proper_nouns",
+      "split": "val",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_02.wav",
+      "text": "Nandu migrated the PostgreSQL database to sharded partitions.",
+      "text_hash": "7d43c5c52964c969",
+      "target_terms": [
+        "Nandu",
+        "PostgreSQL"
+      ],
+      "duration_sec": 4.73
+    },
+    {
+      "id": "pn_03",
+      "subset": "proper_nouns",
+      "split": "val",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_03.wav",
+      "text": "Bablu optimized CUDA kernels for ONNX Runtime inference.",
+      "text_hash": "344b9051327f0313",
+      "target_terms": [
+        "Bablu",
+        "CUDA",
+        "ONNX"
+      ],
+      "duration_sec": 4.44
+    },
+    {
+      "id": "pn_04",
+      "subset": "proper_nouns",
+      "split": "val",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_04.wav",
+      "text": "Rahul deployed the gRPC microservice with Kafka streaming.",
+      "text_hash": "0dba2d07b9dfb001",
+      "target_terms": [
+        "Rahul",
+        "gRPC",
+        "Kafka"
+      ],
+      "duration_sec": 5.3
+    },
+    {
+      "id": "pn_05",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_05.wav",
+      "text": "Priya benchmarked CTranslate2 quantization on Kubernetes nodes.",
+      "text_hash": "be6561f914307cde",
+      "target_terms": [
+        "Priya",
+        "CTranslate2",
+        "Kubernetes"
+      ],
+      "duration_sec": 5.5
+    },
+    {
+      "id": "pn_06",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_06.wav",
+      "text": "Vikram integrated OAuth tokens across the backend cluster.",
+      "text_hash": "6cb0fd64428fdd85",
+      "target_terms": [
+        "Vikram",
+        "OAuth"
+      ],
+      "duration_sec": 4.39
+    },
+    {
+      "id": "pn_07",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_07.wav",
+      "text": "Ananya evaluated TensorRT latency against OpenVINO baselines.",
+      "text_hash": "cc869975bba4e882",
+      "target_terms": [
+        "Ananya",
+        "TensorRT",
+        "OpenVINO"
+      ],
+      "duration_sec": 5.11
+    },
+    {
+      "id": "pn_08",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_08.wav",
+      "text": "Karthik paired Silero VAD with Whisper beam search.",
+      "text_hash": "78f8c792edadac54",
+      "target_terms": [
+        "Karthik",
+        "Silero",
+        "Whisper"
+      ],
+      "duration_sec": 4.61
+    },
+    {
+      "id": "pn_09",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_09.wav",
+      "text": "Rohan implemented SAPI5 fallback for Windows TTS output.",
+      "text_hash": "23b6d4dd60f58a97",
+      "target_terms": [
+        "Rohan",
+        "SAPI5"
+      ],
+      "duration_sec": 5.66
+    },
+    {
+      "id": "pn_10",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_10.wav",
+      "text": "Sneha audited the Llama embeddings inside ChromaDB.",
+      "text_hash": "df67fac2b6d25a46",
+      "target_terms": [
+        "Sneha",
+        "Llama",
+        "ChromaDB"
+      ],
+      "duration_sec": 4.2
+    },
+    {
+      "id": "pn_11",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_11.wav",
+      "text": "Deepa fixed race conditions in asyncio event loops.",
+      "text_hash": "f61836ac981eb442",
+      "target_terms": [
+        "Deepa",
+        "asyncio"
+      ],
+      "duration_sec": 3.94
+    },
+    {
+      "id": "pn_12",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_12.wav",
+      "text": "Aditya verified WeSpeaker CAM embeddings at twenty decibels.",
+      "text_hash": "3f0d11a79590ce81",
+      "target_terms": [
+        "Aditya",
+        "WeSpeaker"
+      ],
+      "duration_sec": 5.23
+    },
+    {
+      "id": "pn_13",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_13.wav",
+      "text": "Siddharth led the system architecture review with Krishnendu.",
+      "text_hash": "bcf162e793f451c8",
+      "target_terms": [
+        "Siddharth",
+        "Krishnendu"
+      ],
+      "duration_sec": 4.89
+    },
+    {
+      "id": "pn_14",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_14.wav",
+      "text": "Meera profiled Docker memory limits under concurrent load.",
+      "text_hash": "0ae565c6cd87c8e8",
+      "target_terms": [
+        "Meera",
+        "Docker"
+      ],
+      "duration_sec": 4.17
+    },
+    {
+      "id": "pn_15",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_15.wav",
+      "text": "Shreya wrote unit tests in pytest for FastAPI endpoints.",
+      "text_hash": "2416aee07fed6704",
+      "target_terms": [
+        "Shreya",
+        "pytest",
+        "FastAPI"
+      ],
+      "duration_sec": 4.73
+    },
+    {
+      "id": "pn_16",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_16.wav",
+      "text": "Varun reduced p99 latency in the Nginx reverse proxy.",
+      "text_hash": "87b7fa6a03a44f53",
+      "target_terms": [
+        "Varun",
+        "Nginx"
+      ],
+      "duration_sec": 6.0
+    },
+    {
+      "id": "pn_17",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_17.wav",
+      "text": "Gaurav configured Prometheus alerts on GPU utilization.",
+      "text_hash": "7f1205fed68ea737",
+      "target_terms": [
+        "Gaurav",
+        "Prometheus"
+      ],
+      "duration_sec": 4.94
+    },
+    {
+      "id": "pn_18",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_18.wav",
+      "text": "Tanvi deployed Kyutai Pocket TTS models on CPU.",
+      "text_hash": "3bd1fbddf6c5cacf",
+      "target_terms": [
+        "Tanvi",
+        "Kyutai"
+      ],
+      "duration_sec": 4.51
+    },
+    {
+      "id": "pn_19",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_19.wav",
+      "text": "Harish validated GraphQL schemas before production release.",
+      "text_hash": "c930990797266d7f",
+      "target_terms": [
+        "Harish",
+        "GraphQL"
+      ],
+      "duration_sec": 4.61
+    },
+    {
+      "id": "pn_20",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_20.wav",
+      "text": "Manish compared Qwen and Llama three quantization curves.",
+      "text_hash": "66b78213b19c1990",
+      "target_terms": [
+        "Manish",
+        "Qwen",
+        "Llama"
+      ],
+      "duration_sec": 4.85
+    },
+    {
+      "id": "pn_21",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_21.wav",
+      "text": "Pooja tuned Mel spectrogram filterbanks with SciPy.",
+      "text_hash": "d135f2aab5d7cde0",
+      "target_terms": [
+        "Pooja",
+        "SciPy"
+      ],
+      "duration_sec": 5.11
+    },
+    {
+      "id": "pn_22",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_22.wav",
+      "text": "Sanjay debugged WebSocket audio buffering in Chrome.",
+      "text_hash": "79f48d0f5c78942c",
+      "target_terms": [
+        "Sanjay",
+        "WebSocket"
+      ],
+      "duration_sec": 4.13
+    },
+    {
+      "id": "pn_23",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_23.wav",
+      "text": "Nikhil refactored dependency injection in Python three point ten.",
+      "text_hash": "6b0fc9c2fc49025f",
+      "target_terms": [
+        "Nikhil",
+        "Python"
+      ],
+      "duration_sec": 4.78
+    },
+    {
+      "id": "pn_24",
+      "subset": "proper_nouns",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/pn_24.wav",
+      "text": "Swati inspected LibriSpeech transcription error rates.",
+      "text_hash": "8dfa61a3501e6a9c",
+      "target_terms": [
+        "Swati",
+        "LibriSpeech"
+      ],
+      "duration_sec": 4.7
+    },
+    {
+      "id": "qa_00",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_00.wav",
+      "text": "Hello Mira, good morning, can we start the interview?",
+      "text_hash": "607c5e46ad6b01b1",
+      "intent_label": "greeting",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 4.49
+    },
+    {
+      "id": "qa_01",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_01.wav",
+      "text": "Hi everyone, great to meet you for today's system check.",
+      "text_hash": "c062a095396b5f31",
+      "intent_label": "greeting",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.98
+    },
+    {
+      "id": "qa_02",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_02.wav",
+      "text": "Good afternoon, Sachin is ready to begin.",
+      "text_hash": "1e25bb22ed4bb241",
+      "intent_label": "greeting",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.38
+    },
+    {
+      "id": "qa_03",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_03.wav",
+      "text": "Hey there, let us start with our voice test.",
+      "text_hash": "830f1e3d564de578",
+      "intent_label": "greeting",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 4.17
+    },
+    {
+      "id": "qa_04",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_04.wav",
+      "text": "Good evening, I am joining from Bengaluru for the interview.",
+      "text_hash": "477c1fafcccc716a",
+      "intent_label": "greeting",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 4.44
+    },
+    {
+      "id": "qa_05",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_05.wav",
+      "text": "Who are you and how does this assistant work?",
+      "text_hash": "180fe42c7a718f73",
+      "intent_label": "identity_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.12
+    },
+    {
+      "id": "qa_06",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_06.wav",
+      "text": "Introduce yourself and explain your role in this call.",
+      "text_hash": "779a5ff8ac1ade0b",
+      "intent_label": "identity_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.65
+    },
+    {
+      "id": "qa_07",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_07.wav",
+      "text": "What is your name and what framework powers you?",
+      "text_hash": "ce1218bfad474bba",
+      "intent_label": "identity_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 4.05
+    },
+    {
+      "id": "qa_08",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_08.wav",
+      "text": "Are you an automated interviewer or a co-pilot?",
+      "text_hash": "d2a8feab5d5ed1b5",
+      "intent_label": "identity_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.84
+    },
+    {
+      "id": "qa_09",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_09.wav",
+      "text": "Tell me who built this assistant and its purpose.",
+      "text_hash": "2d7a7f9cee7540d1",
+      "intent_label": "identity_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.46
+    },
+    {
+      "id": "qa_10",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_10.wav",
+      "text": "Can you explain the six stages of your SOLID pipeline?",
+      "text_hash": "bb96b07fc2b02263",
+      "intent_label": "project_query",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        7,
+        9
+      ],
+      "duration_sec": 3.67
+    },
+    {
+      "id": "qa_11",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_11.wav",
+      "text": "How is the capstone architecture decoupled across services?",
+      "text_hash": "2b87def535e64cd9",
+      "intent_label": "project_query",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        7,
+        9
+      ],
+      "duration_sec": 4.73
+    },
+    {
+      "id": "qa_12",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_12.wav",
+      "text": "Walk me through the model contracts in your pipeline.",
+      "text_hash": "8366559d1dd33318",
+      "intent_label": "project_query",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        7,
+        9
+      ],
+      "duration_sec": 4.03
+    },
+    {
+      "id": "qa_13",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_13.wav",
+      "text": "Explain how the ASR and TTS modules communicate cleanly.",
+      "text_hash": "981daa47d29bced8",
+      "intent_label": "project_query",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        7,
+        9
+      ],
+      "duration_sec": 4.73
+    },
+    {
+      "id": "qa_14",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_14.wav",
+      "text": "What is the SOLID design behind your voice agent?",
+      "text_hash": "17ba3e4ff6e83025",
+      "intent_label": "project_query",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        7,
+        9
+      ],
+      "duration_sec": 3.43
+    },
+    {
+      "id": "qa_15",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_15.wav",
+      "text": "Calculate 48 multiplied by 12 for throughput estimation.",
+      "text_hash": "892938f43ad56fa3",
+      "intent_label": "calculation_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 5.42
+    },
+    {
+      "id": "qa_16",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_16.wav",
+      "text": "What is 250 plus 175 milliseconds total latency?",
+      "text_hash": "ab1e7bdb522efbf4",
+      "intent_label": "calculation_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 6.29
+    },
+    {
+      "id": "qa_17",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_17.wav",
+      "text": "How much is 1024 divided by 16?",
+      "text_hash": "125431356d6b9dd3",
+      "intent_label": "calculation_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.72
+    },
+    {
+      "id": "qa_18",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_18.wav",
+      "text": "Calculate 95 minus 28 percent error reduction.",
+      "text_hash": "e2fe1f38430a8df8",
+      "intent_label": "calculation_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 4.42
+    },
+    {
+      "id": "qa_19",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_19.wav",
+      "text": "What is 15 times 60 requests per minute?",
+      "text_hash": "204c34ed01c39d95",
+      "intent_label": "calculation_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 4.15
+    },
+    {
+      "id": "qa_20",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_20.wav",
+      "text": "What time is it right now on the server?",
+      "text_hash": "61ca63b606c6abd7",
+      "intent_label": "time_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        4,
+        7
+      ],
+      "duration_sec": 3.33
+    },
+    {
+      "id": "qa_21",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_21.wav",
+      "text": "Can you tell me the current time before we wrap up?",
+      "text_hash": "8338f00bc402c03b",
+      "intent_label": "time_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        4,
+        7
+      ],
+      "duration_sec": 3.5
+    },
+    {
+      "id": "qa_22",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_22.wav",
+      "text": "What is the current time in our interview schedule?",
+      "text_hash": "c483033642449b64",
+      "intent_label": "time_query",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        4,
+        7
+      ],
+      "duration_sec": 3.12
+    },
+    {
+      "id": "qa_23",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_23.wav",
+      "text": "I used Redis read replicas and consistent hashing shards to cut latency under forty milliseconds with idempotent retries.",
+      "text_hash": "21442842ddc9c40d",
+      "intent_label": "answer",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        8,
+        10
+      ],
+      "duration_sec": 10.03
+    },
+    {
+      "id": "qa_24",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_24.wav",
+      "text": "To survive fifty times read traffic, I combined Kafka queues, Redis TTL invalidation, circuit breakers, and strict Prometheus observability.",
+      "text_hash": "6b876d7b1092f50f",
+      "intent_label": "answer",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        8,
+        10
+      ],
+      "duration_sec": 11.09
+    },
+    {
+      "id": "qa_25",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_25.wav",
+      "text": "We implemented the saga orchestration pattern across distributed microservices to keep database commits ACID-consistent under failover.",
+      "text_hash": "de74c87195db5bad",
+      "intent_label": "answer",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        8,
+        10
+      ],
+      "duration_sec": 8.33
+    },
+    {
+      "id": "qa_26",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_26.wav",
+      "text": "During the outage, I isolated the database connection pool leak, rolled back the faulty release, and added chaos tests.",
+      "text_hash": "ae6440c9c5b0983b",
+      "intent_label": "answer",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        8,
+        10
+      ],
+      "duration_sec": 7.94
+    },
+    {
+      "id": "qa_27",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_27.wav",
+      "text": "For neural voice cloning, we separate the speaker encoder from the acoustic flow model to maintain low latency.",
+      "text_hash": "2611214d6d08c20d",
+      "intent_label": "answer",
+      "rubric_tier": "high",
+      "expected_score_range": [
+        8,
+        10
+      ],
+      "duration_sec": 8.23
+    },
+    {
+      "id": "qa_28",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_28.wav",
+      "text": "We added a database index and some caching to make queries faster when traffic increased.",
+      "text_hash": "bbdf781706814f3e",
+      "intent_label": "answer",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 6.5
+    },
+    {
+      "id": "qa_29",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_29.wav",
+      "text": "I think we can put a load balancer in front of the backend servers and restart failed containers.",
+      "text_hash": "5a19ab67620ea21c",
+      "intent_label": "answer",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 5.74
+    },
+    {
+      "id": "qa_30",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_30.wav",
+      "text": "We normally store user records in SQL and send asynchronous tasks to a background queue.",
+      "text_hash": "843c5b27dab07939",
+      "intent_label": "answer",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 5.95
+    },
+    {
+      "id": "qa_31",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_31.wav",
+      "text": "My team updated the API endpoint validation so bad requests fail early before touching disk.",
+      "text_hash": "9888d59fac7eed7d",
+      "intent_label": "answer",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 7.82
+    },
+    {
+      "id": "qa_32",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_32.wav",
+      "text": "Maybe just add more RAM to the database server and check logs later.",
+      "text_hash": "04dd4c781bd1d6ff",
+      "intent_label": "answer",
+      "rubric_tier": "low",
+      "expected_score_range": [
+        2,
+        5
+      ],
+      "duration_sec": 5.42
+    },
+    {
+      "id": "qa_33",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_33.wav",
+      "text": "I am not really sure how distributed consistency works, we never tested failures.",
+      "text_hash": "c9db54426a950a9b",
+      "intent_label": "answer",
+      "rubric_tier": "low",
+      "expected_score_range": [
+        1,
+        4
+      ],
+      "duration_sec": 5.5
+    },
+    {
+      "id": "qa_34",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_34.wav",
+      "text": "Usually I just copy code until tests pass without tracking latency metrics.",
+      "text_hash": "083b95b17daa5b3c",
+      "intent_label": "answer",
+      "rubric_tier": "low",
+      "expected_score_range": [
+        1,
+        4
+      ],
+      "duration_sec": 5.54
+    },
+    {
+      "id": "qa_35",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_35.wav",
+      "text": "Yes, caching sounds fine to use somewhere in the project.",
+      "text_hash": "28d5c70fb4a64d0c",
+      "intent_label": "answer",
+      "rubric_tier": "low",
+      "expected_score_range": [
+        2,
+        5
+      ],
+      "duration_sec": 4.89
+    },
+    {
+      "id": "qa_36",
+      "subset": "interview_qa",
+      "split": "val",
+      "voice": "en-IN-NeerjaNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_36.wav",
+      "text": "Thank you for the interview, goodbye for now!",
+      "text_hash": "771d36872ea0e388",
+      "intent_label": "farewell",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.5
+    },
+    {
+      "id": "qa_37",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-GuyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_37.wav",
+      "text": "That concludes my answers, see you later and bye.",
+      "text_hash": "08b08ebee97a9c5c",
+      "intent_label": "farewell",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.6
+    },
+    {
+      "id": "qa_38",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-US-JennyNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_38.wav",
+      "text": "Alright, let us exit the session now, goodbye.",
+      "text_hash": "8d474f46f06d7252",
+      "intent_label": "farewell",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 3.79
+    },
+    {
+      "id": "qa_39",
+      "subset": "interview_qa",
+      "split": "test",
+      "voice": "en-IN-PrabhatNeural",
+      "audio_path": "storage/benchmarks/interview_stress_v1/qa_39.wav",
+      "text": "Thanks Mira, quit the interview and have a good day.",
+      "text_hash": "0d23664b51fdc0e2",
+      "intent_label": "farewell",
+      "rubric_tier": "mid",
+      "expected_score_range": [
+        5,
+        7
+      ],
+      "duration_sec": 4.51
+    }
+  ]
+}

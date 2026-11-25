@@ -79,18 +79,18 @@ All remote manifests are fetched in **Session 4** via lightweight streaming slic
 ### Session 3 — True Zero-Shot Neural Voice Cloning (`Kyutai Pocket TTS INT8`) — `Done`
 - **Status**: Verified `47 passed` in `test_pipeline.py` (Commits pending/Session 3); Kyutai Pocket TTS INT8 (`24 kHz`, CPU RTF `0.482`, `bria.wav` CAM++ CosSim `0.7444`, roundtrip WER `0.0`) integrated in `PocketTTSCloningService`, `PipelineFactory`, `/api/test/stage5-tts`, and `/tts` studio UI.
 
-### Session 4 — Reproducible Benchmark Datasets & Dataset Card — `Next`
-- **Files**: `ml/datasets/prepare_benchmarks.py`, `ml/cards/dataset_card.md`, `test_pipeline.py`.
+### Session 4 — Reproducible Benchmark Datasets & Dataset Card — `Done`
+- **Files**: `ml/datasets/__init__.py`, `ml/datasets/prepare_benchmarks.py`, `ml/datasets/manifests/{librispeech_60,minds14_en_140,clinc_oos_200,interview_stress_v1}.json`, `ml/cards/dataset_card.md`, `test_pipeline.py`.
 - **Implementation Spec**:
   1. Write clean fetcher caching compact slices (`<=150 MB` total in gitignored `storage/benchmarks/` + versioned manifest metadata):
-     - `librispeech_60.json` (60 FLACs, >=10 speakers) + deterministic AWGN generator helper (`add_awgn(audio, snr_db, seed)` for `20 dB` & `10 dB`, never baked redundantly to disk).
-     - `minds14_en_140.json` (stratified 35/15/50 splits across `en-US`, `en-GB`, `en-AU`, deduplicated by transcript hash).
-     - `clinc_oos_200.json` (`small` val/test split).
-     - `interview_stress_v1.jsonl` (40 QA turns + 25 proper nouns, rendered via held-out `EdgeTTS` MP3->WAV so no generator overlap exists with Piper or Pocket TTS).
-  2. Write `ml/cards/dataset_card.md` covering collection, splits, leakage checks, noise protocol, and ethical/bias notes.
-- **Exit Gate**: Manifest verification test confirms non-empty files, exact split disjointness (`set(val) & set(test) == empty`), and schema integrity.
+     - `librispeech_60.json` (60 FLACs, 12 speakers, `enroll:12 / val:12 / test:36`) + deterministic AWGN generator helper (`add_awgn(audio, snr_db, seed)` for `20 dB` & `10 dB`, never baked redundantly to disk).
+     - `minds14_en_140.json` (140 WAVs, 14 intents x 10 items, stratified `dev:42 / val:28 / test:70` across `en-US`, `en-GB`, `en-AU`, deduplicated by `text_sha256`).
+     - `clinc_oos_200.json` (200 text samples, 15 classes incl. `oos`, `val:100 / test:100`).
+     - `interview_stress_v1.json` (40 QA turns across 7 intents & 3 rubric tiers + 25 South-Asian/tech proper-noun turns, `val:15 / test:50`, rendered via held-out `EdgeTTS` MP3->WAV so no generator overlap exists with Piper or Pocket TTS).
+  2. Write `ml/cards/dataset_card.md` covering collection, splits, leakage checks (`0` cross-split `text_hash` collisions), noise protocol, and ethical/bias notes.
+- **Status**: Verified `49 passed in 50.65s` in `test_pipeline.py`; total local audio cache `37.70 MB` across 265 files (`0` cross-split collisions across all 4 manifests).
 
-### Session 5 — Layer A (Stage 2 ASR) Baseline + Contextual Logit Biasing & Phonetic Repair
+### Session 5 — Layer A (Stage 2 ASR) Baseline + Contextual Logit Biasing & Phonetic Repair — `Next`
 - **Files**: `services/asr/asr_services.py`, `ml/configs/asr_*.json`, `ml/experiments/run_asr_ablation.py`, `ml/results/asr_ablation.json`.
 - **Implementation Spec**:
   1. Upgrade `WhisperTransformerASR` minimally without bloat:

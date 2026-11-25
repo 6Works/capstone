@@ -1,0 +1,1431 @@
+{
+  "name": "minds14_en_140",
+  "source": "PolyAI/minds14 (en-US, en-GB, en-AU)",
+  "license": "CC-BY-4.0",
+  "seed": 42,
+  "num_intents": 14,
+  "intent_labels": [
+    "abroad",
+    "address",
+    "app_error",
+    "atm_limit",
+    "balance",
+    "business_loan",
+    "card_issues",
+    "cash_deposit",
+    "direct_debit",
+    "freeze",
+    "high_value_payment",
+    "joint_account",
+    "latest_transactions",
+    "pay_bill"
+  ],
+  "total_items": 140,
+  "split_counts": {
+    "dev": 42,
+    "val": 28,
+    "test": 70
+  },
+  "items": [
+    {
+      "id": "en-US_312_0",
+      "accent": "en-US",
+      "intent_label": "abroad",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_312_0.wav",
+      "text": "like this Christmas going on vacation and they're trying to get everything figured out before they go",
+      "text_hash": "3b3bf66d52b099cd",
+      "duration_sec": 18.43
+    },
+    {
+      "id": "en-US_301_0",
+      "accent": "en-US",
+      "intent_label": "abroad",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_301_0.wav",
+      "text": "I'm planning to go to the UK on the 16th and come back on the 24th I was wondering if my car",
+      "text_hash": "f5b027d7c7af46d2",
+      "duration_sec": 11.15
+    },
+    {
+      "id": "en-US_316_0",
+      "accent": "en-US",
+      "intent_label": "abroad",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_316_0.wav",
+      "text": "oh yes I'm going to Japan for a couple of weeks on vacation and I wanted to know if I can use my card",
+      "text_hash": "40a7915d39fa3147",
+      "duration_sec": 7.77
+    },
+    {
+      "id": "en-US_307_0",
+      "accent": "en-US",
+      "intent_label": "abroad",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_307_0.wav",
+      "text": "hello I'm calling you to see if I can use my card abroad currently I'm in Japan and I don't know if I'm able to use my card processing in some stores",
+      "text_hash": "c53b4e1dcdbd99d6",
+      "duration_sec": 13.4
+    },
+    {
+      "id": "en-GB_221_0",
+      "accent": "en-GB",
+      "intent_label": "abroad",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_221_0.wav",
+      "text": "I just needed to know whether my debit card is going to work when I go travelling I'm going to visit a variety of different countries in Europe and Asia and just want to see is it going to work in B what the chart is going to be",
+      "text_hash": "08fc208c149bbf5c",
+      "duration_sec": 16.9
+    },
+    {
+      "id": "en-GB_245_0",
+      "accent": "en-GB",
+      "intent_label": "abroad",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_245_0.wav",
+      "text": "hi I'm going on holiday I want to know my car don't work when I'm abroad",
+      "text_hash": "2c13fd47a699dfab",
+      "duration_sec": 5.8
+    },
+    {
+      "id": "en-US_295_0",
+      "accent": "en-US",
+      "intent_label": "abroad",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_295_0.wav",
+      "text": "good morning I am going to be taking a trip to Germany shortly and wanted to know whether my bank card will work with",
+      "text_hash": "e06eea10f4238bf8",
+      "duration_sec": 18.77
+    },
+    {
+      "id": "en-AU_250_0",
+      "accent": "en-AU",
+      "intent_label": "abroad",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_250_0.wav",
+      "text": "I'm going overseas and I need to check my credit card works ok but ok overseas",
+      "text_hash": "0552c186d3e6f68e",
+      "duration_sec": 8.52
+    },
+    {
+      "id": "en-US_302_0",
+      "accent": "en-US",
+      "intent_label": "abroad",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_302_0.wav",
+      "text": "hi I'm going to be traveling abroad in Japan and I just wondered if I'm going to be able to use my bank card when I'm there if you could let me know that would be great thank you",
+      "text_hash": "e2b4ce8b0b3c0707",
+      "duration_sec": 11.86
+    },
+    {
+      "id": "en-AU_268_0",
+      "accent": "en-AU",
+      "intent_label": "abroad",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_268_0.wav",
+      "text": "oh hi there I want to find out if the card I've got from the bank can work when I'm overseas",
+      "text_hash": "6dee8222c342ff04",
+      "duration_sec": 9.32
+    },
+    {
+      "id": "en-GB_128_1",
+      "accent": "en-GB",
+      "intent_label": "address",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_128_1.wav",
+      "text": "hi there I would like to change my address today",
+      "text_hash": "bfc491966fdcf17d",
+      "duration_sec": 3.9
+    },
+    {
+      "id": "en-GB_118_1",
+      "accent": "en-GB",
+      "intent_label": "address",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_118_1.wav",
+      "text": "change the address on PayPal",
+      "text_hash": "2a36bf1383c69fab",
+      "duration_sec": 4.44
+    },
+    {
+      "id": "en-GB_157_1",
+      "accent": "en-GB",
+      "intent_label": "address",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_157_1.wav",
+      "text": "hi I want to change my address on my account",
+      "text_hash": "f8a0c212003cdcdd",
+      "duration_sec": 4.35
+    },
+    {
+      "id": "en-GB_145_1",
+      "accent": "en-GB",
+      "intent_label": "address",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_145_1.wav",
+      "text": "hello I wonder if you can help me I want to update my address on my policy",
+      "text_hash": "4f1b45a14d830501",
+      "duration_sec": 9.57
+    },
+    {
+      "id": "en-US_235_1",
+      "accent": "en-US",
+      "intent_label": "address",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_235_1.wav",
+      "text": "my address I want to change my address",
+      "text_hash": "08817b9a2785058b",
+      "duration_sec": 4.44
+    },
+    {
+      "id": "en-AU_236_1",
+      "accent": "en-AU",
+      "intent_label": "address",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_236_1.wav",
+      "text": "hello how did my name is help me today I just want to update my address details on my account",
+      "text_hash": "1e90b17342eb4296",
+      "duration_sec": 12.03
+    },
+    {
+      "id": "en-GB_135_1",
+      "accent": "en-GB",
+      "intent_label": "address",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_135_1.wav",
+      "text": "hello I would like to change my address please",
+      "text_hash": "ef38fb5697f843cf",
+      "duration_sec": 4.61
+    },
+    {
+      "id": "en-GB_137_1",
+      "accent": "en-GB",
+      "intent_label": "address",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_137_1.wav",
+      "text": "afternoon I'm phoning because it would appear that your records show my old address I'd like to change the stress days my speaking to the right department thank you",
+      "text_hash": "d13d03d15c36f8e3",
+      "duration_sec": 16.73
+    },
+    {
+      "id": "en-GB_132_1",
+      "accent": "en-GB",
+      "intent_label": "address",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_132_1.wav",
+      "text": "I want to change my bank address",
+      "text_hash": "89c1459b98e4002a",
+      "duration_sec": 3.07
+    },
+    {
+      "id": "en-AU_213_1",
+      "accent": "en-AU",
+      "intent_label": "address",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_213_1.wav",
+      "text": "now I'm looking to change my address please",
+      "text_hash": "6230b466b61036ac",
+      "duration_sec": 6.23
+    },
+    {
+      "id": "en-US_201_2",
+      "accent": "en-US",
+      "intent_label": "app_error",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_201_2.wav",
+      "text": "if my app is not loading and I cannot access my account",
+      "text_hash": "1f9fef52811cd749",
+      "duration_sec": 6.06
+    },
+    {
+      "id": "en-US_205_2",
+      "accent": "en-US",
+      "intent_label": "app_error",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_205_2.wav",
+      "text": "hello I'm calling for technical difficulties I cannot access my bank account and I was wondering what the problem is thank you",
+      "text_hash": "1790cb9173b16af9",
+      "duration_sec": 9.39
+    },
+    {
+      "id": "en-US_180_2",
+      "accent": "en-US",
+      "intent_label": "app_error",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_180_2.wav",
+      "text": "hi good morning to you don't like to make a complaint I've been trying to look up my house I don't know why thank you",
+      "text_hash": "4fadef8d8456424c",
+      "duration_sec": 9.98
+    },
+    {
+      "id": "en-AU_118_2",
+      "accent": "en-AU",
+      "intent_label": "app_error",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_118_2.wav",
+      "text": "I downloaded the app and the app doesn't seem to be working with my current phone so I was wondering if there's any other way I can access me information without the app that would be good because I just can't get it to work",
+      "text_hash": "dcef9f7e2f0a843d",
+      "duration_sec": 20.65
+    },
+    {
+      "id": "en-GB_109_2",
+      "accent": "en-GB",
+      "intent_label": "app_error",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_109_2.wav",
+      "text": "the app is not working properly the page the app is showing in error message the app is being serviced so I can't access my account and you to access my account the app is not working",
+      "text_hash": "95ff45a569d43212",
+      "duration_sec": 15.62
+    },
+    {
+      "id": "en-US_183_2",
+      "accent": "en-US",
+      "intent_label": "app_error",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_183_2.wav",
+      "text": "hello I'm having a problem with my with the app it won't load my account",
+      "text_hash": "3c8332e7206fcc60",
+      "duration_sec": 12.97
+    },
+    {
+      "id": "en-GB_111_2",
+      "accent": "en-GB",
+      "intent_label": "app_error",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_111_2.wav",
+      "text": "hello I'm trying to use the app on my phone and for getting the bank details but it's not loading correctly just possibly help me",
+      "text_hash": "4096d078768df0c2",
+      "duration_sec": 12.63
+    },
+    {
+      "id": "en-US_209_2",
+      "accent": "en-US",
+      "intent_label": "app_error",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_209_2.wav",
+      "text": "hi there I'm having difficulties using your ass I can't get it to log on or work properly thanks",
+      "text_hash": "3677f6b4beb38dac",
+      "duration_sec": 11.15
+    },
+    {
+      "id": "en-US_190_2",
+      "accent": "en-US",
+      "intent_label": "app_error",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_190_2.wav",
+      "text": "app will not load on my phone",
+      "text_hash": "72d76b52db3131b2",
+      "duration_sec": 5.21
+    },
+    {
+      "id": "en-GB_92_2",
+      "accent": "en-GB",
+      "intent_label": "app_error",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_92_2.wav",
+      "text": "I am nothing tried to access my banking app all morning but it keeps crashing it doesn't seem to be working could you help me please",
+      "text_hash": "290cd51f667f2b74",
+      "duration_sec": 9.38
+    },
+    {
+      "id": "en-AU_165_3",
+      "accent": "en-AU",
+      "intent_label": "atm_limit",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_165_3.wav",
+      "text": "clue I'm ringing up to try and find out about what's my limit to draw cash from my from the ATM",
+      "text_hash": "a92f38ac9a53bd11",
+      "duration_sec": 12.54
+    },
+    {
+      "id": "en-US_284_3",
+      "accent": "en-US",
+      "intent_label": "atm_limit",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_284_3.wav",
+      "text": "what's the most amount of money I can withdraw at one time and during an entire day from an ATM machine",
+      "text_hash": "76b4c87f2796f700",
+      "duration_sec": 9.98
+    },
+    {
+      "id": "en-GB_162_3",
+      "accent": "en-GB",
+      "intent_label": "atm_limit",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_162_3.wav",
+      "text": "hi there how much money can I withdraw from the ATM",
+      "text_hash": "ecd05e43bf428b1a",
+      "duration_sec": 5.39
+    },
+    {
+      "id": "en-GB_171_3",
+      "accent": "en-GB",
+      "intent_label": "atm_limit",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_171_3.wav",
+      "text": "hi I'm trying to withdraw some money from the ATM cash machine and wondering what is the maximum amount of money that I can withdraw thank you",
+      "text_hash": "dc862f21c4da523e",
+      "duration_sec": 10.15
+    },
+    {
+      "id": "en-GB_167_3",
+      "accent": "en-GB",
+      "intent_label": "atm_limit",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_167_3.wav",
+      "text": "what is the maximum amount that I can withdraw from an ATM",
+      "text_hash": "06c080450fca2c80",
+      "duration_sec": 4.95
+    },
+    {
+      "id": "en-US_269_3",
+      "accent": "en-US",
+      "intent_label": "atm_limit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_269_3.wav",
+      "text": "hi I was wondering what the maximum ATM withdrawal limit",
+      "text_hash": "57b31741446b0d31",
+      "duration_sec": 5.55
+    },
+    {
+      "id": "en-AU_155_3",
+      "accent": "en-AU",
+      "intent_label": "atm_limit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_155_3.wav",
+      "text": "what is my maximum ATM withdrawal amount",
+      "text_hash": "2f1547bb194e9284",
+      "duration_sec": 3.93
+    },
+    {
+      "id": "en-AU_146_3",
+      "accent": "en-AU",
+      "intent_label": "atm_limit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_146_3.wav",
+      "text": "I want to redraw money from the ATM and I'm wondering what is the maximum amount of money I can redraw at the ATM is that possible for me to increase my withdrawal limit at a cash machine or do I have to do it on the apps or something else",
+      "text_hash": "9050bc92549d0213",
+      "duration_sec": 24.15
+    },
+    {
+      "id": "en-GB_174_3",
+      "accent": "en-GB",
+      "intent_label": "atm_limit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_174_3.wav",
+      "text": "I'm just ringing to ask it what is the actual limit at the ATM I can withdraw my bank account",
+      "text_hash": "a3fe26d3b900f43e",
+      "duration_sec": 9.13
+    },
+    {
+      "id": "en-US_263_3",
+      "accent": "en-US",
+      "intent_label": "atm_limit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_263_3.wav",
+      "text": "what's the maximum amount I can withdraw from an ATM",
+      "text_hash": "8c63a7680e69919e",
+      "duration_sec": 6.57
+    },
+    {
+      "id": "en-AU_325_4",
+      "accent": "en-AU",
+      "intent_label": "balance",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_325_4.wav",
+      "text": "could you please check my account balance",
+      "text_hash": "4b3fff9c707ac097",
+      "duration_sec": 3.33
+    },
+    {
+      "id": "en-US_72_4",
+      "accent": "en-US",
+      "intent_label": "balance",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_72_4.wav",
+      "text": "how much do I have in my account",
+      "text_hash": "66318924521c6e20",
+      "duration_sec": 3.33
+    },
+    {
+      "id": "en-AU_353_4",
+      "accent": "en-AU",
+      "intent_label": "balance",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_353_4.wav",
+      "text": "what is the balance of my account",
+      "text_hash": "3c186f01ef121cc2",
+      "duration_sec": 3.58
+    },
+    {
+      "id": "en-US_82_4",
+      "accent": "en-US",
+      "intent_label": "balance",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_82_4.wav",
+      "text": "I would like to know what my current account balance shows",
+      "text_hash": "4f63c14838e90316",
+      "duration_sec": 3.24
+    },
+    {
+      "id": "en-GB_299_4",
+      "accent": "en-GB",
+      "intent_label": "balance",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_299_4.wav",
+      "text": "hi I'm calling I'd like to find out what my bank balance is now",
+      "text_hash": "73bc18d6fd539742",
+      "duration_sec": 5.63
+    },
+    {
+      "id": "en-AU_344_4",
+      "accent": "en-AU",
+      "intent_label": "balance",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_344_4.wav",
+      "text": "I'm calling to check my account balance on my savings account",
+      "text_hash": "ecebfd6c6c01f84c",
+      "duration_sec": 9.52
+    },
+    {
+      "id": "en-GB_296_4",
+      "accent": "en-GB",
+      "intent_label": "balance",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_296_4.wav",
+      "text": "hi I'd like to make an enquiry about my account balance please",
+      "text_hash": "6a5bbdf8f3cc081b",
+      "duration_sec": 5.11
+    },
+    {
+      "id": "en-AU_350_4",
+      "accent": "en-AU",
+      "intent_label": "balance",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_350_4.wav",
+      "text": "oh hi I'm only better that I was just wanting to check my account balance my account with your with the bank please",
+      "text_hash": "75f381958db2fc75",
+      "duration_sec": 10.38
+    },
+    {
+      "id": "en-AU_356_4",
+      "accent": "en-AU",
+      "intent_label": "balance",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_356_4.wav",
+      "text": "could you please tell me the balance of my account",
+      "text_hash": "b3878dbbce4679b9",
+      "duration_sec": 5.72
+    },
+    {
+      "id": "en-US_43_4",
+      "accent": "en-US",
+      "intent_label": "balance",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_43_4.wav",
+      "text": "show me my current countdown",
+      "text_hash": "25b009b14f999b62",
+      "duration_sec": 4.69
+    },
+    {
+      "id": "en-AU_437_5",
+      "accent": "en-AU",
+      "intent_label": "business_loan",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_437_5.wav",
+      "text": "crafternoon look I'm actually looking to take out a business loan I was just looking for some information regarding that thank you",
+      "text_hash": "38734c46dca3d9e2",
+      "duration_sec": 11.26
+    },
+    {
+      "id": "en-GB_378_5",
+      "accent": "en-GB",
+      "intent_label": "business_loan",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_378_5.wav",
+      "text": "business phone",
+      "text_hash": "eba2fde653f24af3",
+      "duration_sec": 2.47
+    },
+    {
+      "id": "en-AU_439_5",
+      "accent": "en-AU",
+      "intent_label": "business_loan",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_439_5.wav",
+      "text": "I am calling about a business loan",
+      "text_hash": "9a42d338965702ba",
+      "duration_sec": 3.93
+    },
+    {
+      "id": "en-AU_449_5",
+      "accent": "en-AU",
+      "intent_label": "business_loan",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_449_5.wav",
+      "text": "I just want to ask a question about getting a loan for my business",
+      "text_hash": "79f5fe9ffd17e0c9",
+      "duration_sec": 5.85
+    },
+    {
+      "id": "en-US_561_5",
+      "accent": "en-US",
+      "intent_label": "business_loan",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_561_5.wav",
+      "text": "hello I would like to take alone",
+      "text_hash": "dc0950c4b5ab01a3",
+      "duration_sec": 16.53
+    },
+    {
+      "id": "en-GB_388_5",
+      "accent": "en-GB",
+      "intent_label": "business_loan",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_388_5.wav",
+      "text": "I'm calling about a business loan",
+      "text_hash": "4454d05d4d1cbe6a",
+      "duration_sec": 2.88
+    },
+    {
+      "id": "en-GB_381_5",
+      "accent": "en-GB",
+      "intent_label": "business_loan",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_381_5.wav",
+      "text": "just wondering if you can give me a lay down and protocol on hire bikes I go to acquire a new business start-up in the past couple of weeks and I would like to go further plan whatever you need",
+      "text_hash": "4f7e3dd3957a3308",
+      "duration_sec": 13.14
+    },
+    {
+      "id": "en-GB_414_5",
+      "accent": "en-GB",
+      "intent_label": "business_loan",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_414_5.wav",
+      "text": "I want I know about a new line",
+      "text_hash": "1ea830f89ef85aab",
+      "duration_sec": 4.61
+    },
+    {
+      "id": "en-US_526_5",
+      "accent": "en-US",
+      "intent_label": "business_loan",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_526_5.wav",
+      "text": "I want to apply for a business loan",
+      "text_hash": "5c57bb52279de6e9",
+      "duration_sec": 3.67
+    },
+    {
+      "id": "en-US_540_5",
+      "accent": "en-US",
+      "intent_label": "business_loan",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_540_5.wav",
+      "text": "hi there I'm just calling to inquire about getting a new business loan and Howard",
+      "text_hash": "d94fb07dec345225",
+      "duration_sec": 11.18
+    },
+    {
+      "id": "en-GB_339_6",
+      "accent": "en-GB",
+      "intent_label": "card_issues",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_339_6.wav",
+      "text": "hi I'm how do you need to make a payment on my card and it says declined",
+      "text_hash": "8b31afcee9e36765",
+      "duration_sec": 6.74
+    },
+    {
+      "id": "en-GB_359_6",
+      "accent": "en-GB",
+      "intent_label": "card_issues",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_359_6.wav",
+      "text": "my card is not working",
+      "text_hash": "355d4812828e4398",
+      "duration_sec": 4.61
+    },
+    {
+      "id": "en-AU_405_6",
+      "accent": "en-AU",
+      "intent_label": "card_issues",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_405_6.wav",
+      "text": "hello I was wondering if you could please help me with my card",
+      "text_hash": "380069db1dc99bf9",
+      "duration_sec": 3.67
+    },
+    {
+      "id": "en-GB_355_6",
+      "accent": "en-GB",
+      "intent_label": "card_issues",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_355_6.wav",
+      "text": "can you help me with my car I can't use it it doesn't work",
+      "text_hash": "59bf12584a3b759d",
+      "duration_sec": 5.03
+    },
+    {
+      "id": "en-AU_402_6",
+      "accent": "en-AU",
+      "intent_label": "card_issues",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_402_6.wav",
+      "text": "hello I was completing my grocery shopping a bit earlier in the day and my card declined I've logged into my online account and I see that I have funds available so can you tell me why my card is declining",
+      "text_hash": "5d7800bdda7ca437",
+      "duration_sec": 17.75
+    },
+    {
+      "id": "en-US_479_6",
+      "accent": "en-US",
+      "intent_label": "card_issues",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_479_6.wav",
+      "text": "good morning I'm trying to use my ATM debit card and it is coming up I was wondering if you tell me why I have enough money in the account to cover the charges",
+      "text_hash": "362a0ca865487f2c",
+      "duration_sec": 25.94
+    },
+    {
+      "id": "en-US_515_6",
+      "accent": "en-US",
+      "intent_label": "card_issues",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_515_6.wav",
+      "text": "I'm trying to make a purchase on Amazon but my card keeps declining",
+      "text_hash": "c16aebd3e39bc325",
+      "duration_sec": 7.94
+    },
+    {
+      "id": "en-GB_337_6",
+      "accent": "en-GB",
+      "intent_label": "card_issues",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_337_6.wav",
+      "text": "hi I'm just wondering if you're happy with my bank card please my cash but it's not working",
+      "text_hash": "bae34ef55eb9bff6",
+      "duration_sec": 10.41
+    },
+    {
+      "id": "en-AU_415_6",
+      "accent": "en-AU",
+      "intent_label": "card_issues",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_415_6.wav",
+      "text": "hello ID like to report a problem with my card it's been declined ever since this morning and it just will not work I didn't look at myself nothing suspicious has been taken out but not check the app so I'm a bit confused I would like to have some insight as to why doesn't work",
+      "text_hash": "cdbc3b71e543f2dc",
+      "duration_sec": 20.99
+    },
+    {
+      "id": "en-AU_406_6",
+      "accent": "en-AU",
+      "intent_label": "card_issues",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_406_6.wav",
+      "text": "the card that I've got isn't working on my payment keeps getting two kinds",
+      "text_hash": "4f82a33a27ac5b70",
+      "duration_sec": 9.84
+    },
+    {
+      "id": "en-GB_566_7",
+      "accent": "en-GB",
+      "intent_label": "cash_deposit",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_566_7.wav",
+      "text": "deposit money",
+      "text_hash": "44d8b3988f33dd93",
+      "duration_sec": 4.18
+    },
+    {
+      "id": "en-US_458_7",
+      "accent": "en-US",
+      "intent_label": "cash_deposit",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_458_7.wav",
+      "text": "I would like to deposit money what's the best way to accomplish that",
+      "text_hash": "320e6ed8ca192516",
+      "duration_sec": 7.85
+    },
+    {
+      "id": "en-US_435_7",
+      "accent": "en-US",
+      "intent_label": "cash_deposit",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_435_7.wav",
+      "text": "hey I want to deposit some money into my account I was just wondering how I can transfer that into there",
+      "text_hash": "e605d4915789b687",
+      "duration_sec": 8.11
+    },
+    {
+      "id": "en-GB_558_7",
+      "accent": "en-GB",
+      "intent_label": "cash_deposit",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_558_7.wav",
+      "text": "I am I need to deposit some money into my account I want to know the easiest way of doing it whether to transfer or I need to go to the bank",
+      "text_hash": "5fe31214c181d97a",
+      "duration_sec": 12.07
+    },
+    {
+      "id": "en-US_464_7",
+      "accent": "en-US",
+      "intent_label": "cash_deposit",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_464_7.wav",
+      "text": "would you like to deposit money into my account",
+      "text_hash": "4fa26a9de7efdcc0",
+      "duration_sec": 3.16
+    },
+    {
+      "id": "en-GB_579_7",
+      "accent": "en-GB",
+      "intent_label": "cash_deposit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_579_7.wav",
+      "text": "hi I'd like to make a deposit into my account how can I do that",
+      "text_hash": "d81cb67584541b1e",
+      "duration_sec": 6.06
+    },
+    {
+      "id": "en-GB_557_7",
+      "accent": "en-GB",
+      "intent_label": "cash_deposit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_557_7.wav",
+      "text": "I want to deposit money into my account",
+      "text_hash": "e56af989b053ad4f",
+      "duration_sec": 4.35
+    },
+    {
+      "id": "en-US_468_7",
+      "accent": "en-US",
+      "intent_label": "cash_deposit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_468_7.wav",
+      "text": "hi hello I just need to deposit money into my account please",
+      "text_hash": "c22913c4cf165a3b",
+      "duration_sec": 5.46
+    },
+    {
+      "id": "en-US_474_7",
+      "accent": "en-US",
+      "intent_label": "cash_deposit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_474_7.wav",
+      "text": "I'm using the bank can you help me transfer money into my account thank you",
+      "text_hash": "00a9747ab2ee3faa",
+      "duration_sec": 8.02
+    },
+    {
+      "id": "en-GB_582_7",
+      "accent": "en-GB",
+      "intent_label": "cash_deposit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_582_7.wav",
+      "text": "hi can I deposit money into my account",
+      "text_hash": "47fcd3e0d8badf65",
+      "duration_sec": 4.35
+    },
+    {
+      "id": "en-GB_434_8",
+      "accent": "en-GB",
+      "intent_label": "direct_debit",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_434_8.wav",
+      "text": "I have a question about direct debits",
+      "text_hash": "7a070e1c4bb4f75a",
+      "duration_sec": 5.8
+    },
+    {
+      "id": "en-AU_534_8",
+      "accent": "en-AU",
+      "intent_label": "direct_debit",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_534_8.wav",
+      "text": "hello IT company has asked me to set up a direct debit for my billing can you please show me how I would set up a direct debit for my transaction account",
+      "text_hash": "4faa090f653e7d5f",
+      "duration_sec": 12.17
+    },
+    {
+      "id": "en-AU_542_8",
+      "accent": "en-AU",
+      "intent_label": "direct_debit",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_542_8.wav",
+      "text": "how do I free information about my recent Direct debits",
+      "text_hash": "c160c93a5ea226ee",
+      "duration_sec": 5.29
+    },
+    {
+      "id": "en-US_333_8",
+      "accent": "en-US",
+      "intent_label": "direct_debit",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_333_8.wav",
+      "text": "can you tell me about direct debit",
+      "text_hash": "53911c7ac01099d6",
+      "duration_sec": 4.18
+    },
+    {
+      "id": "en-GB_440_8",
+      "accent": "en-GB",
+      "intent_label": "direct_debit",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_440_8.wav",
+      "text": "hey I'm just calling in to ask you if I have any direct debits that I hate her mind up for and could I be possible to see my direct debits as I want to return any direct debit",
+      "text_hash": "e17a2233c6a5d5b8",
+      "duration_sec": 17.58
+    },
+    {
+      "id": "en-GB_444_8",
+      "accent": "en-GB",
+      "intent_label": "direct_debit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_444_8.wav",
+      "text": "I need some help organising my direct debits that are still current",
+      "text_hash": "d283f08f5aa5ead7",
+      "duration_sec": 7.85
+    },
+    {
+      "id": "en-AU_537_8",
+      "accent": "en-AU",
+      "intent_label": "direct_debit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_537_8.wav",
+      "text": "please return me to the direct debits",
+      "text_hash": "b1aeb5c8ac0ce99d",
+      "duration_sec": 4.95
+    },
+    {
+      "id": "en-US_331_8",
+      "accent": "en-US",
+      "intent_label": "direct_debit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_331_8.wav",
+      "text": "how do I set up a direct debit",
+      "text_hash": "b7556f8992e3f4c0",
+      "duration_sec": 3.41
+    },
+    {
+      "id": "en-AU_527_8",
+      "accent": "en-AU",
+      "intent_label": "direct_debit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_527_8.wav",
+      "text": "Isaiah if you could guide me through Direct debits",
+      "text_hash": "eaed09227381ae1a",
+      "duration_sec": 5.63
+    },
+    {
+      "id": "en-AU_536_8",
+      "accent": "en-AU",
+      "intent_label": "direct_debit",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_536_8.wav",
+      "text": "how about take someone today about my direct debit please",
+      "text_hash": "28026afee1758ed2",
+      "duration_sec": 3.84
+    },
+    {
+      "id": "en-US_153_9",
+      "accent": "en-US",
+      "intent_label": "freeze",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_153_9.wav",
+      "text": "I want to see freezing my card",
+      "text_hash": "77996c57d50d5606",
+      "duration_sec": 4.83
+    },
+    {
+      "id": "en-GB_64_9",
+      "accent": "en-GB",
+      "intent_label": "freeze",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_64_9.wav",
+      "text": "just blocked my card you freeze my card",
+      "text_hash": "2c079cab3c366a40",
+      "duration_sec": 5.85
+    },
+    {
+      "id": "en-US_137_9",
+      "accent": "en-US",
+      "intent_label": "freeze",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_137_9.wav",
+      "text": "I'd like to freeze my card",
+      "text_hash": "877fadda4edcc11b",
+      "duration_sec": 2.9
+    },
+    {
+      "id": "en-US_126_9",
+      "accent": "en-US",
+      "intent_label": "freeze",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_126_9.wav",
+      "text": "hi I've lost my bank card and please stop all transactions I don't want anybody using my card for anything I don't know where it is can you do this for me thank you",
+      "text_hash": "74c12d3a4c763d06",
+      "duration_sec": 16.38
+    },
+    {
+      "id": "en-AU_93_9",
+      "accent": "en-AU",
+      "intent_label": "freeze",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_93_9.wav",
+      "text": "I need some help to freeze my card",
+      "text_hash": "ac857358788e70f3",
+      "duration_sec": 6.91
+    },
+    {
+      "id": "en-AU_61_9",
+      "accent": "en-AU",
+      "intent_label": "freeze",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_61_9.wav",
+      "text": "hi I'm just calling because ID like to freeze all transactions on my",
+      "text_hash": "49f2b4ee4d5c2c2a",
+      "duration_sec": 4.35
+    },
+    {
+      "id": "en-AU_50_9",
+      "accent": "en-AU",
+      "intent_label": "freeze",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_50_9.wav",
+      "text": "I would like to stop all transactions and freeze my credit card",
+      "text_hash": "e1bf64aa039d6ec6",
+      "duration_sec": 5.89
+    },
+    {
+      "id": "en-AU_51_9",
+      "accent": "en-AU",
+      "intent_label": "freeze",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_51_9.wav",
+      "text": "n I prove my card on the internet",
+      "text_hash": "bf6f7d4dc04f60d5",
+      "duration_sec": 5.39
+    },
+    {
+      "id": "en-AU_56_9",
+      "accent": "en-AU",
+      "intent_label": "freeze",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_56_9.wav",
+      "text": "hello can you please freeze my card",
+      "text_hash": "b0c94e580653ff35",
+      "duration_sec": 3.33
+    },
+    {
+      "id": "en-GB_41_9",
+      "accent": "en-GB",
+      "intent_label": "freeze",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_41_9.wav",
+      "text": "please stop all transactions on my",
+      "text_hash": "fbd175622e27ef84",
+      "duration_sec": 2.82
+    },
+    {
+      "id": "en-US_422_10",
+      "accent": "en-US",
+      "intent_label": "high_value_payment",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_422_10.wav",
+      "text": "I like to know how to send a large payment can go through after I use",
+      "text_hash": "1df63d803d8fae18",
+      "duration_sec": 6.83
+    },
+    {
+      "id": "en-GB_544_10",
+      "accent": "en-GB",
+      "intent_label": "high_value_payment",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_544_10.wav",
+      "text": "hey I was wondering if you could help me with this enquiry or enquiry I have so I'm I'm actually paying a large amount of money to buy something from the store and it says that I'm I'll be getting a text message but I don't really know these payment goes and what I need to do could you help me on that my puppies",
+      "text_hash": "131fcff81d45b3c0",
+      "duration_sec": 28.33
+    },
+    {
+      "id": "en-GB_512_10",
+      "accent": "en-GB",
+      "intent_label": "high_value_payment",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_512_10.wav",
+      "text": "hi I'm trying to make a large payment on mine and it says I'm going to get a text message",
+      "text_hash": "28119ea446d69ec9",
+      "duration_sec": 7.0
+    },
+    {
+      "id": "en-AU_574_10",
+      "accent": "en-AU",
+      "intent_label": "high_value_payment",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_574_10.wav",
+      "text": "hi I'm traffic lights payment prefer lots of money I do not know what to do with my messages and apparently chords",
+      "text_hash": "90b8c5f9fa11d2bb",
+      "duration_sec": 19.37
+    },
+    {
+      "id": "en-GB_508_10",
+      "accent": "en-GB",
+      "intent_label": "high_value_payment",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_508_10.wav",
+      "text": "pay a large sum payment",
+      "text_hash": "88435d69ac86da8e",
+      "duration_sec": 4.52
+    },
+    {
+      "id": "en-GB_533_10",
+      "accent": "en-GB",
+      "intent_label": "high_value_payment",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_533_10.wav",
+      "text": "I need an SMS message code to make a large bank payment",
+      "text_hash": "741c4a9e9d23d52d",
+      "duration_sec": 6.49
+    },
+    {
+      "id": "en-GB_521_10",
+      "accent": "en-GB",
+      "intent_label": "high_value_payment",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_521_10.wav",
+      "text": "trying to make a large payment online and it says I'm getting a text message",
+      "text_hash": "444d200d88b69a0f",
+      "duration_sec": 5.89
+    },
+    {
+      "id": "en-AU_573_10",
+      "accent": "en-AU",
+      "intent_label": "high_value_payment",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_573_10.wav",
+      "text": "what phone number will the SMS be sent by so I know it's not scam I want to know the two large amount or not",
+      "text_hash": "8b331be9109cb6a8",
+      "duration_sec": 11.43
+    },
+    {
+      "id": "en-GB_528_10",
+      "accent": "en-GB",
+      "intent_label": "high_value_payment",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_528_10.wav",
+      "text": "I need to make a big payment online and I need to get a text message to think",
+      "text_hash": "6cc1d85065264f2e",
+      "duration_sec": 5.97
+    },
+    {
+      "id": "en-GB_526_10",
+      "accent": "en-GB",
+      "intent_label": "high_value_payment",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_526_10.wav",
+      "text": "which ones make a large payments to the bank price payment and will need to send a confirmation code to your mobile to get security information that is for the right person and there is no activity",
+      "text_hash": "0f210221a7cf6644",
+      "duration_sec": 18.3
+    },
+    {
+      "id": "en-US_27_11",
+      "accent": "en-US",
+      "intent_label": "joint_account",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_27_11.wav",
+      "text": "how to go about setting up a joint account for my partner and myself",
+      "text_hash": "8be8a054bf52ce8b",
+      "duration_sec": 8.62
+    },
+    {
+      "id": "en-GB_275_11",
+      "accent": "en-GB",
+      "intent_label": "joint_account",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_275_11.wav",
+      "text": "I want an account for me and my husband",
+      "text_hash": "538da2412abd72e5",
+      "duration_sec": 3.5
+    },
+    {
+      "id": "en-GB_278_11",
+      "accent": "en-GB",
+      "intent_label": "joint_account",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_278_11.wav",
+      "text": "I want to open a bank account with my partner's so how can I do so how can I open a joint account",
+      "text_hash": "7de1736143c23eac",
+      "duration_sec": 7.17
+    },
+    {
+      "id": "en-GB_277_11",
+      "accent": "en-GB",
+      "intent_label": "joint_account",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_277_11.wav",
+      "text": "I'd like to set up a joint bank account",
+      "text_hash": "ae2b2a3ee30fa1bc",
+      "duration_sec": 4.35
+    },
+    {
+      "id": "en-AU_295_11",
+      "accent": "en-AU",
+      "intent_label": "joint_account",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_295_11.wav",
+      "text": "hey ID like to set up a bank account for myself and my partner",
+      "text_hash": "75342997fba8151d",
+      "duration_sec": 8.42
+    },
+    {
+      "id": "en-GB_288_11",
+      "accent": "en-GB",
+      "intent_label": "joint_account",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_288_11.wav",
+      "text": "please can I have more information about setting up a joint account with my partner",
+      "text_hash": "3a90d53a3d9080a2",
+      "duration_sec": 5.97
+    },
+    {
+      "id": "en-GB_256_11",
+      "accent": "en-GB",
+      "intent_label": "joint_account",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_256_11.wav",
+      "text": "hi I want to set up a joint account with my partner and not sure how to do this she could let me know",
+      "text_hash": "58ac62c070f7d59b",
+      "duration_sec": 8.17
+    },
+    {
+      "id": "en-AU_276_11",
+      "accent": "en-AU",
+      "intent_label": "joint_account",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_276_11.wav",
+      "text": "yes I would like to open a joint account",
+      "text_hash": "f05ec05dfb8ed701",
+      "duration_sec": 8.6
+    },
+    {
+      "id": "en-US_8_11",
+      "accent": "en-US",
+      "intent_label": "joint_account",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_8_11.wav",
+      "text": "I need to find out if I probably set up a joint account",
+      "text_hash": "4df0492fdabeb80f",
+      "duration_sec": 7.34
+    },
+    {
+      "id": "en-US_28_11",
+      "accent": "en-US",
+      "intent_label": "joint_account",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_28_11.wav",
+      "text": "I'm on your ass and my husband and I are trying to set up a joint account I can see where I set up an account by myself but I'm not sure where to go to set up a joint account can you help me with this please thank you",
+      "text_hash": "04a6e193ea36ffa8",
+      "duration_sec": 15.96
+    },
+    {
+      "id": "en-GB_469_12",
+      "accent": "en-GB",
+      "intent_label": "latest_transactions",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_469_12.wav",
+      "text": "yeah I recognise the payment",
+      "text_hash": "823bcae053c1d078",
+      "duration_sec": 4.35
+    },
+    {
+      "id": "en-US_373_12",
+      "accent": "en-US",
+      "intent_label": "latest_transactions",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_373_12.wav",
+      "text": "please tell me my most recent transaction",
+      "text_hash": "e29503455e31b163",
+      "duration_sec": 5.89
+    },
+    {
+      "id": "en-AU_484_12",
+      "accent": "en-AU",
+      "intent_label": "latest_transactions",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_484_12.wav",
+      "text": "I am call about recent transactions",
+      "text_hash": "67754f0b9743f2bc",
+      "duration_sec": 8.24
+    },
+    {
+      "id": "en-GB_470_12",
+      "accent": "en-GB",
+      "intent_label": "latest_transactions",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_470_12.wav",
+      "text": "and my latest transactions please",
+      "text_hash": "917dc5574b39633a",
+      "duration_sec": 6.14
+    },
+    {
+      "id": "en-GB_505_12",
+      "accent": "en-GB",
+      "intent_label": "latest_transactions",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_505_12.wav",
+      "text": "hi could I have some more information about my latest transaction there's a paint that I'm not aware of",
+      "text_hash": "31fb42ba02c8fcba",
+      "duration_sec": 8.02
+    },
+    {
+      "id": "en-GB_479_12",
+      "accent": "en-GB",
+      "intent_label": "latest_transactions",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_479_12.wav",
+      "text": "I've just had a text and I don't recognise some of the transactions on it so can we go through them just to make sure that they probably add me and just said thanks",
+      "text_hash": "0ee7453b7fadf24b",
+      "duration_sec": 13.19
+    },
+    {
+      "id": "en-US_381_12",
+      "accent": "en-US",
+      "intent_label": "latest_transactions",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_381_12.wav",
+      "text": "did something in my account that I'm not sure. Can you show me my last turned back because I'm not familiar with that payment",
+      "text_hash": "6c7fe1c592de11ad",
+      "duration_sec": 10.33
+    },
+    {
+      "id": "en-GB_488_12",
+      "accent": "en-GB",
+      "intent_label": "latest_transactions",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_488_12.wav",
+      "text": "hi it's a payment I don't recognise on my transaction history and I'd like to investigate this further thank you",
+      "text_hash": "4ea54588ab812500",
+      "duration_sec": 8.19
+    },
+    {
+      "id": "en-GB_489_12",
+      "accent": "en-GB",
+      "intent_label": "latest_transactions",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_489_12.wav",
+      "text": "hi I was wondering if it would be possible to have a look at my latest transactions just because there's a payment on there that I don't I don't recognise it so I was wondering whether would be able to have a quick look at it",
+      "text_hash": "210ce5b8f4b08264",
+      "duration_sec": 19.88
+    },
+    {
+      "id": "en-GB_471_12",
+      "accent": "en-GB",
+      "intent_label": "latest_transactions",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_471_12.wav",
+      "text": "I owe you show me like my latest transactions",
+      "text_hash": "147465a4e5ea4ebe",
+      "duration_sec": 4.95
+    },
+    {
+      "id": "en-US_86_13",
+      "accent": "en-US",
+      "intent_label": "pay_bill",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_86_13.wav",
+      "text": "my bills are due",
+      "text_hash": "bd7aa6920ec65faf",
+      "duration_sec": 1.71
+    },
+    {
+      "id": "en-AU_25_13",
+      "accent": "en-AU",
+      "intent_label": "pay_bill",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_25_13.wav",
+      "text": "I need to pay a bill ID like to make payment",
+      "text_hash": "47751bcc1888af3b",
+      "duration_sec": 6.66
+    },
+    {
+      "id": "en-GB_4_13",
+      "accent": "en-GB",
+      "intent_label": "pay_bill",
+      "split": "dev",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_4_13.wav",
+      "text": "I have a bill I need to make payment",
+      "text_hash": "9ca12814ead525ee",
+      "duration_sec": 5.8
+    },
+    {
+      "id": "en-GB_12_13",
+      "accent": "en-GB",
+      "intent_label": "pay_bill",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-GB_12_13.wav",
+      "text": "oh hi I was wondering if I could make a payment to pay a bill or my electricity",
+      "text_hash": "b5033afe7f6a2ce2",
+      "duration_sec": 16.25
+    },
+    {
+      "id": "en-AU_17_13",
+      "accent": "en-AU",
+      "intent_label": "pay_bill",
+      "split": "val",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_17_13.wav",
+      "text": "hello ID like to make a payment for a bill it's due and a couple of days can you walk me through the steps of how to do that thank you",
+      "text_hash": "abd6a3f145901840",
+      "duration_sec": 12.97
+    },
+    {
+      "id": "en-AU_37_13",
+      "accent": "en-AU",
+      "intent_label": "pay_bill",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_37_13.wav",
+      "text": "yes good morning I would just like to make a payment from my credit card basically just for electricity bill on this page to help me process that transaction I don't like paying online first I like to bring up in processing",
+      "text_hash": "205cd970ef5058c4",
+      "duration_sec": 25.94
+    },
+    {
+      "id": "en-US_101_13",
+      "accent": "en-US",
+      "intent_label": "pay_bill",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_101_13.wav",
+      "text": "I haven't told you on my case is called I would like to make the payment please",
+      "text_hash": "f8b63c87cadb44da",
+      "duration_sec": 5.63
+    },
+    {
+      "id": "en-US_114_13",
+      "accent": "en-US",
+      "intent_label": "pay_bill",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_114_13.wav",
+      "text": "hello I'm calling to pay for my electric and water bill or can I make this payment",
+      "text_hash": "e49593fa6c52f406",
+      "duration_sec": 6.14
+    },
+    {
+      "id": "en-US_109_13",
+      "accent": "en-US",
+      "intent_label": "pay_bill",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-US_109_13.wav",
+      "text": "can I make a payment please",
+      "text_hash": "357c61620263086d",
+      "duration_sec": 5.97
+    },
+    {
+      "id": "en-AU_26_13",
+      "accent": "en-AU",
+      "intent_label": "pay_bill",
+      "split": "test",
+      "audio_path": "storage/benchmarks/minds14_en_140/en-AU_26_13.wav",
+      "text": "hi there I'm going to pay off my credit card bill",
+      "text_hash": "1c1b73cdf0081eef",
+      "duration_sec": 5.29
+    }
+  ]
+}

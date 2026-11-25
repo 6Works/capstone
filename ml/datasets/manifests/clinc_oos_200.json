@@ -1,0 +1,1431 @@
+{
+  "name": "clinc_oos_200",
+  "source": "clinc/clinc_oos (small: validation/test)",
+  "license": "CC-BY-3.0",
+  "seed": 42,
+  "num_intents": 15,
+  "intent_labels": [
+    "oos",
+    "meaning_of_life",
+    "improve_credit_score",
+    "change_language",
+    "timer",
+    "translate",
+    "insurance_change",
+    "payday",
+    "find_phone",
+    "replacement_card_duration",
+    "pto_request",
+    "travel_alert",
+    "fun_fact",
+    "transfer",
+    "definition"
+  ],
+  "total_items": 200,
+  "split_counts": {
+    "val": 100,
+    "test": 100
+  },
+  "items": [
+    {
+      "id": "val_42_0",
+      "split": "val",
+      "intent_label": "oos",
+      "text": "how can i breach a network",
+      "text_hash": "559aa0280566a5a3"
+    },
+    {
+      "id": "val_42_1",
+      "split": "val",
+      "intent_label": "oos",
+      "text": "is autism a genetic disease",
+      "text_hash": "07438bfe145eda77"
+    },
+    {
+      "id": "val_42_2",
+      "split": "val",
+      "intent_label": "oos",
+      "text": "do ducks eat meat, vegetables, or both",
+      "text_hash": "0c4855a4435a3926"
+    },
+    {
+      "id": "val_42_3",
+      "split": "val",
+      "intent_label": "oos",
+      "text": "how the birds fly",
+      "text_hash": "f44b9152b14b48e0"
+    },
+    {
+      "id": "val_42_4",
+      "split": "val",
+      "intent_label": "oos",
+      "text": "when was electrical engineering created",
+      "text_hash": "bd6e90898b71aab2"
+    },
+    {
+      "id": "val_42_5",
+      "split": "val",
+      "intent_label": "oos",
+      "text": "how can i keep my windshield from fogging up in winter",
+      "text_hash": "e508c9a8d1eab284"
+    },
+    {
+      "id": "val_42_6",
+      "split": "val",
+      "intent_label": "oos",
+      "text": "what do geese eat",
+      "text_hash": "4e04d2a291105a6d"
+    },
+    {
+      "id": "test_42_0",
+      "split": "test",
+      "intent_label": "oos",
+      "text": "is anything being newscasted about the threat of famine in chadu",
+      "text_hash": "230cd86857823576"
+    },
+    {
+      "id": "test_42_1",
+      "split": "test",
+      "intent_label": "oos",
+      "text": "what is the population of south africa",
+      "text_hash": "2e7218e0ac470536"
+    },
+    {
+      "id": "test_42_2",
+      "split": "test",
+      "intent_label": "oos",
+      "text": "how do i make my android phone more secure",
+      "text_hash": "07c567a20f5d66e7"
+    },
+    {
+      "id": "test_42_3",
+      "split": "test",
+      "intent_label": "oos",
+      "text": "do i have overdraft protection",
+      "text_hash": "d6d32562a474dfd1"
+    },
+    {
+      "id": "test_42_4",
+      "split": "test",
+      "intent_label": "oos",
+      "text": "what are yahoo's top stories right now",
+      "text_hash": "07451ca8fa908d89"
+    },
+    {
+      "id": "test_42_5",
+      "split": "test",
+      "intent_label": "oos",
+      "text": "who were the superbowl 23 champions",
+      "text_hash": "8a3fd66e9bc9c214"
+    },
+    {
+      "id": "test_42_6",
+      "split": "test",
+      "intent_label": "oos",
+      "text": "can you sell stocks for me",
+      "text_hash": "bbc4fe4a41bb36ce"
+    },
+    {
+      "id": "val_22_0",
+      "split": "val",
+      "intent_label": "meaning_of_life",
+      "text": "what is our purpose",
+      "text_hash": "6cb88c1305ae1cc8"
+    },
+    {
+      "id": "val_22_1",
+      "split": "val",
+      "intent_label": "meaning_of_life",
+      "text": "what do you think we are on earth for",
+      "text_hash": "7624ad26d7c72b24"
+    },
+    {
+      "id": "val_22_2",
+      "split": "val",
+      "intent_label": "meaning_of_life",
+      "text": "what do you think our purpose is in life",
+      "text_hash": "f7f684a2d2ac046a"
+    },
+    {
+      "id": "val_22_3",
+      "split": "val",
+      "intent_label": "meaning_of_life",
+      "text": "what do you think life is really about",
+      "text_hash": "b4e395a91bc64ae4"
+    },
+    {
+      "id": "val_22_4",
+      "split": "val",
+      "intent_label": "meaning_of_life",
+      "text": "tell me the meaning of life",
+      "text_hash": "4b9d0436b203012a"
+    },
+    {
+      "id": "val_22_5",
+      "split": "val",
+      "intent_label": "meaning_of_life",
+      "text": "what's your opinion on the meaning of life",
+      "text_hash": "75f47392df9d71fb"
+    },
+    {
+      "id": "val_22_6",
+      "split": "val",
+      "intent_label": "meaning_of_life",
+      "text": "i'd like to know the meaning of life",
+      "text_hash": "5667048e5ac21212"
+    },
+    {
+      "id": "test_22_0",
+      "split": "test",
+      "intent_label": "meaning_of_life",
+      "text": "what's life mean to you",
+      "text_hash": "550ae1ea9c4758bc"
+    },
+    {
+      "id": "test_22_1",
+      "split": "test",
+      "intent_label": "meaning_of_life",
+      "text": "what's the answer to it all",
+      "text_hash": "3aa7d22b2dc575db"
+    },
+    {
+      "id": "test_22_2",
+      "split": "test",
+      "intent_label": "meaning_of_life",
+      "text": "do you think being alive has any meaning",
+      "text_hash": "318399e9bf9a140a"
+    },
+    {
+      "id": "test_22_3",
+      "split": "test",
+      "intent_label": "meaning_of_life",
+      "text": "what information can you give me on the meaning of life",
+      "text_hash": "b3faf5a31ea6d68f"
+    },
+    {
+      "id": "test_22_4",
+      "split": "test",
+      "intent_label": "meaning_of_life",
+      "text": "would you let me know what the meaning is life is",
+      "text_hash": "d9f5ab361bf106c0"
+    },
+    {
+      "id": "test_22_5",
+      "split": "test",
+      "intent_label": "meaning_of_life",
+      "text": "is there meaning in life",
+      "text_hash": "6f92c0ebbc7d25eb"
+    },
+    {
+      "id": "test_22_6",
+      "split": "test",
+      "intent_label": "meaning_of_life",
+      "text": "do you think our lives have purpose or meaning",
+      "text_hash": "7f761d0a1186a54f"
+    },
+    {
+      "id": "val_28_0",
+      "split": "val",
+      "intent_label": "improve_credit_score",
+      "text": "what will help my credit score",
+      "text_hash": "01dc87978ae6d008"
+    },
+    {
+      "id": "val_28_1",
+      "split": "val",
+      "intent_label": "improve_credit_score",
+      "text": "show me a plan to help my credit score rating",
+      "text_hash": "3e176489b426857f"
+    },
+    {
+      "id": "val_28_2",
+      "split": "val",
+      "intent_label": "improve_credit_score",
+      "text": "how do i prevent my credit score from dropping",
+      "text_hash": "22942262c6f48636"
+    },
+    {
+      "id": "val_28_3",
+      "split": "val",
+      "intent_label": "improve_credit_score",
+      "text": "what are the top 10 ways to build my credit score",
+      "text_hash": "cecc76c011ab47b3"
+    },
+    {
+      "id": "val_28_4",
+      "split": "val",
+      "intent_label": "improve_credit_score",
+      "text": "what is the best way to keep my credit score from going down",
+      "text_hash": "aaadacecf010a868"
+    },
+    {
+      "id": "val_28_5",
+      "split": "val",
+      "intent_label": "improve_credit_score",
+      "text": "what are some ways to raise my credit score",
+      "text_hash": "cdacce037e368240"
+    },
+    {
+      "id": "val_28_6",
+      "split": "val",
+      "intent_label": "improve_credit_score",
+      "text": "how can i make sure that my credit score does not decrease",
+      "text_hash": "7bf0a4ce3f37ca50"
+    },
+    {
+      "id": "test_28_0",
+      "split": "test",
+      "intent_label": "improve_credit_score",
+      "text": "how is it possible to get a better credit score",
+      "text_hash": "68dea730f87ce86d"
+    },
+    {
+      "id": "test_28_1",
+      "split": "test",
+      "intent_label": "improve_credit_score",
+      "text": "how can i prevent my credit score from dropping",
+      "text_hash": "06e1c33d930f23d7"
+    },
+    {
+      "id": "test_28_2",
+      "split": "test",
+      "intent_label": "improve_credit_score",
+      "text": "what steps should i take if i want to ensure my credit score doesn't drop",
+      "text_hash": "2cec8eab8da1c885"
+    },
+    {
+      "id": "test_28_3",
+      "split": "test",
+      "intent_label": "improve_credit_score",
+      "text": "i want to know how i can build up a good credit score",
+      "text_hash": "f425aa10ef95b7cc"
+    },
+    {
+      "id": "test_28_4",
+      "split": "test",
+      "intent_label": "improve_credit_score",
+      "text": "will only having five late payments really make my credit bad",
+      "text_hash": "b70426805765cac7"
+    },
+    {
+      "id": "test_28_5",
+      "split": "test",
+      "intent_label": "improve_credit_score",
+      "text": "give me some ideas for boosting my credit score",
+      "text_hash": "211113fd601ba04d"
+    },
+    {
+      "id": "test_28_6",
+      "split": "test",
+      "intent_label": "improve_credit_score",
+      "text": "\"what's the method to improve credit score",
+      "text_hash": "6a78b663263edbb8"
+    },
+    {
+      "id": "val_29_0",
+      "split": "val",
+      "intent_label": "change_language",
+      "text": "please change your language setting to spanish now",
+      "text_hash": "9c811d014331dc18"
+    },
+    {
+      "id": "val_29_1",
+      "split": "val",
+      "intent_label": "change_language",
+      "text": "please respond to me in english from now on",
+      "text_hash": "0216c6699441b314"
+    },
+    {
+      "id": "val_29_2",
+      "split": "val",
+      "intent_label": "change_language",
+      "text": "speak navajo",
+      "text_hash": "73503d5d868e2eb2"
+    },
+    {
+      "id": "val_29_3",
+      "split": "val",
+      "intent_label": "change_language",
+      "text": "speak french",
+      "text_hash": "9cf4f7a9d755d77c"
+    },
+    {
+      "id": "val_29_4",
+      "split": "val",
+      "intent_label": "change_language",
+      "text": "you need to change your language setting to russian please",
+      "text_hash": "9161943f68cc08d0"
+    },
+    {
+      "id": "val_29_5",
+      "split": "val",
+      "intent_label": "change_language",
+      "text": "speak mandarin",
+      "text_hash": "d7a787495f2722c4"
+    },
+    {
+      "id": "val_29_6",
+      "split": "val",
+      "intent_label": "change_language",
+      "text": "change your language setting to spanish",
+      "text_hash": "cae137d33a806947"
+    },
+    {
+      "id": "test_29_0",
+      "split": "test",
+      "intent_label": "change_language",
+      "text": "i need you to switch the language you are responding in",
+      "text_hash": "0a8b82ec904a07dd"
+    },
+    {
+      "id": "test_29_1",
+      "split": "test",
+      "intent_label": "change_language",
+      "text": "speak in french please",
+      "text_hash": "71648e5f190b7287"
+    },
+    {
+      "id": "test_29_2",
+      "split": "test",
+      "intent_label": "change_language",
+      "text": "speak in dutch",
+      "text_hash": "5735368c5080ccd1"
+    },
+    {
+      "id": "test_29_3",
+      "split": "test",
+      "intent_label": "change_language",
+      "text": "we have to speak in english",
+      "text_hash": "dc9e45f375d32423"
+    },
+    {
+      "id": "test_29_4",
+      "split": "test",
+      "intent_label": "change_language",
+      "text": "would you understand me if i speak to you in navajo",
+      "text_hash": "8e769833e25936ed"
+    },
+    {
+      "id": "test_29_5",
+      "split": "test",
+      "intent_label": "change_language",
+      "text": "can i speak spanish to you hombre",
+      "text_hash": "97d1ea2fbcfef68a"
+    },
+    {
+      "id": "test_29_6",
+      "split": "test",
+      "intent_label": "change_language",
+      "text": "please make your language setting norwegian",
+      "text_hash": "a47f257476aac945"
+    },
+    {
+      "id": "val_32_0",
+      "split": "val",
+      "intent_label": "timer",
+      "text": "i need a timer that is set at 1 hour exactly",
+      "text_hash": "4ce87be455dcaa4e"
+    },
+    {
+      "id": "val_32_1",
+      "split": "val",
+      "intent_label": "timer",
+      "text": "i'd like to set a new timer",
+      "text_hash": "95ba8e0818045901"
+    },
+    {
+      "id": "val_32_2",
+      "split": "val",
+      "intent_label": "timer",
+      "text": "i need you to create a timer",
+      "text_hash": "fc81696e9cd7a8c1"
+    },
+    {
+      "id": "val_32_3",
+      "split": "val",
+      "intent_label": "timer",
+      "text": "create a new timer",
+      "text_hash": "022d6a8c617098c0"
+    },
+    {
+      "id": "val_32_4",
+      "split": "val",
+      "intent_label": "timer",
+      "text": "the timer is calculated for 10 minutes",
+      "text_hash": "42d8cd54e64528a1"
+    },
+    {
+      "id": "val_32_5",
+      "split": "val",
+      "intent_label": "timer",
+      "text": "create a timer that is set to go off after 25 mins",
+      "text_hash": "17153a0d88d30407"
+    },
+    {
+      "id": "val_32_6",
+      "split": "val",
+      "intent_label": "timer",
+      "text": "please set a timer to go off in 45 minutes",
+      "text_hash": "24f6326810f7b067"
+    },
+    {
+      "id": "test_32_0",
+      "split": "test",
+      "intent_label": "timer",
+      "text": "i need a timer for 45 minutes",
+      "text_hash": "b6cda48e2d551f83"
+    },
+    {
+      "id": "test_32_1",
+      "split": "test",
+      "intent_label": "timer",
+      "text": "give me a 10 minute timer",
+      "text_hash": "5c98a9c54e03c5f1"
+    },
+    {
+      "id": "test_32_2",
+      "split": "test",
+      "intent_label": "timer",
+      "text": "set a timer for 10 minutes",
+      "text_hash": "9a94c3c1fedf835b"
+    },
+    {
+      "id": "test_32_3",
+      "split": "test",
+      "intent_label": "timer",
+      "text": "who set up the numbers for it",
+      "text_hash": "61446dd021645e0c"
+    },
+    {
+      "id": "test_32_4",
+      "split": "test",
+      "intent_label": "timer",
+      "text": "set a timer to go off in 1 hour",
+      "text_hash": "e9f1acd51fa6b0bc"
+    },
+    {
+      "id": "test_32_5",
+      "split": "test",
+      "intent_label": "timer",
+      "text": "set a 3 minute timer",
+      "text_hash": "6c34e9b1783dba5c"
+    },
+    {
+      "id": "test_32_6",
+      "split": "test",
+      "intent_label": "timer",
+      "text": "make a 10 minute timer",
+      "text_hash": "826a8fa426110c60"
+    },
+    {
+      "id": "val_61_0",
+      "split": "val",
+      "intent_label": "translate",
+      "text": "how do you say good bye in french",
+      "text_hash": "973d70cf3736a593"
+    },
+    {
+      "id": "val_61_1",
+      "split": "val",
+      "intent_label": "translate",
+      "text": "how can i say \"cancel my order\" in french",
+      "text_hash": "b477896751805a7d"
+    },
+    {
+      "id": "val_61_2",
+      "split": "val",
+      "intent_label": "translate",
+      "text": "how can i say thank you very much in chinese",
+      "text_hash": "ea8fbe9a9ea7f825"
+    },
+    {
+      "id": "val_61_3",
+      "split": "val",
+      "intent_label": "translate",
+      "text": "how do i say thank you in spanish",
+      "text_hash": "ea9ad53054acd3e5"
+    },
+    {
+      "id": "val_61_4",
+      "split": "val",
+      "intent_label": "translate",
+      "text": "i need to know how to say hello in france",
+      "text_hash": "b71947fa81dc4fa0"
+    },
+    {
+      "id": "val_61_5",
+      "split": "val",
+      "intent_label": "translate",
+      "text": "i want to know how to say goodbye in france",
+      "text_hash": "58fdb7d6418108d3"
+    },
+    {
+      "id": "val_61_6",
+      "split": "val",
+      "intent_label": "translate",
+      "text": "would you translate a sentence into russian for me, please",
+      "text_hash": "3c24988b4096ed49"
+    },
+    {
+      "id": "test_61_0",
+      "split": "test",
+      "intent_label": "translate",
+      "text": "how would i say where is the bathroom if i were korean",
+      "text_hash": "79afb7ae596710e1"
+    },
+    {
+      "id": "test_61_1",
+      "split": "test",
+      "intent_label": "translate",
+      "text": "what would the word for grass be in finland",
+      "text_hash": "0a6ec23cf5ff5191"
+    },
+    {
+      "id": "test_61_2",
+      "split": "test",
+      "intent_label": "translate",
+      "text": "how would i say i am lost if i were japanese",
+      "text_hash": "723817a11ac40cc5"
+    },
+    {
+      "id": "test_61_3",
+      "split": "test",
+      "intent_label": "translate",
+      "text": "what's the french word you use for potato",
+      "text_hash": "cfd467cd2be00ac7"
+    },
+    {
+      "id": "test_61_4",
+      "split": "test",
+      "intent_label": "translate",
+      "text": "what is the right way to say excuse me in spanish",
+      "text_hash": "bfd8e5dad80da5b2"
+    },
+    {
+      "id": "test_61_5",
+      "split": "test",
+      "intent_label": "translate",
+      "text": "how do you say please in french",
+      "text_hash": "f4c0f41a96f3e028"
+    },
+    {
+      "id": "test_61_6",
+      "split": "test",
+      "intent_label": "translate",
+      "text": "what's the spanish word for pasta",
+      "text_hash": "5895808e1f14625d"
+    },
+    {
+      "id": "val_64_0",
+      "split": "val",
+      "intent_label": "insurance_change",
+      "text": "i need to change my insurance policy, how",
+      "text_hash": "ee6b8e8402f0a9de"
+    },
+    {
+      "id": "val_64_1",
+      "split": "val",
+      "intent_label": "insurance_change",
+      "text": "tell me how to get new insurance",
+      "text_hash": "a71c722f08c32075"
+    },
+    {
+      "id": "val_64_2",
+      "split": "val",
+      "intent_label": "insurance_change",
+      "text": "can you help me switch to a new insurance plan",
+      "text_hash": "3e1fd91b9b10f664"
+    },
+    {
+      "id": "val_64_3",
+      "split": "val",
+      "intent_label": "insurance_change",
+      "text": "can you tell me how do i get new insurance",
+      "text_hash": "e6c7757e878c8a8b"
+    },
+    {
+      "id": "val_64_4",
+      "split": "val",
+      "intent_label": "insurance_change",
+      "text": "i'd like to know how to make changes for my insurance policy",
+      "text_hash": "d1e5ae82d77ec133"
+    },
+    {
+      "id": "val_64_5",
+      "split": "val",
+      "intent_label": "insurance_change",
+      "text": "tell me how to change my policy",
+      "text_hash": "3b02171ddd2197c2"
+    },
+    {
+      "id": "val_64_6",
+      "split": "val",
+      "intent_label": "insurance_change",
+      "text": "explain to me how do i get new insurance",
+      "text_hash": "1231757c42a3cd25"
+    },
+    {
+      "id": "test_64_0",
+      "split": "test",
+      "intent_label": "insurance_change",
+      "text": "do you know how i get new insurance",
+      "text_hash": "a964cc4b15441f7b"
+    },
+    {
+      "id": "test_64_1",
+      "split": "test",
+      "intent_label": "insurance_change",
+      "text": "help me find a new insurance plan",
+      "text_hash": "c04c3ddec61658ba"
+    },
+    {
+      "id": "test_64_2",
+      "split": "test",
+      "intent_label": "insurance_change",
+      "text": "i am interested in a new insurance plan",
+      "text_hash": "77028383678e4cc5"
+    },
+    {
+      "id": "test_64_3",
+      "split": "test",
+      "intent_label": "insurance_change",
+      "text": "what do i need to do to get new insurance",
+      "text_hash": "2ac1c299b732bd5b"
+    },
+    {
+      "id": "test_64_4",
+      "split": "test",
+      "intent_label": "insurance_change",
+      "text": "what are the steps to change my insurance policy",
+      "text_hash": "abb53ee9f1ef59e0"
+    },
+    {
+      "id": "test_64_5",
+      "split": "test",
+      "intent_label": "insurance_change",
+      "text": "how do i sign up for a new allstatedplan",
+      "text_hash": "24b94ec4eb6bc527"
+    },
+    {
+      "id": "test_64_6",
+      "split": "test",
+      "intent_label": "insurance_change",
+      "text": "what if i want to switch insurance plans",
+      "text_hash": "5ff5e4c2a55342fa"
+    },
+    {
+      "id": "val_79_0",
+      "split": "val",
+      "intent_label": "payday",
+      "text": "when was i paid most recently",
+      "text_hash": "b09fac150a9706f6"
+    },
+    {
+      "id": "val_79_1",
+      "split": "val",
+      "intent_label": "payday",
+      "text": "which day is it that my payment comes in",
+      "text_hash": "b6acd6e7adefdfbe"
+    },
+    {
+      "id": "val_79_2",
+      "split": "val",
+      "intent_label": "payday",
+      "text": "when's the next time i get paid",
+      "text_hash": "3550af8a57f9469c"
+    },
+    {
+      "id": "val_79_3",
+      "split": "val",
+      "intent_label": "payday",
+      "text": "how long has it been since i was paid",
+      "text_hash": "2d26cfefc0767fae"
+    },
+    {
+      "id": "val_79_4",
+      "split": "val",
+      "intent_label": "payday",
+      "text": "how many days until i get my payment",
+      "text_hash": "d2935505e345c137"
+    },
+    {
+      "id": "val_79_5",
+      "split": "val",
+      "intent_label": "payday",
+      "text": "when do i get my paycheck",
+      "text_hash": "6756280feabe20b4"
+    },
+    {
+      "id": "val_79_6",
+      "split": "val",
+      "intent_label": "payday",
+      "text": "when is the next payday",
+      "text_hash": "6d38f6ae4c5e8b0b"
+    },
+    {
+      "id": "test_79_0",
+      "split": "test",
+      "intent_label": "payday",
+      "text": "when do i get paid for my work",
+      "text_hash": "fdc37155e3a8404f"
+    },
+    {
+      "id": "test_79_1",
+      "split": "test",
+      "intent_label": "payday",
+      "text": "when will my next paycheck be coming",
+      "text_hash": "8fa8591b278379ff"
+    },
+    {
+      "id": "test_79_2",
+      "split": "test",
+      "intent_label": "payday",
+      "text": "what was the date when i last go paid",
+      "text_hash": "6b5dbf2563109594"
+    },
+    {
+      "id": "test_79_3",
+      "split": "test",
+      "intent_label": "payday",
+      "text": "what's the date on my last pay stub",
+      "text_hash": "dd4a4c97563dd215"
+    },
+    {
+      "id": "test_79_4",
+      "split": "test",
+      "intent_label": "payday",
+      "text": "when can i expect my paycheck",
+      "text_hash": "f1217c22056adad6"
+    },
+    {
+      "id": "test_79_5",
+      "split": "test",
+      "intent_label": "payday",
+      "text": "can you tell me the date of my last check",
+      "text_hash": "2fabc7150f75a2f5"
+    },
+    {
+      "id": "test_79_6",
+      "split": "test",
+      "intent_label": "payday",
+      "text": "when do i get my next paycheck",
+      "text_hash": "f7a183a748c40ebd"
+    },
+    {
+      "id": "val_81_0",
+      "split": "val",
+      "intent_label": "find_phone",
+      "text": "i have lost my phone",
+      "text_hash": "9b79b71966f4beae"
+    },
+    {
+      "id": "val_81_1",
+      "split": "val",
+      "intent_label": "find_phone",
+      "text": "what did i do with my phone",
+      "text_hash": "b07683cfd5b383cf"
+    },
+    {
+      "id": "val_81_2",
+      "split": "val",
+      "intent_label": "find_phone",
+      "text": "what happened to my cellphone",
+      "text_hash": "a07db2213318ef73"
+    },
+    {
+      "id": "val_81_3",
+      "split": "val",
+      "intent_label": "find_phone",
+      "text": "do you remember where i left my cellphone",
+      "text_hash": "f8b6eded5205abaf"
+    },
+    {
+      "id": "val_81_4",
+      "split": "val",
+      "intent_label": "find_phone",
+      "text": "please help me find my lost phone",
+      "text_hash": "eb50c1bf0e65565b"
+    },
+    {
+      "id": "val_81_5",
+      "split": "val",
+      "intent_label": "find_phone",
+      "text": "can you tell me where my phone is",
+      "text_hash": "df658d5b72f655c9"
+    },
+    {
+      "id": "val_81_6",
+      "split": "val",
+      "intent_label": "find_phone",
+      "text": "please help me in finding my phone",
+      "text_hash": "2788432d47f9d6f1"
+    },
+    {
+      "id": "test_81_0",
+      "split": "test",
+      "intent_label": "find_phone",
+      "text": "i cannot locate my phone, can you help me",
+      "text_hash": "2ab14ff445ae1c14"
+    },
+    {
+      "id": "test_81_1",
+      "split": "test",
+      "intent_label": "find_phone",
+      "text": "where did i place my phone",
+      "text_hash": "20674a7648200822"
+    },
+    {
+      "id": "test_81_2",
+      "split": "test",
+      "intent_label": "find_phone",
+      "text": "i think i lost my phone",
+      "text_hash": "f374cf63591d8939"
+    },
+    {
+      "id": "test_81_3",
+      "split": "test",
+      "intent_label": "find_phone",
+      "text": "could you help me locate my phone",
+      "text_hash": "a50bb87e107e797b"
+    },
+    {
+      "id": "test_81_4",
+      "split": "test",
+      "intent_label": "find_phone",
+      "text": "where the bleep did i put my bleeping phone",
+      "text_hash": "c25cd4a1165322e7"
+    },
+    {
+      "id": "test_81_5",
+      "split": "test",
+      "intent_label": "find_phone",
+      "text": "is my phone somewhere around here",
+      "text_hash": "b1447a598526a17b"
+    },
+    {
+      "id": "test_81_6",
+      "split": "test",
+      "intent_label": "find_phone",
+      "text": "i've lost my phone somewhere",
+      "text_hash": "21c4ded700680221"
+    },
+    {
+      "id": "val_90_0",
+      "split": "val",
+      "intent_label": "replacement_card_duration",
+      "text": "how soon does it take a card new card to get mailed to me",
+      "text_hash": "2e9614628c968a7c"
+    },
+    {
+      "id": "val_90_1",
+      "split": "val",
+      "intent_label": "replacement_card_duration",
+      "text": "about how long does it usually take a new card to get mailed to me",
+      "text_hash": "513a5104373e3483"
+    },
+    {
+      "id": "val_90_2",
+      "split": "val",
+      "intent_label": "replacement_card_duration",
+      "text": "what's the time of arrival on my new credit card",
+      "text_hash": "871a9e5c3358f3e6"
+    },
+    {
+      "id": "val_90_3",
+      "split": "val",
+      "intent_label": "replacement_card_duration",
+      "text": "after losing a credit card, how long does it take to get a new one",
+      "text_hash": "b87504f2f0f5c900"
+    },
+    {
+      "id": "val_90_4",
+      "split": "val",
+      "intent_label": "replacement_card_duration",
+      "text": "is it a short time before i receive my new credit card",
+      "text_hash": "79b2a68b0462607b"
+    },
+    {
+      "id": "val_90_5",
+      "split": "val",
+      "intent_label": "replacement_card_duration",
+      "text": "tell me the duration it takes to get a new cc",
+      "text_hash": "ec7c8d0dd93e7690"
+    },
+    {
+      "id": "val_90_6",
+      "split": "val",
+      "intent_label": "replacement_card_duration",
+      "text": "how long does it usually take for a new credit card to come",
+      "text_hash": "0bf937df9dcfb091"
+    },
+    {
+      "id": "test_90_0",
+      "split": "test",
+      "intent_label": "replacement_card_duration",
+      "text": "what is the time frame for sending a customer who lost their credit card a new one",
+      "text_hash": "c2b903572a3b6c04"
+    },
+    {
+      "id": "test_90_1",
+      "split": "test",
+      "intent_label": "replacement_card_duration",
+      "text": "i need to know the time it takes to get a new credit card sent to someone who lost theirs",
+      "text_hash": "2c7164d3988b7a86"
+    },
+    {
+      "id": "test_90_2",
+      "split": "test",
+      "intent_label": "replacement_card_duration",
+      "text": "i lost my credit card recently  how long does take to get a new one in the mail",
+      "text_hash": "6465e2f89a40487d"
+    },
+    {
+      "id": "test_90_3",
+      "split": "test",
+      "intent_label": "replacement_card_duration",
+      "text": "can credit card companies expedite delivery of reissued credit cards",
+      "text_hash": "f69c1347dad1f154"
+    },
+    {
+      "id": "test_90_4",
+      "split": "test",
+      "intent_label": "replacement_card_duration",
+      "text": "how long does it take for a credit card to be reissued and mailed to me",
+      "text_hash": "764426f47d6206a9"
+    },
+    {
+      "id": "test_90_5",
+      "split": "test",
+      "intent_label": "replacement_card_duration",
+      "text": "what is amount of time it takes to get a new credit card i lost mine recently",
+      "text_hash": "6ec7674d9af2e479"
+    },
+    {
+      "id": "test_90_6",
+      "split": "test",
+      "intent_label": "replacement_card_duration",
+      "text": "can you call the help desk line for my credit card company",
+      "text_hash": "721e523701f29218"
+    },
+    {
+      "id": "val_97_0",
+      "split": "val",
+      "intent_label": "pto_request",
+      "text": "what's the method for requesting a vacation",
+      "text_hash": "3684339abc638dbd"
+    },
+    {
+      "id": "val_97_1",
+      "split": "val",
+      "intent_label": "pto_request",
+      "text": "what is the process for making a vacation request",
+      "text_hash": "8bf0b86fd140e293"
+    },
+    {
+      "id": "val_97_2",
+      "split": "val",
+      "intent_label": "pto_request",
+      "text": "i am requesting pto for march 2 and 3",
+      "text_hash": "91762eb3406c9513"
+    },
+    {
+      "id": "val_97_3",
+      "split": "val",
+      "intent_label": "pto_request",
+      "text": "provide assistance on what to do to make a vacation request",
+      "text_hash": "3f51b528cd36c32a"
+    },
+    {
+      "id": "val_97_4",
+      "split": "val",
+      "intent_label": "pto_request",
+      "text": "i would like to know if i can put a pto request in for march 19 to march 20",
+      "text_hash": "948384859f12dfc9"
+    },
+    {
+      "id": "val_97_5",
+      "split": "val",
+      "intent_label": "pto_request",
+      "text": "please help me make a request for vacation",
+      "text_hash": "9134fddfb583c6bd"
+    },
+    {
+      "id": "val_97_6",
+      "split": "val",
+      "intent_label": "pto_request",
+      "text": "i have a vacation request that i need made",
+      "text_hash": "195806bc6aacde14"
+    },
+    {
+      "id": "test_97_0",
+      "split": "test",
+      "intent_label": "pto_request",
+      "text": "can i put in a pto request for monday to wednesday",
+      "text_hash": "80befe9586b40658"
+    },
+    {
+      "id": "test_97_1",
+      "split": "test",
+      "intent_label": "pto_request",
+      "text": "walk me through on how to make a vacation request",
+      "text_hash": "015c057bb4d4f48b"
+    },
+    {
+      "id": "test_97_2",
+      "split": "test",
+      "intent_label": "pto_request",
+      "text": "vacation request information",
+      "text_hash": "70981bafe22e477c"
+    },
+    {
+      "id": "test_97_3",
+      "split": "test",
+      "intent_label": "pto_request",
+      "text": "can i put in a pto request for december 25th to january 1st",
+      "text_hash": "e0c0b390a17fed68"
+    },
+    {
+      "id": "test_97_4",
+      "split": "test",
+      "intent_label": "pto_request",
+      "text": "i'd like to request a vacation",
+      "text_hash": "b71cbc1089b1c239"
+    },
+    {
+      "id": "test_97_5",
+      "split": "test",
+      "intent_label": "pto_request",
+      "text": "please put in a vacation request",
+      "text_hash": "e0bb268428c0c699"
+    },
+    {
+      "id": "test_97_6",
+      "split": "test",
+      "intent_label": "pto_request",
+      "text": "how does one go about putting in a vacation request",
+      "text_hash": "f9d834b963e22e89"
+    },
+    {
+      "id": "val_128_0",
+      "split": "val",
+      "intent_label": "travel_alert",
+      "text": "is there any danger going to brazil",
+      "text_hash": "c66c7a6983b70a2c"
+    },
+    {
+      "id": "val_128_1",
+      "split": "val",
+      "intent_label": "travel_alert",
+      "text": "how safe is visiting canada this week",
+      "text_hash": "d4616d3956c15a57"
+    },
+    {
+      "id": "val_128_2",
+      "split": "val",
+      "intent_label": "travel_alert",
+      "text": "is france safe to travel to",
+      "text_hash": "e909a043fe496b26"
+    },
+    {
+      "id": "val_128_3",
+      "split": "val",
+      "intent_label": "travel_alert",
+      "text": "what's the danger level of flying to russia right now",
+      "text_hash": "69f0af24aba161d3"
+    },
+    {
+      "id": "val_128_4",
+      "split": "val",
+      "intent_label": "travel_alert",
+      "text": "is it safe to travel to mexico",
+      "text_hash": "e57fbd67f116ac6a"
+    },
+    {
+      "id": "val_128_5",
+      "split": "val",
+      "intent_label": "travel_alert",
+      "text": "are there any travel alerts for antarctica",
+      "text_hash": "30c9629144daacc1"
+    },
+    {
+      "id": "val_128_6",
+      "split": "val",
+      "intent_label": "travel_alert",
+      "text": "does mexico have any travel alerts i should know about",
+      "text_hash": "1fdeb4b9de58b622"
+    },
+    {
+      "id": "test_128_0",
+      "split": "test",
+      "intent_label": "travel_alert",
+      "text": "are there travel alerts for the us",
+      "text_hash": "84c8fa7f7778ba11"
+    },
+    {
+      "id": "test_128_1",
+      "split": "test",
+      "intent_label": "travel_alert",
+      "text": "can people safely travel to cambodia",
+      "text_hash": "a8dd9e6aba522e97"
+    },
+    {
+      "id": "test_128_2",
+      "split": "test",
+      "intent_label": "travel_alert",
+      "text": "mexico travel alerts",
+      "text_hash": "c04868dfafc5a8e5"
+    },
+    {
+      "id": "test_128_3",
+      "split": "test",
+      "intent_label": "travel_alert",
+      "text": "am i safe to go to africa",
+      "text_hash": "35db1e37c406d078"
+    },
+    {
+      "id": "test_128_4",
+      "split": "test",
+      "intent_label": "travel_alert",
+      "text": "is it safe in italy",
+      "text_hash": "0e9b4355482a69b1"
+    },
+    {
+      "id": "test_128_5",
+      "split": "test",
+      "intent_label": "travel_alert",
+      "text": "is it safe to go to serbia",
+      "text_hash": "d4e7a694238e7686"
+    },
+    {
+      "id": "test_128_6",
+      "split": "test",
+      "intent_label": "travel_alert",
+      "text": "have there been any travel alerts for the us",
+      "text_hash": "49f25ec835bc200d"
+    },
+    {
+      "id": "val_129_0",
+      "split": "val",
+      "intent_label": "fun_fact",
+      "text": "give me a cool fact about potatoes",
+      "text_hash": "190342bb23292e8e"
+    },
+    {
+      "id": "val_129_1",
+      "split": "val",
+      "intent_label": "fun_fact",
+      "text": "give me a cool fact about puppies",
+      "text_hash": "da8561293946051f"
+    },
+    {
+      "id": "val_129_2",
+      "split": "val",
+      "intent_label": "fun_fact",
+      "text": "what's a fun fact about axolotls",
+      "text_hash": "849798608d41eb61"
+    },
+    {
+      "id": "val_129_3",
+      "split": "val",
+      "intent_label": "fun_fact",
+      "text": "show me trivia about cats",
+      "text_hash": "3e2c9b406f21cf32"
+    },
+    {
+      "id": "val_129_4",
+      "split": "val",
+      "intent_label": "fun_fact",
+      "text": "give me a cool fact about seattle",
+      "text_hash": "d4bc42bf4d4e65d0"
+    },
+    {
+      "id": "val_129_5",
+      "split": "val",
+      "intent_label": "fun_fact",
+      "text": "tell me something interesting about new york state",
+      "text_hash": "8c5637a69f6bd7ba"
+    },
+    {
+      "id": "val_129_6",
+      "split": "val",
+      "intent_label": "fun_fact",
+      "text": "read me cat trivia",
+      "text_hash": "0a64781356cf22d8"
+    },
+    {
+      "id": "test_129_0",
+      "split": "test",
+      "intent_label": "fun_fact",
+      "text": "tell me something interesting about bees",
+      "text_hash": "64f6f65772876992"
+    },
+    {
+      "id": "test_129_1",
+      "split": "test",
+      "intent_label": "fun_fact",
+      "text": "give me something interesting about stars",
+      "text_hash": "48f90e95088ce47c"
+    },
+    {
+      "id": "test_129_2",
+      "split": "test",
+      "intent_label": "fun_fact",
+      "text": "i need interesting baseball trivia from the nineteen eighties",
+      "text_hash": "cf0ecbf3b512f825"
+    },
+    {
+      "id": "test_129_3",
+      "split": "test",
+      "intent_label": "fun_fact",
+      "text": "give me a fun fact about dolphin",
+      "text_hash": "2717fbffece7e0e0"
+    },
+    {
+      "id": "test_129_4",
+      "split": "test",
+      "intent_label": "fun_fact",
+      "text": "tell me fun science facts",
+      "text_hash": "019f2ee19ba1023d"
+    },
+    {
+      "id": "test_129_5",
+      "split": "test",
+      "intent_label": "fun_fact",
+      "text": "what is some trivia question about coffee",
+      "text_hash": "d756953bb854dbde"
+    },
+    {
+      "id": "test_129_6",
+      "split": "test",
+      "intent_label": "fun_fact",
+      "text": "what is some trivia about the weather",
+      "text_hash": "79cd88a277750f28"
+    },
+    {
+      "id": "val_133_0",
+      "split": "val",
+      "intent_label": "transfer",
+      "text": "transfer 1000 dollars from my first national bank to my bethpage federal credit union savings",
+      "text_hash": "b4ad10f2d5140fb8"
+    },
+    {
+      "id": "val_133_1",
+      "split": "val",
+      "intent_label": "transfer",
+      "text": "move three hundred and fifty dollars from my citibank savings account to my chase savings account",
+      "text_hash": "54d353b5d851ad72"
+    },
+    {
+      "id": "val_133_2",
+      "split": "val",
+      "intent_label": "transfer",
+      "text": "send from my bbc money market to my t rowe price money market seven thousand dollars",
+      "text_hash": "749a4355689cbcf3"
+    },
+    {
+      "id": "val_133_3",
+      "split": "val",
+      "intent_label": "transfer",
+      "text": "transfer 50 dollars from my checking account to my money market account",
+      "text_hash": "393a90f30a372af4"
+    },
+    {
+      "id": "val_133_4",
+      "split": "val",
+      "intent_label": "transfer",
+      "text": "take one hundred and fifty bucks from my wells fargo checking account and put it in my wells fargo savings account",
+      "text_hash": "c8f5b718dc11a372"
+    },
+    {
+      "id": "val_133_5",
+      "split": "val",
+      "intent_label": "transfer",
+      "text": "take out of my checking 400 dollars and put it into my emergency savings account",
+      "text_hash": "59fdd09919a159aa"
+    },
+    {
+      "id": "val_133_6",
+      "split": "val",
+      "intent_label": "transfer",
+      "text": "move 100 dollars from my savings to my checking",
+      "text_hash": "42abb2d7aa9690b3"
+    },
+    {
+      "id": "test_133_0",
+      "split": "test",
+      "intent_label": "transfer",
+      "text": "i would like assistance moving money from one account to another",
+      "text_hash": "1ba3073bbb259c16"
+    },
+    {
+      "id": "test_133_1",
+      "split": "test",
+      "intent_label": "transfer",
+      "text": "transer $800 from my checking to savings account",
+      "text_hash": "eba08f963c5f710f"
+    },
+    {
+      "id": "test_133_2",
+      "split": "test",
+      "intent_label": "transfer",
+      "text": "can i move some money around",
+      "text_hash": "fc287cd038f4a0ea"
+    },
+    {
+      "id": "test_133_3",
+      "split": "test",
+      "intent_label": "transfer",
+      "text": "how much money can i transfer today",
+      "text_hash": "4d8c41d74a5a03a7"
+    },
+    {
+      "id": "test_133_4",
+      "split": "test",
+      "intent_label": "transfer",
+      "text": "i would like help moving money between accounts",
+      "text_hash": "4e791644c1139a17"
+    },
+    {
+      "id": "test_133_5",
+      "split": "test",
+      "intent_label": "transfer",
+      "text": "transfer seventy dollars between national and citizens accounts",
+      "text_hash": "e3e6a8d1cfb6a69b"
+    },
+    {
+      "id": "test_133_6",
+      "split": "test",
+      "intent_label": "transfer",
+      "text": "please move $100 from my checking to saving account",
+      "text_hash": "eb1156ba4565bfea"
+    },
+    {
+      "id": "val_139_0",
+      "split": "val",
+      "intent_label": "definition",
+      "text": "define antagonist for me please",
+      "text_hash": "7e251a04f1682334"
+    },
+    {
+      "id": "val_139_1",
+      "split": "val",
+      "intent_label": "definition",
+      "text": "tell me please what paean means",
+      "text_hash": "290463ecf607320e"
+    },
+    {
+      "id": "test_139_0",
+      "split": "test",
+      "intent_label": "definition",
+      "text": "define discontent",
+      "text_hash": "41b956966b99553a"
+    },
+    {
+      "id": "test_139_1",
+      "split": "test",
+      "intent_label": "definition",
+      "text": "what does anachronistic mean",
+      "text_hash": "3eeade69a101a7ea"
+    }
+  ]
+}
