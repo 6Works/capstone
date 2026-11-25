@@ -122,14 +122,42 @@
               <div class="flex items-center space-x-2 text-xs">
                 <span class="text-slate-500 font-semibold">Engine:</span>
                 <select id="ttsEngineSelect" onchange="onEngineChange()" class="bg-slate-100 border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700">
-                  <option value="neural_vits" selected>Neural VITS (Zero-Shot Local ONNX)</option>
-                  <option value="pyttsx3">pyttsx3 SAPI5 (Windows Offline)</option>
-                  <option value="elevenlabs">ElevenLabs (Human Cadence & Breaths)</option>
-                  <option value="gtts">Google TTS (Cloud Stream)</option>
+                  <option value="edge_tts" selected>✨ Azure Neural (Free Studio Quality - Edge-TTS)</option>
+                  <option value="elevenlabs">🌟 ElevenLabs (Studio Zero-Shot Neural Cloner)</option>
+                  <option value="neural_vits">🧠 Piper VITS (Local Fast ONNX)</option>
+                  <option value="pyttsx3">💻 pyttsx3 SAPI5 (Windows Offline)</option>
                 </select>
               </div>
 
-              <div id="voiceProfileContainer" class="flex items-center space-x-2 text-xs">
+              <!-- Azure Neural Voice Selector -->
+              <div id="azureVoiceContainer" class="flex items-center space-x-2 text-xs">
+                <span class="text-slate-500 font-semibold">Voice:</span>
+                <select id="azureVoiceSelect" class="bg-sky-50 border border-sky-300 rounded-lg px-3 py-1.5 text-xs font-bold text-sky-800">
+                  <option value="en-IN-PrabhatNeural" selected>Prabhat (Indian English Male - Fluent & Natural)</option>
+                  <option value="en-IN-NeerjaNeural">Neerja (Indian English Female - Expressive)</option>
+                  <option value="en-US-GuyNeural">Guy (US Male - Conversational)</option>
+                  <option value="en-US-JennyNeural">Jenny (US Female - Warm & Clear)</option>
+                  <option value="en-US-AriaNeural">Aria (US Female - Professional Executive)</option>
+                  <option value="en-GB-RyanNeural">Ryan (UK Male - Authoritative)</option>
+                </select>
+              </div>
+
+              <!-- ElevenLabs Key & Voice Selector -->
+              <div id="elevenLabsContainer" class="hidden flex items-center space-x-2 text-xs">
+                <span class="text-slate-500 font-semibold">API Key:</span>
+                <input type="password" id="elevenApiKeyInput" placeholder="xi-... (or from .env)" class="bg-purple-50 border border-purple-300 rounded-lg px-2.5 py-1 text-xs font-mono text-purple-900 w-36">
+                <select id="elevenVoiceSelect" class="bg-purple-50 border border-purple-300 rounded-lg px-2.5 py-1 text-xs font-bold text-purple-800">
+                  <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Calm)</option>
+                  <option value="AZnzlk1XvdvUeBnXmlld">Domi (Empathic)</option>
+                  <option value="EXAVITQu4vr4xnSDxMaL">Bella (Expressive)</option>
+                  <option value="ErXwobaYiN019PkySvjV">Antoni (Storyteller)</option>
+                  <option value="MF3mGyEYCl7XYWbV9V6O">Elli (Young)</option>
+                  <option value="TxGEqnHWrfWFTfGW9XjX">Josh (Deep Baritone)</option>
+                </select>
+              </div>
+
+              <!-- Piper Local Vocal Profile Selector -->
+              <div id="voiceProfileContainer" class="hidden flex items-center space-x-2 text-xs">
                 <span class="text-slate-500 font-semibold">Vocal Profile:</span>
                 <select id="voiceProfileSelect" class="bg-rose-50 border border-rose-300 rounded-lg px-3 py-1.5 text-xs font-bold text-rose-800">
                   <option value="mira_neural">Mira (Warm Conversational - 218Hz)</option>
@@ -368,6 +396,16 @@
                 <input type="text" id="cloneVoiceName" placeholder="e.g. My Voice, Sachin, Rahul, Technical Interviewer" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 font-bold focus:outline-hidden focus:ring-2 focus:ring-rose-500 shadow-2xs">
               </div>
 
+              <!-- Optional ElevenLabs API Key for Studio Clones -->
+              <div class="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-200/80 space-y-1.5">
+                <label class="block text-xs font-bold text-slate-800 flex items-center justify-between">
+                  <span><i class="fa-solid fa-cloud text-indigo-600 mr-1.5"></i>ElevenLabs API Key (Optional for Studio-Grade Cloud Clone):</span>
+                  <span class="text-[10px] text-slate-500 font-normal">Saved in browser storage</span>
+                </label>
+                <input type="password" id="cloneElevenApiKey" placeholder="xi-... (leave blank to use local reference profile)" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-900 font-mono focus:outline-hidden focus:ring-2 focus:ring-indigo-500 shadow-2xs">
+                <p class="text-[10px] text-indigo-700/80">If supplied, clones instantly to ElevenLabs for 100% human studio reproduction.</p>
+              </div>
+
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 flex flex-col justify-between">
                   <div>
@@ -449,6 +487,15 @@
                   <span class="font-mono text-rose-400">||z|| = 1.0</span>
                 </div>
                 <canvas id="embeddingCanvas" width="300" height="40" class="w-full h-10 bg-slate-950 rounded-lg border border-slate-800"></canvas>
+              </div>
+
+              <!-- Reference Audio Playback (Original vs Cloned) -->
+              <div id="refAudioBox" class="p-3 bg-slate-800/90 rounded-lg border border-slate-700 space-y-1.5 hidden">
+                <div class="flex items-center justify-between text-[11px] font-bold text-slate-300">
+                  <span><i class="fa-solid fa-microphone text-rose-400 mr-1.5"></i>Original Reference Voice:</span>
+                  <span id="refBadge" class="text-[9px] px-2 py-0.5 rounded bg-rose-900/60 text-rose-300 font-mono">YOUR VOICE</span>
+                </div>
+                <audio id="refAudioPlayer" controls class="w-full h-8"></audio>
               </div>
 
               <div class="pt-2">
@@ -842,11 +889,21 @@
 
     function onEngineChange() {
       const engine = document.getElementById('ttsEngineSelect').value;
+      const azureContainer = document.getElementById('azureVoiceContainer');
+      const elevenContainer = document.getElementById('elevenLabsContainer');
       const profileContainer = document.getElementById('voiceProfileContainer');
-      if (engine === 'neural_vits') {
-        profileContainer.classList.remove('opacity-40', 'pointer-events-none');
-      } else {
-        profileContainer.classList.add('opacity-40', 'pointer-events-none');
+
+      if (azureContainer) azureContainer.classList.add('hidden');
+      if (elevenContainer) elevenContainer.classList.add('hidden');
+      if (profileContainer) profileContainer.classList.add('hidden');
+
+      if (engine === 'edge_tts') {
+        if (azureContainer) azureContainer.classList.remove('hidden');
+      } else if (engine === 'elevenlabs') {
+        if (elevenContainer) elevenContainer.classList.remove('hidden');
+        if (profileContainer) profileContainer.classList.remove('hidden');
+      } else if (engine === 'neural_vits') {
+        if (profileContainer) profileContainer.classList.remove('hidden');
       }
     }
 
@@ -909,9 +966,17 @@
       const text = document.getElementById('ttsTextInput').value.trim();
       const engine = document.getElementById('ttsEngineSelect').value;
       const profileId = document.getElementById('voiceProfileSelect').value;
+      const azureVoice = document.getElementById('azureVoiceSelect') ? document.getElementById('azureVoiceSelect').value : null;
+      const elevenKey = document.getElementById('elevenApiKeyInput') ? document.getElementById('elevenApiKeyInput').value.trim() : '';
+      const elevenVoice = document.getElementById('elevenVoiceSelect') ? document.getElementById('elevenVoiceSelect').value : null;
       const rate = parseInt(document.getElementById('speechRateSlider').value);
       const withPauses = document.getElementById('pauseToggle').checked;
       const withNorm = document.getElementById('normToggle').checked;
+
+      // Remember ElevenLabs key if provided
+      if (elevenKey) {
+        localStorage.setItem('capstone_eleven_key', elevenKey);
+      }
 
       const btn = document.getElementById('synthBtnText');
       const status = document.getElementById('synthStatus');
@@ -923,7 +988,11 @@
       }
 
       btn.innerText = 'Synthesizing...';
-      status.innerText = 'Neural vocoder processing...';
+      status.innerText = `${engine.toUpperCase()} synthesis in progress...`;
+
+      let selectedVoice = null;
+      if (engine === 'edge_tts') selectedVoice = azureVoice;
+      else if (engine === 'elevenlabs') selectedVoice = elevenVoice;
 
       const t0 = performance.now();
       try {
@@ -933,7 +1002,9 @@
           body: JSON.stringify({
             text: text,
             provider: engine,
+            voice: selectedVoice,
             profile_id: profileId,
+            api_key: elevenKey || localStorage.getItem('capstone_eleven_key') || null,
             speech_rate: rate,
             with_pauses: withPauses,
             with_normalization: withNorm
@@ -1143,6 +1214,7 @@
       const fileInput = document.getElementById('cloneAudioFileInput');
       const btnText = document.getElementById('processCloneBtnText');
       const statusEl = document.getElementById('cloneStatusMsg');
+      const elevenKey = (document.getElementById('cloneElevenApiKey') ? document.getElementById('cloneElevenApiKey').value.trim() : '') || localStorage.getItem('capstone_eleven_key') || '';
 
       let audioFile = null;
       if (fileInput.files && fileInput.files[0]) {
@@ -1158,11 +1230,15 @@
       }
 
       btnText.innerText = 'Extracting Acoustic Profile & Embeddings...';
-      statusEl.innerText = 'Computing Short-Time Autocorrelation F0 and 128-D Mel Projections...';
+      statusEl.innerText = elevenKey ? 'Cloning to ElevenLabs and computing acoustic embeddings...' : 'Computing Short-Time Autocorrelation F0 and 128-D Mel Projections...';
 
       const formData = new FormData();
       formData.append('file', audioFile);
       formData.append('name', name);
+      if (elevenKey) {
+        formData.append('eleven_api_key', elevenKey);
+        localStorage.setItem('capstone_eleven_key', elevenKey);
+      }
 
       try {
         const resp = await fetch('/api/tts/clone-voice', {
@@ -1181,9 +1257,19 @@
         btnText.innerText = 'Extract Acoustic Embeddings & Clone Voice';
 
         if (resp.ok && data.status === 'success') {
-          statusEl.innerText = `Voice '${name}' successfully cloned!`;
+          statusEl.innerText = `Voice '${name}' successfully cloned! ${data.profile.has_elevenlabs_clone ? '(Synced with ElevenLabs)' : '(Local Reference Stored)'}`;
           renderExtractedProfile(data.profile);
           await refreshProfilesList(data.profile.profile_id);
+
+          // Reveal Reference Audio Player
+          if (data.ref_audio_url) {
+            const refBox = document.getElementById('refAudioBox');
+            const refPlayer = document.getElementById('refAudioPlayer');
+            if (refBox && refPlayer) {
+              refPlayer.src = data.ref_audio_url + '?t=' + Date.now();
+              refBox.classList.remove('hidden');
+            }
+          }
 
           const audBtn = document.getElementById('auditionCloneBtn');
           audBtn.disabled = false;
@@ -1465,6 +1551,14 @@
             </button>
           `;
 
+          if (v.has_reference_audio) {
+            actionBtns += `
+              <button onclick="playReferenceAudio('${v.profile_id}')" class="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold rounded-lg transition text-[10px] inline-flex items-center ml-1">
+                <i class="fa-solid fa-microphone mr-1"></i> Original
+              </button>
+            `;
+          }
+
           if (!v.is_preset) {
             actionBtns += `
               <button onclick="promptRenameProfile('${v.profile_id}', '${safeName}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg transition text-[10px] inline-flex items-center ml-1">
@@ -1476,9 +1570,14 @@
             `;
           }
 
-          const badge = v.is_preset
-            ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-500 font-mono">PRESET</span>`
-            : `<span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-700 font-mono">CLONED</span>`;
+          let badge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-500 font-mono">PRESET</span>`;
+          if (!v.is_preset) {
+            if (v.has_elevenlabs_clone) {
+              badge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-purple-100 text-purple-700 font-mono">ELEVENLABS</span>`;
+            } else {
+              badge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-700 font-mono">LOCAL CLONE</span>`;
+            }
+          }
 
           tr.innerHTML = `
             <td class="p-3 font-mono text-slate-500 font-bold">${v.profile_id}</td>
@@ -1560,6 +1659,16 @@
       }
     }
 
+    function playReferenceAudio(profileId) {
+      const player = document.getElementById('ttsAudioPlayer');
+      if (player) {
+        player.src = `/api/tts/voices/${profileId}/reference?t=${Date.now()}`;
+        player.load();
+        player.play().catch(e => console.warn('Audio play restricted by autoplay policy:', e));
+        document.getElementById('playerState').innerText = `Playing Original Sample: ${profileId}`;
+      }
+    }
+
     // Benchmark Arena Race
     async function runBenchmarkRace() {
       const btn = document.getElementById('benchBtnText');
@@ -1592,6 +1701,14 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      const savedKey = localStorage.getItem('capstone_eleven_key') || '';
+      if (savedKey) {
+        const cloneKeyInput = document.getElementById('cloneElevenApiKey');
+        const synthKeyInput = document.getElementById('elevenApiKeyInput');
+        if (cloneKeyInput) cloneKeyInput.value = savedKey;
+        if (synthKeyInput) synthKeyInput.value = savedKey;
+      }
+      onEngineChange();
       refreshProfilesList();
       inspectFrontEnd();
       drawSimulatedWaveform();
