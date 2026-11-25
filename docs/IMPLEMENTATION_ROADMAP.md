@@ -126,8 +126,9 @@ All remote manifests are fetched in **Session 4** via lightweight streaming slic
   2. Added lightweight offline-safe GitHub Actions CI (`.github/workflows/ci.yml`), slim Python 3.10 CPU container (`Dockerfile` + `.dockerignore`), and structured ML Model Cards (`ml/cards/model_cards.md`).
 - **Status**: Verified `py_compile` + `58 passed in 59.23s` in `test_pipeline.py` (incl. `TestSession9ProductionHardening` preset wiring & FastAPI `TestClient` soak across `/api/health`, `/api/tts/engines`, `/api/tts/voices`, `/api/llm/status`, `/`, `/tts`, `/api/asr/transcribe-file`); live Uvicorn port 8000 booted cleanly (`chrome_devtools` browser check blocked only on user Chrome remote debugging `DevToolsActivePort` not open).
 
-### Session 10 — Publication-Grade Capstone Report & IEEE Research Paper — `Next`
-- **Files**: `docs/CAPSTONE_REPORT_IEEE.md`, `docs/RESEARCH_PAPER_IEEE.md`.
+### Session 10 — Publication-Grade Capstone Report & IEEE Research Paper — `Done`
+- **Files**: `docs/CAPSTONE_REPORT_IEEE.md`, `docs/RESEARCH_PAPER_IEEE.md`, `docs/IMPLEMENTATION_ROADMAP.md`.
 - **Implementation Spec**:
-  1. Populate all 10 chapters + front/back matter using **only** directly verified results, plots, model/dataset cards, verified IEEE/ICML/NeurIPS/Interspeech citations, and student/faculty metadata (**Shivendra Pratap**, Section **K23DT**, Batch **2027**, Roll No **33**, Subject **Deep Learning**, Prof. **Anjar Hussain Lone**, plus `[MOCK]` placeholders only for unverified institutional headers/dates/survey placeholders).
-  2. Produce the tight **8-page IEEE Research Paper** distilled directly from Phases 0–5 with exact tables, significance tests, and Pareto plot.
+  1. Populated all 10 chapters, front matter, 28 IEEE references, and Appendices A–F in `docs/CAPSTONE_REPORT_IEEE.md` using directly verified results, plots (`fig1`–`fig4`), model/dataset cards, team ownership (`docs/TEAM.md`), and student/faculty metadata (**Shivendra Pratap**, Section **K23DT**, Batch **2027**, Roll No **33**, Subject **Deep Learning**, **Prof. Anjar Hussain Lone**, plus clearly bracketed `[MOCK]` placeholders for institutional headers, Phase 0 survey/UAT figures, and plagiarism index).
+  2. Produced the concise IEEE conference-style manuscript in `docs/RESEARCH_PAPER_IEEE.md` distilling Phases 0–5, mathematical Pareto formulation, 9-row ablation matrix, paired bootstrap significance tests, explainability, and error analysis.
+- **Status**: Complete and verified against all JSON metrics, figure assets (`EXISTS=True`), syntax checks, and `test_pipeline.py`.
