@@ -7,8 +7,7 @@
 | Frontend | Anurag | Siddharth |
 | Backend | Shivendra | Anurag |
 | ML and evals | Krishnendu | Sachin |Shivendra | Prince
-| Security and CI | Sachin | Siddharth |
-
+| Security and CI | Krishnendu | Siddharth |Sachin
 ## Decisions
 
 Tie-breaker: Jo bhi uss kamm ko acche se janta ho. Discuss for 10 minutes, the tie-breaker decides, and the decision is logged in an issue.
