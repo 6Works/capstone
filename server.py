@@ -5,6 +5,7 @@ Allows dynamic swapping of ASR, NLP, and TTS service providers at runtime.
 """
 
 import os
+import time
 import shutil
 import tempfile
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
@@ -553,16 +554,18 @@ async def clone_voice_from_reference(
     """
     Chapter 4 Zero-Shot Voice Cloning:
     Extracts acoustic speaker profile (F0, spectral centroid, 128-D embedding) from audio.
+    Supports any audio container: WAV, WebM (browser mic), MP3, OGG, Opus, AAC.
     """
-    from services.tts import VoiceCloner, voice_cloner
     os.makedirs("storage/temp_audio", exist_ok=True)
-    temp_wav = os.path.join("storage/temp_audio", f"ref_clone_{int(time.time()*1000)}.wav")
-
-    with open(temp_wav, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    ext = os.path.splitext(file.filename or "")[1] or ".audio"
+    temp_path = os.path.join("storage/temp_audio", f"ref_clone_{int(time.time()*1000)}{ext}")
 
     try:
-        profile = VoiceCloner.extract_acoustic_profile_from_wav(temp_wav, profile_name=name)
+        with open(temp_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        from services.tts import VoiceCloner, voice_cloner
+        profile = VoiceCloner.extract_acoustic_profile_from_wav(temp_path, profile_name=name or "Cloned Voice")
         voice_cloner.save_cloned_profile(profile)
         return {
             "status": "success",
@@ -570,11 +573,16 @@ async def clone_voice_from_reference(
             "profile": profile.to_dict()
         }
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Acoustic profiling failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "detail": f"Acoustic profiling failed: {str(e)}"}
+        )
     finally:
-        if os.path.exists(temp_wav):
+        if os.path.exists(temp_path):
             try:
-                os.remove(temp_wav)
+                os.remove(temp_path)
             except Exception:
                 pass
 
