@@ -460,6 +460,76 @@ class TestStage5TTSService:
         assert data["status"] == "success"
         assert "audio_url" in data
 
+    def test_pocket_tts_zero_shot_cloning_and_api(self):
+        """Verifies PocketTTSCloningService ONNX zero-shot synthesis, factory wiring, and Stage 5 API."""
+        import wave
+        from fastapi.testclient import TestClient
+        from server import app
+        from services.tts import PocketTTSCloningService, VoiceCloner, voice_cloner
+
+        if not PocketTTSCloningService.resolve_model_dir():
+            pytest.skip("Kyutai Pocket TTS INT8 weights not present locally")
+
+        # 1. PipelineFactory injection
+        pipe = PipelineFactory.create_pipeline(
+            asr_provider="mock",
+            tts_provider="pocket_tts",
+            output_provider="web",
+            speaker_profile_id="mira_neural",
+        )
+        assert isinstance(pipe.tts, PocketTTSCloningService)
+
+        # 2. Check /api/tts/engines advertises pocket_tts
+        client = TestClient(app)
+        eng_resp = client.get("/api/tts/engines")
+        assert eng_resp.status_code == 200
+        engines = {e["id"]: e for e in eng_resp.json()["engines"]}
+        assert "pocket_tts" in engines
+        assert engines["pocket_tts"]["is_available"] is True
+
+        # 3. Direct zero-shot cloning synthesis on a 1.5s speech-like reference WAV
+        import numpy as np
+        import tempfile
+        sr = 16000
+        t = np.linspace(0, 1.5, int(sr * 1.5), endpoint=False)
+        sig = (0.3 * np.sin(2 * np.pi * 145.0 * t) + 0.15 * np.sin(2 * np.pi * 290.0 * t))
+        ref_wav = os.path.join(tempfile.gettempdir(), f"pocket_ref_{int(time.time()*1000)}.wav")
+        out_wav = os.path.join(tempfile.gettempdir(), f"pocket_out_{int(time.time()*1000)}.wav")
+        tmp_pid = f"test_pocket_{int(time.time()*1000)}"
+        try:
+            with wave.open(ref_wav, "wb") as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(sr)
+                wf.writeframes((sig * 32767.0).astype(np.int16).tobytes())
+
+            prof = VoiceCloner.extract_acoustic_profile_from_wav(
+                ref_wav,
+                profile_name="Temp Pocket Target",
+                profile_id=tmp_pid,
+                save_ref_dir=voice_cloner.profiles_dir,
+            )
+            voice_cloner.save_cloned_profile(prof)
+
+            resp = client.post("/api/test/stage5-tts", json={
+                "text": "Testing offline zero shot cloning.",
+                "provider": "pocket_tts",
+                "profile_id": tmp_pid,
+            })
+            assert resp.status_code == 200
+            body = resp.json()
+            assert body["status"] == "success"
+            assert body["provider"].startswith("pocket_tts_")
+            assert body["file_path"] and os.path.exists(body["file_path"])
+            with wave.open(body["file_path"], "rb") as wf:
+                dur = wf.getnframes() / wf.getframerate()
+                assert dur > 0.5
+        finally:
+            voice_cloner.delete_profile(tmp_pid)
+            for p in (ref_wav, out_wav):
+                if os.path.exists(p):
+                    os.remove(p)
+
 
 class TestStage6AudioOutputService:
     def test_web_stream_audio_sink(self):

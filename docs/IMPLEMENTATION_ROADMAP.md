@@ -76,15 +76,10 @@ All remote manifests are fetched in **Session 4** via lightweight streaming slic
 ### Session 2 — Neural Speaker Encoder (`WeSpeaker CAM++ LM` ONNX) — `Done`
 - **Status**: Verified `46 passed` in `test_pipeline.py`; WeSpeaker CAM++ LM (`27.93 MB`, `512-D`) active in `VoiceCloner`; benchmark saved in `ml/results/speaker_encoder_eval.json`.
 
-### Session 3 — True Zero-Shot Neural Voice Cloning (`Kyutai Pocket TTS INT8`) — `Next`
-- **Files**: `services/tts/tts_services.py`, `services/tts/__init__.py`, `orchestrator/factory.py`, `server.py`, `web/pages/tts.html`, `test_pipeline.py`.
-- **Implementation Spec**:
-  1. Download & extract `sherpa-onnx-pocket-tts-int8-2026-01-26.tar.bz2` (93.8 MB) into gitignored `models/pocket_tts/`; auto-discover `.onnx` & `.json` files via deterministic globbing for `OfflineTtsPocketModelConfig`.
-  2. Implement `PocketTTSCloningService(ITTSService)` (~90 lines max): loads cached `sherpa_onnx.OfflineTts`, loads target `profile.ref_audio_path` via `VoiceCloner.load_audio_signal`, builds `GenerationConfig(reference_audio=..., reference_sample_rate=16000)`, synthesizes zero-shot cloned speech, normalizes peak PCM safely to WAV, and falls back gracefully to `NeuralVoiceCloningTTSService` if weights are absent.
-  3. Wire `"pocket_tts"` into `PipelineFactory`, `GET /api/tts/engines`, `POST /api/test/stage5-tts`, and the engine dropdown in `web/pages/tts.html`.
-- **Exit Gate**: Synthesize real cloned WAV from a reference clip via API & unit test (`duration > 0.5s`, valid WAV headers), zero regression across suite.
+### Session 3 — True Zero-Shot Neural Voice Cloning (`Kyutai Pocket TTS INT8`) — `Done`
+- **Status**: Verified `47 passed` in `test_pipeline.py` (Commits pending/Session 3); Kyutai Pocket TTS INT8 (`24 kHz`, CPU RTF `0.482`, `bria.wav` CAM++ CosSim `0.7444`, roundtrip WER `0.0`) integrated in `PocketTTSCloningService`, `PipelineFactory`, `/api/test/stage5-tts`, and `/tts` studio UI.
 
-### Session 4 — Reproducible Benchmark Datasets & Dataset Card
+### Session 4 — Reproducible Benchmark Datasets & Dataset Card — `Next`
 - **Files**: `ml/datasets/prepare_benchmarks.py`, `ml/cards/dataset_card.md`, `test_pipeline.py`.
 - **Implementation Spec**:
   1. Write clean fetcher caching compact slices (`<=150 MB` total in gitignored `storage/benchmarks/` + versioned manifest metadata):
