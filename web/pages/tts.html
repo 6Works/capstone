@@ -914,7 +914,10 @@
       const status = document.getElementById('synthStatus');
       const player = document.getElementById('ttsAudioPlayer');
 
-      if (!text) return;
+      if (!text) {
+        alert('Please enter or select text to synthesize.');
+        return;
+      }
 
       btn.innerText = 'Synthesizing...';
       status.innerText = 'Neural vocoder processing...';
@@ -933,6 +936,11 @@
             with_normalization: withNorm
           })
         });
+
+        if (!resp.ok) {
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.detail || `Server returned error (${resp.status})`);
+        }
 
         const data = await resp.json();
         const duration = Math.round(performance.now() - t0);
@@ -955,8 +963,14 @@
 
         if (data.audio_url) {
           player.src = data.audio_url + '?t=' + Date.now();
-          player.play();
-          document.getElementById('playerState').innerText = 'Playing';
+          player.load();
+          try {
+            await player.play();
+            document.getElementById('playerState').innerText = 'Playing';
+          } catch (playErr) {
+            console.warn("Browser autoplay policy prevented automatic playback:", playErr);
+            document.getElementById('playerState').innerText = 'Ready (Click Play)';
+          }
           drawSimulatedWaveform();
           player.onended = () => {
             document.getElementById('playerState').innerText = 'Finished';
@@ -1166,7 +1180,7 @@
         if (resp.ok && data.status === 'success') {
           statusEl.innerText = `Voice '${name}' successfully cloned!`;
           renderExtractedProfile(data.profile);
-          refreshProfilesList();
+          await refreshProfilesList(data.profile.profile_id);
 
           const audBtn = document.getElementById('auditionCloneBtn');
           audBtn.disabled = false;
@@ -1214,10 +1228,16 @@
       const profileId = audBtn.dataset.profileId;
       if (!profileId) return;
 
+      await refreshProfilesList(profileId);
       switchTab('synthesis');
       const select = document.getElementById('voiceProfileSelect');
       select.value = profileId;
-      synthesizeSpeech();
+      const engineSelect = document.getElementById('ttsEngineSelect');
+      if (engineSelect) {
+        engineSelect.value = 'neural_vits';
+        onEngineChange();
+      }
+      await synthesizeSpeech();
     }
 
     // Voice Morphing Engine
@@ -1362,14 +1382,14 @@
     }
 
     // Refresh Profiles
-    async function refreshProfilesList() {
+    async function refreshProfilesList(targetProfileId) {
       try {
         const resp = await fetch('/api/tts/voices');
         const data = await resp.json();
         
         // Select in Tab 1
         const select = document.getElementById('voiceProfileSelect');
-        const currentVal = select.value;
+        const currentVal = targetProfileId || select.value;
         select.innerHTML = '';
         data.voices.forEach(v => {
           const opt = document.createElement('option');
@@ -1377,7 +1397,9 @@
           opt.innerText = `${v.name} (${v.fundamental_freq_f0}Hz)`;
           select.appendChild(opt);
         });
-        if (data.voices.some(v => v.profile_id === currentVal)) {
+        if (targetProfileId && data.voices.some(v => v.profile_id === targetProfileId)) {
+          select.value = targetProfileId;
+        } else if (data.voices.some(v => v.profile_id === currentVal)) {
           select.value = currentVal;
         }
 
@@ -1408,10 +1430,16 @@
       }
     }
 
-    function selectProfileForSynthesis(profileId) {
+    async function selectProfileForSynthesis(profileId) {
+      await refreshProfilesList(profileId);
       switchTab('synthesis');
       document.getElementById('voiceProfileSelect').value = profileId;
-      synthesizeSpeech();
+      const engineSelect = document.getElementById('ttsEngineSelect');
+      if (engineSelect) {
+        engineSelect.value = 'neural_vits';
+        onEngineChange();
+      }
+      await synthesizeSpeech();
     }
 
     // Benchmark Arena Race
