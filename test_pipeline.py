@@ -685,3 +685,78 @@ class TestBlueprintServiceAndIntelligentProfiling:
         assert "SQLWorkbench" in res["blueprint"]["all_plugins"]
 
 
+class TestMLEvaluationMetrics:
+    """Verifies Session 1 research evaluation primitives and ONNX research runtime availability."""
+
+    def test_asr_and_slu_metrics(self):
+        from ml.metrics import compute_asr_metrics, compute_slu_metrics
+
+        asr_m = compute_asr_metrics(
+            references=["Hello Sachin, tell me about PyTorch", "My name is Aradhya"],
+            hypotheses=["Hello Sachin tell me about PyTorch", "My name is Aradhya"],
+            target_terms=[["Sachin", "PyTorch"], ["Aradhya"]],
+        )
+        assert asr_m["wer"] == 0.0
+        assert asr_m["cer"] == 0.0
+        assert asr_m["target_term_recall"] == 1.0
+
+        slu_m = compute_slu_metrics(
+            y_true=["greeting", "project_query", "greeting", "farewell"],
+            y_pred=["greeting", "project_query", "general_query", "farewell"],
+            schema_valid_flags=[True, True, False, True],
+        )
+        assert slu_m["accuracy"] == 0.75
+        assert slu_m["schema_valid_rate"] == 0.75
+        assert 0.0 < slu_m["macro_f1"] < 1.0
+
+    def test_speaker_similarity_bootstrap_and_stoi(self):
+        import tempfile
+        import wave
+        import numpy as np
+        import sherpa_onnx
+        from ml.metrics import (
+            compute_speaker_similarity,
+            compute_audio_intelligibility,
+            paired_bootstrap_test,
+            summarize_seeds,
+            estimate_cost_per_1k_turns,
+        )
+
+        assert sherpa_onnx is not None
+        assert compute_speaker_similarity([1.0, 0.0, 0.0], [1.0, 0.0, 0.0]) == 1.0
+        assert compute_speaker_similarity([1.0, 0.0], [0.0, 1.0]) == 0.0
+
+        sig = paired_bootstrap_test(
+            baseline_scores=[0.60, 0.62, 0.58, 0.61, 0.59, 0.60],
+            candidate_scores=[0.85, 0.87, 0.84, 0.86, 0.88, 0.85],
+            n_resamples=500,
+            seed=42,
+            higher_is_better=True,
+        )
+        assert sig["observed_improvement"] > 0.2
+        assert sig["p_value"] < 0.05
+
+        s = summarize_seeds([0.80, 0.82, 0.84])
+        assert s["mean"] == 0.82
+        assert s["n_seeds"] == 3
+        assert estimate_cost_per_1k_turns(avg_latency_sec=1.0) > 0.0
+
+        # Verify STOI cleanly on a synthetic speech-like tone
+        sr = 16000
+        t = np.linspace(0, 0.6, int(sr * 0.6))
+        wav_pcm = (0.3 * np.sin(2 * np.pi * 220 * t) * 32767).astype(np.int16)
+        p1 = os.path.join(tempfile.gettempdir(), f"stoi_test_{int(time.time()*1000)}.wav")
+        try:
+            with wave.open(p1, "wb") as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(sr)
+                wf.writeframes(wav_pcm.tobytes())
+            score = compute_audio_intelligibility(p1, p1)
+            assert score >= 0.99
+        finally:
+            if os.path.exists(p1):
+                os.remove(p1)
+
+
+

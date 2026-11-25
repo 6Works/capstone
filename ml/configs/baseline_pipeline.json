@@ -1,0 +1,26 @@
+{
+  "experiment_id": "baseline_pipeline_v1",
+  "description": "Unmodified open baseline for end-to-end 6-stage pipeline prior to per-layer improvements.",
+  "seeds": [42, 1337, 2026],
+  "hardware_target": "cpu_or_gtx1650_4gb",
+  "layers": {
+    "stage2_asr": {
+      "provider": "whisper",
+      "model_size": "tiny.en",
+      "compute_type": "int8",
+      "vad_filter": false,
+      "initial_prompt": ""
+    },
+    "stage3_nlp": {
+      "provider": "llm",
+      "model": "qwen2.5-coder:1.5b",
+      "temperature": 0.0,
+      "schema_repair": false
+    },
+    "stage5_tts": {
+      "provider": "neural_vits",
+      "speaker_encoder": "random_proj_128d",
+      "profile_id": "mira_neural"
+    }
+  }
+}
