@@ -304,6 +304,24 @@ class TestStage5TTSService:
         # Mira is 218Hz, Alex is 124Hz -> 50/50 blend should be around 171Hz
         assert 160.0 <= morphed.fundamental_freq_f0 <= 180.0
 
+    def test_neural_tts_multi_sentence_synthesis(self):
+        """Verifies multi-sentence synthesis joins all chunks and preserves speech duration."""
+        from services.tts import NeuralVoiceCloningTTSService
+        import wave
+        service = NeuralVoiceCloningTTSService(speaker_profile_id="mira_neural")
+        text = "Hello! This is sentence two. And this is sentence three."
+        res = service.synthesize(text)
+        assert res.status == "success"
+        assert res.file_path and os.path.exists(res.file_path)
+        with wave.open(res.file_path, "rb") as wf:
+            dur = wf.getnframes() / wf.getframerate()
+            # 3 sentences should take at least 1.5 seconds
+            assert dur > 1.5
+        try:
+            os.remove(res.file_path)
+        except Exception:
+            pass
+
     def test_clone_voice_api_endpoint(self):
         """Verifies POST /api/tts/clone-voice handles file upload and returns JSON response."""
         from fastapi.testclient import TestClient
