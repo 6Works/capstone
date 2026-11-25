@@ -53,6 +53,7 @@ class VoiceCloner:
     and transforms neural synthesis into the cloned vocal identity.
     """
 
+    PRESET_IDS = {"mira_neural", "alex_interviewer", "sarah_executive", "david_architect"}
     BASE_F0 = 175.0  # Base reference pitch of default Lessac model (Hz)
 
     def __init__(self, profiles_dir: str = "storage/cloned_voices"):
@@ -150,16 +151,23 @@ class VoiceCloner:
                 try:
                     with open(path, "r", encoding="utf-8") as f:
                         data = json.load(f)
+                        gender = data.get("gender_estimate", "neutral")
+                        f0 = data["fundamental_freq_f0"]
+                        # Auto-calibrate semitones relative to gender baseline (145Hz male / 218Hz female)
+                        base_ref_f0 = 145.0 if (gender == "male" or f0 < 155.0) else 218.0
+                        calibrated_shift = round(float(12.0 * math.log2(max(50.0, f0) / base_ref_f0)), 2)
+                        calibrated_shift = max(-4.0, min(4.0, calibrated_shift))
+
                         prof = SpeakerProfile(
                             profile_id=data["profile_id"],
                             name=data["name"],
                             description=data.get("description", "Custom Cloned Voice"),
-                            gender_estimate=data.get("gender_estimate", "neutral"),
-                            fundamental_freq_f0=data["fundamental_freq_f0"],
+                            gender_estimate=gender,
+                            fundamental_freq_f0=f0,
                             pitch_variability_std=data.get("pitch_variability_std", 20.0),
                             spectral_centroid=data["spectral_centroid"],
                             spectral_flatness=data.get("spectral_flatness", 0.04),
-                            pitch_shift_semitones=data["pitch_shift_semitones"],
+                            pitch_shift_semitones=calibrated_shift,
                             length_scale=data.get("length_scale", 1.0),
                             noise_scale=data.get("noise_scale", 0.667),
                             noise_w_scale=data.get("noise_w_scale", 0.8),
@@ -171,11 +179,62 @@ class VoiceCloner:
                     print(f"[VoiceCloner] Error loading profile {fname}: {e}")
 
     def list_profiles(self) -> List[Dict[str, Any]]:
-        """Returns all available preset and user-cloned speaker profiles."""
-        return [p.to_dict() for p in self.profiles.values()]
+        """Returns all available preset and user-cloned speaker profiles with preset flags."""
+        result = []
+        for p in self.profiles.values():
+            d = p.to_dict()
+            d["is_preset"] = p.profile_id in self.PRESET_IDS
+            result.append(d)
+        return result
 
     def get_profile(self, profile_id: str) -> Optional[SpeakerProfile]:
         return self.profiles.get(profile_id)
+
+    def delete_profile(self, profile_id: str) -> bool:
+        """
+        Deletes a cloned or morphed profile from memory and disk storage.
+        Built-in archetypal presets (mira, alex, sarah, david) are protected.
+        """
+        if profile_id in self.PRESET_IDS:
+            raise ValueError(f"Cannot delete built-in archetypal preset '{profile_id}'")
+        if profile_id not in self.profiles:
+            return False
+
+        # Remove from in-memory registry
+        del self.profiles[profile_id]
+
+        # Remove persistent JSON file from storage
+        path = os.path.join(self.profiles_dir, f"{profile_id}.json")
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+            except Exception as e:
+                print(f"[VoiceCloner] Error removing profile file {path}: {e}")
+        return True
+
+    def rename_profile(self, profile_id: str, new_name: str) -> Optional[SpeakerProfile]:
+        """Renames an existing profile and persists the update to disk."""
+        if not new_name or not new_name.strip():
+            raise ValueError("New voice name cannot be empty")
+        new_name = new_name.strip()
+
+        prof = self.get_profile(profile_id)
+        if not prof:
+            return None
+
+        prof.name = new_name
+        self.profiles[profile_id] = prof
+
+        # Persist update to disk if it's a saved custom profile
+        if profile_id not in self.PRESET_IDS:
+            path = os.path.join(self.profiles_dir, f"{profile_id}.json")
+            try:
+                with open(path, "w", encoding="utf-8") as f:
+                    json.dump(prof.to_dict(), f, indent=2)
+            except Exception as e:
+                print(f"[VoiceCloner] Error updating profile file {path}: {e}")
+
+        return prof
 
     @classmethod
     def load_audio_signal(cls, audio_path: str, target_sr: int = 16000) -> Tuple[np.ndarray, int]:
@@ -289,12 +348,13 @@ class VoiceCloner:
             spectral_centroid = 2000.0
             spectral_flatness = 0.04
 
-        # 3. Classify gender estimate & semitone pitch shift relative to baseline (175 Hz)
-        gender_est = "female" if f0_mean > 175.0 else ("male" if f0_mean < 145.0 else "neutral")
-        semitones = float(12.0 * math.log2(max(50.0, f0_mean) / cls.BASE_F0))
+        # 3. Classify gender estimate & semitone pitch shift relative to baseline model
+        gender_est = "female" if f0_mean > 175.0 else ("male" if f0_mean < 155.0 else "neutral")
+        base_ref_f0 = 145.0 if gender_est == "male" else 218.0
+        semitones = float(12.0 * math.log2(max(50.0, f0_mean) / base_ref_f0))
 
-        # Clamp semitones to safe natural limits (-8 to +8 semitones)
-        semitones = max(-8.0, min(8.0, semitones))
+        # Clamp semitones to safe natural limits (-4 to +4 semitones)
+        semitones = max(-4.0, min(4.0, semitones))
 
         # 4. Cadence & Stochastic Variability
         length_scale = float(1.0 - (semitones * 0.015))  # Higher pitch speakers tend to speak slightly faster
@@ -480,30 +540,36 @@ class VoiceCloner:
     def apply_acoustic_timbre_conditioning(cls, wav_path: str, profile: SpeakerProfile, output_path: str) -> str:
         """
         Applies DSP vocal tract acoustic conditioning to match target speaker timbre:
-        - Pitch shift via polynomial rate resampling + WSOLA time reconstruction.
+        - Fine pitch tuning via polynomial rate resampling.
         - Formant / Equalization filtering (bass warmth or high-frequency brilliance).
         """
         audio, orig_sr = cls.load_audio_signal(wav_path, target_sr=16000)
         channels = 1
 
-        semitones = profile.pitch_shift_semitones
+        target_f0 = profile.fundamental_freq_f0
+        base_ref_f0 = 145.0 if (profile.gender_estimate == "male" or target_f0 < 155.0) else 218.0
+        semitones = float(12.0 * math.log2(max(50.0, target_f0) / base_ref_f0))
+        semitones = max(-4.0, min(4.0, semitones))
 
-        # Apply WSOLA pitch shifting if significant difference (|semitones| > 0.4)
-        if abs(semitones) > 0.4:
-            audio = cls._pitch_shift_wsola(audio, orig_sr, semitones)
+        # Apply pitch shift if difference is perceptible (|semitones| > 0.3)
+        if abs(semitones) > 0.3:
+            ratio = 2.0 ** (semitones / 12.0)
+            target_len = int(len(audio) / ratio)
+            if target_len > 100:
+                audio = signal.resample(audio, target_len)
 
         # Equalization filter based on spectral centroid and gender
         nyquist = orig_sr / 2.0
-        if profile.gender_estimate == "male" or profile.fundamental_freq_f0 < 140.0:
-            # Low-frequency chest resonance boost (120-250 Hz)
-            boost_freq = min(220.0, nyquist - 50)
-            b, a = signal.iirpeak(boost_freq, Q=2.0, fs=orig_sr)
-            audio = audio + 0.35 * signal.lfilter(b, a, audio)
-        elif profile.gender_estimate == "female" or profile.fundamental_freq_f0 > 200.0:
-            # Upper-mid vocal presence and breath air boost (2.5 kHz - 4.5 kHz)
-            air_freq = min(3500.0, nyquist - 50)
+        if profile.gender_estimate == "male" or profile.fundamental_freq_f0 < 155.0:
+            # Low-frequency chest resonance boost (140-220 Hz)
+            boost_freq = min(180.0, nyquist - 50)
+            b, a = signal.iirpeak(boost_freq, Q=1.8, fs=orig_sr)
+            audio = audio + 0.25 * signal.lfilter(b, a, audio)
+        elif profile.gender_estimate == "female" or profile.fundamental_freq_f0 > 185.0:
+            # Upper-mid vocal presence and breath air boost (2.8 kHz - 4.0 kHz)
+            air_freq = min(3200.0, nyquist - 50)
             b, a = signal.iirpeak(air_freq, Q=1.8, fs=orig_sr)
-            audio = audio + 0.30 * signal.lfilter(b, a, audio)
+            audio = audio + 0.25 * signal.lfilter(b, a, audio)
 
         # Normalize and prevent clipping
         max_val = np.max(np.abs(audio))
