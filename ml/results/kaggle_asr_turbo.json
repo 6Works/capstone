@@ -1,0 +1,20 @@
+{
+  "model": "openai/whisper-large-v3-turbo",
+  "license": "MIT",
+  "splits": {
+    "minds14_full_498": {
+      "wer": 0.2517,
+      "cer": 0.2013,
+      "num_samples": 498,
+      "accent_wer": {
+        "en-US": 0.2978,
+        "en-AU": 0.2251,
+        "en-GB": 0.2341
+      }
+    },
+    "interview_stress_50": {
+      "wer": 0.0787,
+      "num_samples": 50
+    }
+  }
+}
