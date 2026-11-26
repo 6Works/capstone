@@ -1,7 +1,16 @@
 """
-Session 2 Experiment: Speaker Verification & Embedding Quality Benchmark.
-Compares baseline RandomProj-128D vs. WeSpeaker CAM++ LM (512-D ONNX)
-on real unseen multi-speaker LibriSpeech test-clean utterances (clean & 20 dB AWGN).
+Upgraded Speaker Verification & Cross-Channel / Dual-Encoder Audit:
+Compares 3 encoders cleanly across identical splits:
+  1. RandomProj-128D (Welch Mel PSD random projection baseline)
+  2. WeSpeaker CAM++ LM (512-D ONNX, CC-BY-4.0 / Apache-2.0 sherpa-onnx)
+  3. WeSpeaker ECAPA512_LM (512-D ECAPA-TDNN ONNX, CC-BY-4.0)
+
+Evaluates:
+  - librispeech_60 (clean & 20 dB AWGN)
+  - True Cross-Channel Degradation (enroll/A clean vs B passed through 300-3400 Hz telephony bandpass + 18 dB AWGN + -6 dB gain)
+  - librispeech_other_60 (challenging noisy/accented unseen speakers)
+Reports encoder-comparable EER, ROC-AUC, and dimensionless Fisher Discriminability d'
+plus bounded paired bootstrap tests (B=2000, p >= 0.001 floor).
 """
 
 import os
@@ -9,185 +18,187 @@ import sys
 import json
 import time
 import itertools
+from typing import Dict, Any, List, Tuple
 import numpy as np
-import requests
+import scipy.signal as signal
 
-# Ensure project root is importable when executed directly
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from services.tts.voice_cloner import VoiceCloner
-from ml.metrics import compute_speaker_similarity, paired_bootstrap_test
+from ml.datasets import load_manifest, add_awgn
+from ml.metrics import (
+    compute_speaker_similarity,
+    compute_verification_stats,
+    paired_bootstrap_test,
+)
 
 
-def _fetch_librispeech_probe(cache_dir: str, num_speakers: int = 4, utts_per_speaker: int = 3):
-    """Downloads a tiny cached multi-speaker FLAC subset from openslr/librispeech_asr test-clean."""
-    os.makedirs(cache_dir, exist_ok=True)
-    manifest_path = os.path.join(cache_dir, "manifest.json")
-    if os.path.exists(manifest_path):
-        with open(manifest_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        if len(data) >= num_speakers * utts_per_speaker and all(os.path.exists(d["path"]) for d in data):
-            return data
-
-    by_speaker = {}
-    offset = 0
-    while len([s for s, items in by_speaker.items() if len(items) >= utts_per_speaker]) < num_speakers and offset < 500:
-        url = f"https://datasets-server.huggingface.co/rows?dataset=openslr/librispeech_asr&config=clean&split=test&offset={offset}&length=100"
-        resp = requests.get(url, timeout=20)
-        resp.raise_for_status()
-        rows = resp.json().get("rows", [])
-        if not rows:
-            break
-        for r in rows:
-            row = r["row"]
-            spk = str(row["speaker_id"])
-            bucket = by_speaker.setdefault(spk, [])
-            if len(bucket) < utts_per_speaker:
-                audio_url = row["audio"][0]["src"]
-                local_path = os.path.join(cache_dir, f"spk_{spk}_{row['id']}.flac")
-                if not os.path.exists(local_path):
-                    ar = requests.get(audio_url, timeout=30)
-                    ar.raise_for_status()
-                    with open(local_path, "wb") as af:
-                        af.write(ar.content)
-                bucket.append({"speaker_id": spk, "utt_id": str(row["id"]), "path": local_path, "text": row["text"]})
-        offset += 100
-
-    selected = []
-    for spk, items in by_speaker.items():
-        if len(items) >= utts_per_speaker:
-            selected.extend(items[:utts_per_speaker])
-            if len(selected) >= num_speakers * utts_per_speaker:
-                break
-
-    with open(manifest_path, "w", encoding="utf-8") as f:
-        json.dump(selected, f, indent=2)
-    return selected
+def _apply_channel_shift(audio: np.ndarray, sr: int = 16000, seed: int = 101) -> np.ndarray:
+    """Applies telephone-like bandpass (300-3400 Hz) + 18 dB AWGN + -6 dB gain attenuation."""
+    sos = signal.butter(4, [300.0, 3400.0], btype="bandpass", fs=sr, output="sos")
+    filtered = signal.sosfilt(sos, np.asarray(audio, dtype=np.float32)).astype(np.float32)
+    filtered = add_awgn(filtered * 0.5, snr_db=18.0, seed=seed)
+    return filtered
 
 
-def _add_awgn(audio: np.ndarray, snr_db: float, seed: int = 42) -> np.ndarray:
-    """Adds deterministic Additive White Gaussian Noise calibrated to target SNR (dB)."""
-    rng = np.random.RandomState(seed)
-    sig_power = float(np.mean(audio ** 2)) + 1e-12
-    noise_power = sig_power / (10.0 ** (snr_db / 10.0))
-    noise = rng.normal(0.0, np.sqrt(noise_power), size=audio.shape).astype(np.float32)
-    return np.clip(audio + noise, -1.0, 1.0)
+def _extract_all(clips: List[Dict[str, Any]], signals: List[Tuple[np.ndarray, int]], encoder_cfg: Dict[str, Any]):
+    use_neural = encoder_cfg["use_neural"]
+    model_path = encoder_cfg.get("model_path")
 
-
-def _evaluate_backend(clips, signals, use_neural: bool):
-    """Computes verification cosine distributions, ROC-AUC, EER, and warm latency."""
-    from sklearn.metrics import roc_auc_score, roc_curve
-
-    # Measure cold initialization separately from steady-state utterance inference
     t_init = time.perf_counter()
     if use_neural:
-        VoiceCloner._get_speaker_extractor()
-    cold_init_ms = round((time.perf_counter() - t_init) * 1000.0, 2)
+        VoiceCloner._get_speaker_extractor(model_path=model_path)
+    cold_ms = round((time.perf_counter() - t_init) * 1000.0, 2)
 
     embs = []
     latencies_ms = []
     backend_name = ""
     for audio, sr in signals:
         t0 = time.perf_counter()
-        emb, backend_name = VoiceCloner.extract_speaker_embedding(audio, sample_rate=sr, use_neural=use_neural)
+        emb, backend_name = VoiceCloner.extract_speaker_embedding(
+            audio, sample_rate=sr, use_neural=use_neural, model_path=model_path
+        )
         latencies_ms.append((time.perf_counter() - t0) * 1000.0)
         embs.append(emb)
 
-    y_true = []
-    y_scores = []
-    same_scores = []
-    diff_scores = []
-    lowest_same_pair = None
+    return embs, backend_name, cold_ms, round(float(np.mean(latencies_ms)), 2)
 
+
+def _eval_within_channel(clips: List[Dict[str, Any]], signals: List[Tuple[np.ndarray, int]], encoder_cfg: Dict[str, Any]) -> Dict[str, Any]:
+    embs, backend_name, cold_ms, mean_lat = _extract_all(clips, signals, encoder_cfg)
+    same_scores, diff_scores, pair_margins = [], [], []
     for i, j in itertools.combinations(range(len(clips)), 2):
         sim = compute_speaker_similarity(embs[i], embs[j])
         is_same = int(clips[i]["speaker_id"] == clips[j]["speaker_id"])
-        y_true.append(is_same)
-        y_scores.append(sim)
+        pair_margins.append(sim if is_same else -sim)
         if is_same:
             same_scores.append(sim)
-            if lowest_same_pair is None or sim < lowest_same_pair["cos_sim"]:
-                lowest_same_pair = {
-                    "spk": clips[i]["speaker_id"],
-                    "utt_a": clips[i]["utt_id"],
-                    "utt_b": clips[j]["utt_id"],
-                    "cos_sim": sim,
-                }
         else:
             diff_scores.append(sim)
 
-    auc = float(roc_auc_score(y_true, y_scores))
-    fpr, tpr, _ = roc_curve(y_true, y_scores)
-    fnr = 1.0 - tpr
-    eer_idx = int(np.nanargmin(np.abs(fnr - fpr)))
-    eer = float((fpr[eer_idx] + fnr[eer_idx]) / 2.0)
-
-    return {
+    stats = compute_verification_stats(same_scores, diff_scores)
+    stats.update({
         "backend": backend_name,
         "embedding_dim": len(embs[0]) if embs else 0,
-        "same_speaker_mean": round(float(np.mean(same_scores)), 4),
-        "same_speaker_std": round(float(np.std(same_scores, ddof=1)), 4),
-        "diff_speaker_mean": round(float(np.mean(diff_scores)), 4),
-        "diff_speaker_std": round(float(np.std(diff_scores, ddof=1)), 4),
-        "separation_gap": round(float(np.mean(same_scores) - np.mean(diff_scores)), 4),
-        "roc_auc": round(auc, 4),
-        "eer": round(eer, 4),
-        "cold_init_ms": cold_init_ms,
-        "mean_latency_ms": round(float(np.mean(latencies_ms)), 2),
-        "lowest_same_pair": lowest_same_pair,
-        "num_same_pairs": len(same_scores),
-        "num_diff_pairs": len(diff_scores),
-        "pair_margins": [round(float(s if yt == 1 else -s), 4) for yt, s in zip(y_true, y_scores)],
-    }
+        "cold_init_ms": cold_ms,
+        "mean_latency_ms": mean_lat,
+        "pair_margins": [round(float(x), 4) for x in pair_margins],
+    })
+    return stats
+
+
+def _eval_cross_channel(
+    clips: List[Dict[str, Any]],
+    clean_signals: List[Tuple[np.ndarray, int]],
+    shifted_signals: List[Tuple[np.ndarray, int]],
+    encoder_cfg: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Pairs Clean enrollment/utterance i strictly against Channel-Shifted utterance j (i != j)."""
+    embs_clean, backend_name, cold_ms, mean_lat = _extract_all(clips, clean_signals, encoder_cfg)
+    embs_shift, _, _, _ = _extract_all(clips, shifted_signals, encoder_cfg)
+
+    same_scores, diff_scores, pair_margins = [], [], []
+    for i in range(len(clips)):
+        for j in range(len(clips)):
+            if clips[i]["id"] == clips[j]["id"]:
+                continue  # Exclude identical utterance
+            sim = compute_speaker_similarity(embs_clean[i], embs_shift[j])
+            is_same = int(clips[i]["speaker_id"] == clips[j]["speaker_id"])
+            pair_margins.append(sim if is_same else -sim)
+            if is_same:
+                same_scores.append(sim)
+            else:
+                diff_scores.append(sim)
+
+    stats = compute_verification_stats(same_scores, diff_scores)
+    stats.update({
+        "backend": backend_name,
+        "embedding_dim": len(embs_clean[0]) if embs_clean else 0,
+        "cold_init_ms": cold_ms,
+        "mean_latency_ms": mean_lat,
+        "pair_margins": [round(float(x), 4) for x in pair_margins],
+    })
+    return stats
 
 
 def main():
-    cfg_path = os.path.join(ROOT_DIR, "ml", "configs", "speaker_encoder_campp.json")
-    with open(cfg_path, "r", encoding="utf-8") as f:
-        cfg = json.load(f)
+    ls_clean = load_manifest("librispeech_60")["items"]  # 12 speakers x 5 utts = 60 clips
+    ls_clean_sigs = [VoiceCloner.load_audio_signal(os.path.join(ROOT_DIR, c["audio_path"]), target_sr=16000) for c in ls_clean]
+    ls_awgn_sigs = [(add_awgn(a, 20.0, seed=42 + idx), sr) for idx, (a, sr) in enumerate(ls_clean_sigs)]
+    ls_xchan_sigs = [(_apply_channel_shift(a, sr=sr, seed=100 + idx), sr) for idx, (a, sr) in enumerate(ls_clean_sigs)]
 
-    cache_dir = os.path.join(ROOT_DIR, "storage", "benchmarks", "librispeech_speaker_probe")
-    clips = _fetch_librispeech_probe(
-        cache_dir=cache_dir,
-        num_speakers=cfg["num_speakers"],
-        utts_per_speaker=cfg["utts_per_speaker"],
-    )
+    encoders = [
+        ("baseline_random_proj", {"use_neural": False}),
+        ("neural_wespeaker_campp", {"use_neural": True, "model_path": VoiceCloner.DEFAULT_SPEAKER_ENCODER_PATH}),
+    ]
+    if os.path.exists(VoiceCloner.ECAPA_SPEAKER_ENCODER_PATH):
+        encoders.append(("neural_wespeaker_ecapa512", {"use_neural": True, "model_path": VoiceCloner.ECAPA_SPEAKER_ENCODER_PATH}))
 
-    clean_signals = [VoiceCloner.load_audio_signal(c["path"], target_sr=16000) for c in clips]
-    noisy_signals = [(_add_awgn(a, cfg["noise_snr_db"], seed=cfg["seed"]), sr) for a, sr in clean_signals]
+    results: Dict[str, Any] = {
+        "experiment": "speaker_encoder_dual_audit_v2",
+        "num_clips_clean": len(ls_clean),
+        "num_speakers": len({c["speaker_id"] for c in ls_clean}),
+        "conditions": {},
+    }
 
-    results = {"config": cfg, "conditions": {}}
-    for cond_name, sigs in [("clean", clean_signals), (f"awgn_{int(cfg['noise_snr_db'])}db", noisy_signals)]:
-        base_res = _evaluate_backend(clips, sigs, use_neural=False)
-        neur_res = _evaluate_backend(clips, sigs, use_neural=True)
-        sig_test = paired_bootstrap_test(
-            baseline_scores=base_res.pop("pair_margins"),
-            candidate_scores=neur_res.pop("pair_margins"),
-            n_resamples=1000,
-            seed=cfg["seed"],
-            higher_is_better=True,
-        )
-        results["conditions"][cond_name] = {
-            "baseline_random_proj": base_res,
-            "neural_wespeaker_campp": neur_res,
-            "paired_bootstrap_discrimination": sig_test,
-        }
+    for cond_name, mode, sig_a, sig_b in [
+        ("clean_librispeech_60", "within", ls_clean_sigs, None),
+        ("awgn_20db_librispeech_60", "within", ls_awgn_sigs, None),
+        ("cross_channel_telephony_eq", "cross", ls_clean_sigs, ls_xchan_sigs),
+    ]:
+        cond_out: Dict[str, Any] = {}
+        margins_by_enc: Dict[str, List[float]] = {}
+        for enc_id, enc_cfg in encoders:
+            if mode == "within":
+                res = _eval_within_channel(ls_clean, sig_a, enc_cfg)
+            else:
+                res = _eval_cross_channel(ls_clean, sig_a, sig_b, enc_cfg)
+            margins_by_enc[enc_id] = res.pop("pair_margins")
+            cond_out[enc_id] = res
 
-    out_dir = os.path.join(ROOT_DIR, "ml", "results")
-    os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, "speaker_encoder_eval.json")
+        base_m = margins_by_enc["baseline_random_proj"]
+        for neural_id in [k for k in margins_by_enc if k != "baseline_random_proj"]:
+            cond_out[f"bootstrap_{neural_id}_vs_random_proj"] = paired_bootstrap_test(
+                base_m, margins_by_enc[neural_id], n_resamples=2000, seed=42, higher_is_better=True
+            )
+        results["conditions"][cond_name] = cond_out
+
+    # Evaluate on real noisy LibriSpeech test-other if present
+    other_path = os.path.join(ROOT_DIR, "ml", "datasets", "manifests", "librispeech_other_60.json")
+    if os.path.exists(other_path):
+        ls_other = load_manifest("librispeech_other_60")["items"]
+        other_sigs = [VoiceCloner.load_audio_signal(os.path.join(ROOT_DIR, c["audio_path"]), target_sr=16000) for c in ls_other]
+        other_xchan = [(_apply_channel_shift(a, sr=sr, seed=300 + idx), sr) for idx, (a, sr) in enumerate(other_sigs)]
+        for cond_name, mode, sig_a, sig_b in [
+            ("clean_librispeech_other_60", "within", other_sigs, None),
+            ("cross_channel_other_60", "cross", other_sigs, other_xchan),
+        ]:
+            cond_out = {}
+            margins_by_enc = {}
+            for enc_id, enc_cfg in encoders:
+                res = _eval_within_channel(ls_other, sig_a, enc_cfg) if mode == "within" else _eval_cross_channel(ls_other, sig_a, sig_b, enc_cfg)
+                margins_by_enc[enc_id] = res.pop("pair_margins")
+                cond_out[enc_id] = res
+            base_m = margins_by_enc["baseline_random_proj"]
+            for neural_id in [k for k in margins_by_enc if k != "baseline_random_proj"]:
+                cond_out[f"bootstrap_{neural_id}_vs_random_proj"] = paired_bootstrap_test(
+                    base_m, margins_by_enc[neural_id], n_resamples=2000, seed=42, higher_is_better=True
+                )
+            results["conditions"][cond_name] = cond_out
+
+    out_file = os.path.join(ROOT_DIR, "ml", "results", "speaker_encoder_eval.json")
+    os.makedirs(os.path.dirname(out_file), exist_ok=True)
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
-    print(f"\nSaved speaker encoder evaluation -> {out_file}")
-    for cond, row in results["conditions"].items():
-        b, n, p = row["baseline_random_proj"], row["neural_wespeaker_campp"], row["paired_bootstrap_discrimination"]
+    print(f"Saved upgraded speaker encoder evaluation -> {out_file}")
+    for cond, data in results["conditions"].items():
         print(f"\n[{cond}]")
-        print(f"  Baseline (128-D): same={b['same_speaker_mean']} diff={b['diff_speaker_mean']} gap={b['separation_gap']} AUC={b['roc_auc']} EER={b['eer']} lat={b['mean_latency_ms']}ms")
-        print(f"  CAM++ LM (512-D): same={n['same_speaker_mean']} diff={n['diff_speaker_mean']} gap={n['separation_gap']} AUC={n['roc_auc']} EER={n['eer']} lat={n['mean_latency_ms']}ms")
-        print(f"  Bootstrap sig   : improvement={p['observed_improvement']} 95%CI=[{p['ci_95_low']}, {p['ci_95_high']}] p={p['p_value']}")
+        for k, v in data.items():
+            if not k.startswith("bootstrap_"):
+                print(f"  {k:28s}: AUC={v['roc_auc']:.4f} EER={v['eer']:.4f} d'={v['d_prime']:.3f} (same={v['same_mean']} diff={v['diff_mean']})")
 
 
 if __name__ == "__main__":

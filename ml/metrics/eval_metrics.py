@@ -1,12 +1,24 @@
 """
 Core Research Evaluation Primitives (ML Lab — Decoupled from Production API).
-Provides ASR, SLU, Speaker Similarity, Audio Intelligibility, Cost Pareto,
-and Paired Bootstrap significance helpers for reproducible ablation studies.
+Provides ASR (WER, CER, Non-Entity WER, Over-Correction), SLU (Accuracy, Macro-F1, Schema Validity),
+Speaker Similarity (EER, ROC-AUC, Fisher d', Cloning Specificity Margin), Audio Intelligibility (STOI),
+Cost Pareto, TOST Non-Inferiority, and Bounded Paired Bootstrap significance helpers.
 """
 
 from typing import Dict, Any, List, Optional, Sequence
 import re
 import numpy as np
+
+
+_SPOKEN_NUMBERS = {
+    "zero": "0", "one": "1", "two": "2", "three": "3", "four": "4",
+    "five": "5", "six": "6", "seven": "7", "eight": "8", "nine": "9",
+    "ten": "10", "eleven": "11", "twelve": "12", "thirteen": "13",
+    "fourteen": "14", "fifteen": "15", "sixteen": "16", "seventeen": "17",
+    "eighteen": "18", "nineteen": "19", "twenty": "20", "thirty": "30",
+    "forty": "40", "fifty": "50", "sixty": "60", "seventy": "70",
+    "eighty": "80", "ninety": "90",
+}
 
 
 def _normalize_text(text: str) -> str:
@@ -15,12 +27,43 @@ def _normalize_text(text: str) -> str:
     return " ".join(cleaned.split())
 
 
+def normalize_text_itn(text: str) -> str:
+    """Applies lightweight ITN-equivalent normalization (% -> percent, numeric hyphens, cardinal digits)."""
+    s = (text or "").lower().replace("%", " percent ")
+    s = re.sub(r"(?<=\d)-(?=\d)", " ", s)
+    s = re.sub(r"[^\w\s'-]", " ", s)
+    out = []
+    for tok in s.split():
+        if tok in _SPOKEN_NUMBERS:
+            out.append(_SPOKEN_NUMBERS[tok])
+        elif tok == "alright":
+            out.extend(["all", "right"])
+        else:
+            out.append(tok)
+    return " ".join(out)
+
+
+def compute_itn_wer(references: Sequence[str], hypotheses: Sequence[str]) -> Dict[str, float]:
+    """Computes ITN-normalized WER and CER alongside verbatim metrics to isolate formatting artifacts."""
+    import jiwer
+    n_refs = [normalize_text_itn(r) or "<empty>" for r in references]
+    n_hyps = [normalize_text_itn(h) for h in hypotheses]
+    return {
+        "itn_wer": round(float(jiwer.wer(n_refs, n_hyps)), 4),
+        "itn_cer": round(float(jiwer.cer(n_refs, n_hyps)), 4),
+    }
+
+
 def compute_asr_metrics(
     references: Sequence[str],
     hypotheses: Sequence[str],
     target_terms: Optional[Sequence[Sequence[str]]] = None,
+    raw_hypotheses: Optional[Sequence[str]] = None,
 ) -> Dict[str, Any]:
-    """Computes corpus WER, CER via jiwer, plus optional target proper-noun recall."""
+    """
+    Computes corpus WER & CER via jiwer, optional target proper-noun recall,
+    non-entity WER (fluff/fluent word accuracy), and repair precision / over-correction rate.
+    """
     if len(references) != len(hypotheses) or not references:
         raise ValueError("references and hypotheses must be non-empty sequences of equal length.")
 
@@ -43,18 +86,65 @@ def compute_asr_metrics(
             raise ValueError("target_terms length must match references length.")
         total_terms = 0
         matched_terms = 0
-        for hyp_norm, terms in zip(norm_hyps, target_terms):
-            hyp_tokens = set(hyp_norm.split())
+        non_ent_refs: List[str] = []
+        non_ent_hyps: List[str] = []
+
+        for ref_n, hyp_n, terms in zip(norm_refs, norm_hyps, target_terms):
+            hyp_tokens = set(hyp_n.split())
+            ent_tok_set = set()
             for term in terms:
                 t_norm = _normalize_text(term)
                 if not t_norm:
                     continue
                 total_terms += 1
-                if t_norm in hyp_norm or t_norm in hyp_tokens:
+                if t_norm in hyp_n or t_norm in hyp_tokens:
                     matched_terms += 1
+                ent_tok_set.update(t_norm.split())
+
+            rem_r = [w for w in ref_n.split() if w not in ent_tok_set]
+            rem_h = [w for w in hyp_n.split() if w not in ent_tok_set]
+            if rem_r:
+                non_ent_refs.append(" ".join(rem_r))
+                non_ent_hyps.append(" ".join(rem_h) if rem_h else "")
+
         out["target_term_recall"] = round(matched_terms / total_terms, 4) if total_terms else 1.0
         out["target_terms_total"] = total_terms
         out["target_terms_matched"] = matched_terms
+        if non_ent_refs:
+            out["non_entity_wer"] = round(float(jiwer.wer(non_ent_refs, non_ent_hyps)), 4)
+
+    if raw_hypotheses is not None:
+        if len(raw_hypotheses) != len(references):
+            raise ValueError("raw_hypotheses length must match references length.")
+        tokens_modified = 0
+        true_fixes = 0
+        false_repairs = 0
+        for ref_n, raw_h, rep_h in zip(norm_refs, raw_hypotheses, norm_hyps):
+            ref_toks = set(ref_n.split())
+            raw_toks = (_normalize_text(raw_h)).split()
+            rep_toks = rep_h.split()
+            # Track multi-set difference conservatively when lengths align or via word set diffs
+            if len(raw_toks) == len(rep_toks):
+                for rw, pw in zip(raw_toks, rep_toks):
+                    if rw != pw:
+                        tokens_modified += 1
+                        if pw in ref_toks and rw not in ref_toks:
+                            true_fixes += 1
+                        elif rw in ref_toks and pw not in ref_toks:
+                            false_repairs += 1
+            else:
+                raw_set, rep_set = set(raw_toks), set(rep_toks)
+                added = rep_set - raw_set
+                removed = raw_set - rep_set
+                tokens_modified += max(len(added), len(removed))
+                true_fixes += len(added & ref_toks)
+                false_repairs += len(removed & ref_toks)
+
+        out["tokens_modified"] = tokens_modified
+        out["true_repairs"] = true_fixes
+        out["false_repairs"] = false_repairs
+        out["repair_precision"] = round(true_fixes / tokens_modified, 4) if tokens_modified else 1.0
+        out["overcorrection_rate"] = round(false_repairs / max(sum(len(_normalize_text(h).split()) for h in raw_hypotheses), 1), 4)
 
     return out
 
@@ -101,6 +191,45 @@ def compute_speaker_similarity(emb_a: Sequence[float], emb_b: Sequence[float]) -
     return round(float(np.dot(a, b) / denom), 4)
 
 
+def compute_verification_stats(same_scores: Sequence[float], diff_scores: Sequence[float]) -> Dict[str, float]:
+    """
+    Computes encoder-comparable speaker verification statistics:
+    ROC-AUC, EER, Fisher Discriminability d', and raw cosine mean/std distributions.
+    """
+    from sklearn.metrics import roc_auc_score, roc_curve
+
+    s_arr = np.asarray(same_scores, dtype=np.float64)
+    d_arr = np.asarray(diff_scores, dtype=np.float64)
+    y_true = np.concatenate([np.ones(len(s_arr)), np.zeros(len(d_arr))])
+    y_scores = np.concatenate([s_arr, d_arr])
+
+    auc = float(roc_auc_score(y_true, y_scores))
+    fpr, tpr, _ = roc_curve(y_true, y_scores)
+    fnr = 1.0 - tpr
+    eer_idx = int(np.nanargmin(np.abs(fnr - fpr)))
+    eer = float((fpr[eer_idx] + fnr[eer_idx]) / 2.0)
+
+    s_mean = float(np.mean(s_arr))
+    d_mean = float(np.mean(d_arr))
+    s_var = float(np.var(s_arr, ddof=1)) if len(s_arr) > 1 else 0.0
+    d_var = float(np.var(d_arr, ddof=1)) if len(d_arr) > 1 else 0.0
+    pooled_std = float(np.sqrt(0.5 * (s_var + d_var) + 1e-12))
+    d_prime = (s_mean - d_mean) / pooled_std
+
+    return {
+        "same_mean": round(s_mean, 4),
+        "same_std": round(float(np.sqrt(s_var)), 4),
+        "diff_mean": round(d_mean, 4),
+        "diff_std": round(float(np.sqrt(d_var)), 4),
+        "cosine_gap": round(s_mean - d_mean, 4),
+        "d_prime": round(d_prime, 4),
+        "roc_auc": round(auc, 4),
+        "eer": round(eer, 4),
+        "num_same": int(len(s_arr)),
+        "num_diff": int(len(d_arr)),
+    }
+
+
 def compute_audio_intelligibility(clean_wav_path: str, degraded_wav_path: str, target_sr: int = 16000) -> float:
     """Computes Short-Time Objective Intelligibility (STOI) in [0, 1] for two WAV files."""
     import soundfile as sf
@@ -131,13 +260,14 @@ def compute_audio_intelligibility(clean_wav_path: str, degraded_wav_path: str, t
 def paired_bootstrap_test(
     baseline_scores: Sequence[float],
     candidate_scores: Sequence[float],
-    n_resamples: int = 1000,
+    n_resamples: int = 2000,
     seed: int = 42,
     higher_is_better: bool = True,
-) -> Dict[str, float]:
+) -> Dict[str, Any]:
     """
-    Runs a seeded paired bootstrap significance test over per-sample metric arrays.
-    Reports mean improvement delta, 95% confidence interval, and two-sided p-value.
+    Runs a seeded paired bootstrap significance test over per-unit metric arrays.
+    Uses the Phipson & Smyth (2010) bounded estimator p = (count + 1) / (B + 1)
+    so p_value is strictly bounded > 0 (e.g. <= 0.001 at B=2000 when count=0).
     """
     base = np.asarray(baseline_scores, dtype=np.float64)
     cand = np.asarray(candidate_scores, dtype=np.float64)
@@ -155,11 +285,12 @@ def paired_bootstrap_test(
         boot_means[i] = np.mean(diffs[idx])
 
     ci_low, ci_high = np.percentile(boot_means, [2.5, 97.5])
-    # Two-sided p-value: fraction of bootstrap resamples crossing or opposing 0
     if observed_delta >= 0:
-        p_one_sided = float(np.mean(boot_means <= 0.0))
+        count = int(np.sum(boot_means <= 0.0))
     else:
-        p_one_sided = float(np.mean(boot_means >= 0.0))
+        count = int(np.sum(boot_means >= 0.0))
+
+    p_one_sided = (count + 1.0) / (float(n_resamples) + 1.0)
     p_value = min(1.0, 2.0 * p_one_sided)
 
     return {
@@ -167,6 +298,60 @@ def paired_bootstrap_test(
         "ci_95_low": round(float(ci_low), 4),
         "ci_95_high": round(float(ci_high), 4),
         "p_value": round(p_value, 4),
+        "p_below_001": bool(p_value < 0.001),
+        "n_resamples": int(n_resamples),
+        "n_units": int(n),
+    }
+
+
+def tost_non_inferiority(
+    baseline_scores: Sequence[float],
+    candidate_scores: Sequence[float],
+    margin: float = -0.05,
+    n_resamples: int = 2000,
+    seed: int = 42,
+    higher_is_better: bool = True,
+) -> Dict[str, Any]:
+    """
+    Bootstrap Two One-Sided Tests (TOST) non-inferiority & equivalence check against
+    margin Delta (default -0.05 on [0, 1] scale). Candidate is declared non-inferior
+    only if the 90% CI lower bound strictly exceeds `margin` (p_non_inferiority < 0.05).
+    """
+    base = np.asarray(baseline_scores, dtype=np.float64)
+    cand = np.asarray(candidate_scores, dtype=np.float64)
+    if base.shape != cand.shape or base.size < 2:
+        raise ValueError("Paired score arrays must have identical length >= 2.")
+
+    diffs = (cand - base) if higher_is_better else (base - cand)
+    rng = np.random.RandomState(seed)
+    n = diffs.size
+    boot_means = np.empty(n_resamples, dtype=np.float64)
+    for i in range(n_resamples):
+        idx = rng.randint(0, n, size=n)
+        boot_means[i] = np.mean(diffs[idx])
+
+    ci_90_low, ci_90_high = np.percentile(boot_means, [5.0, 95.0])
+    ci_95_low, ci_95_high = np.percentile(boot_means, [2.5, 97.5])
+    abs_margin = abs(float(margin))
+    low_bound = -abs_margin
+    high_bound = abs_margin
+
+    p_lower = (int(np.sum(boot_means <= low_bound)) + 1.0) / (float(n_resamples) + 1.0)
+    p_upper = (int(np.sum(boot_means >= high_bound)) + 1.0) / (float(n_resamples) + 1.0)
+    p_tost = max(p_lower, p_upper)
+
+    return {
+        "observed_delta": round(float(np.mean(diffs)), 4),
+        "margin": round(low_bound, 4),
+        "ci_90_low": round(float(ci_90_low), 4),
+        "ci_90_high": round(float(ci_90_high), 4),
+        "ci_95_low": round(float(ci_95_low), 4),
+        "ci_95_high": round(float(ci_95_high), 4),
+        "p_non_inferiority": round(p_lower, 4),
+        "p_tost_equivalence": round(p_tost, 4),
+        "non_inferior": bool(ci_90_low > low_bound and p_lower < 0.05),
+        "equivalent": bool(ci_90_low > low_bound and ci_90_high < high_bound and p_tost < 0.05),
+        "n_units": int(n),
     }
 
 
@@ -190,6 +375,10 @@ def estimate_cost_per_1k_turns(
     compute_hourly_usd: float = 0.05,
     cloud_api_usd_per_1k_turns: float = 0.0,
 ) -> float:
-    """Estimates marginal dollar cost per 1,000 voice pipeline turns for Pareto plots."""
+    """
+    Estimates marginal dollar cost per 1,000 voice pipeline turns:
+      C_1k = ((L_sec * 1000) / 3600) * R_hr + C_api
+    where R_hr = compute_hourly_usd ($0.05/hr for <=4 GB CPU/edge VM, $0.15/hr for >4 GB GPU/8B offload).
+    """
     compute_cost = (max(0.0, avg_latency_sec) * 1000.0 / 3600.0) * compute_hourly_usd
     return round(compute_cost + cloud_api_usd_per_1k_turns, 4)

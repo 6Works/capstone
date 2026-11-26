@@ -1,0 +1,8 @@
+{
+  "experiment_id": "slu_distilbert_lora",
+  "description": "Locally trained Apache-2.0 DistilBERT-base LoRA cross-layer noisy-ASR SLU + OOS classifier with ASR word-confidence tags.",
+  "provider": "distilbert_lora",
+  "model_name": "models/slu_lora_adapter",
+  "asr_pre_repair": true,
+  "seeds": [42, 1337, 2026]
+}

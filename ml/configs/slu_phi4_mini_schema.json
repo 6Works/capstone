@@ -1,0 +1,15 @@
+{
+  "experiment_id": "slu_phi4_mini_schema",
+  "description": "Commercially permissive MIT Microsoft Phi-4-mini (3.8B) baseline with GBNF JSON-Schema decoding & calibrated prompt.",
+  "provider": "ollama",
+  "model_name": "phi4-mini",
+  "use_json_mode": true,
+  "use_schema_mode": true,
+  "calibrated_prompt": true,
+  "enable_schema_repair": false,
+  "enable_repair_retry": false,
+  "asr_pre_repair": false,
+  "use_logprobs": false,
+  "seeds": [42, 1337, 2026],
+  "temperature": 0.1
+}

@@ -1,5 +1,5 @@
 """
-Session 7 Experiment: Layer C (Stage 5 TTS) Voice Cloning & Synthesis Ablation.
+Session 7 Experiment (Upgraded): Layer C (Stage 5 TTS) Voice Cloning & Synthesis Ablation.
 Evaluates 5 TTS architectures across all 12 unseen LibriSpeech speakers x 3 held-out interview utterances (36 paired runs):
   1. tts_pyttsx3           (Offline Windows SAPI5 robotic floor baseline)
   2. tts_piper_raw         (Unconditioned Piper VITS lessac-low, zero speaker conditioning)
@@ -7,20 +7,23 @@ Evaluates 5 TTS architectures across all 12 unseen LibriSpeech speakers x 3 held
   4. tts_pocket_clone      (Layer C zero-shot flow-matching Kyutai Pocket TTS INT8, 24 kHz)
   5. tts_edgetts_ref       (Microsoft Azure Neural EdgeTTS gender-matched cloud baseline)
 
-Evaluates against disjoint held-out target speaker utterances (enroll vs val/test) without self-matching leakage.
-Records WeSpeaker CAM++ Cosine Similarity, F0 MAE (Hz), Whisper-tiny.en Roundtrip WER,
-WSOLA DSP STOI, CPU RTF, Peak RSS (MB), Cost/1k turns, and Paired Bootstrap p-values.
+Upgrades per review:
+  - Dual independent neural speaker encoders: WeSpeaker CAM++ LM (512-D) AND WeSpeaker ECAPA-TDNN-512 LM (192-D).
+  - Cloning Specificity Margin: matched target ref similarity minus mean similarity to 11 mismatched speakers.
+  - Encoder Verification Stats (ROC-AUC, EER, Fisher d') across target vs mismatched speaker pairs.
+  - Streaming Time-to-First-Audio (TTFA ms) telemetry for Pocket TTS INT8 plus short-reference warning count.
+  - Bounded Paired Bootstrap (N=2000, Phipson-Smyth, never p=0.0) at both clip level (N=36) and speaker level (N=12).
 """
 
 import os
 import sys
 import json
 import time
+import shutil
 import tempfile
 import subprocess
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 import numpy as np
-import soundfile as sf
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if ROOT_DIR not in sys.path:
@@ -41,6 +44,7 @@ from ml.metrics import (
     compute_asr_metrics,
     compute_speaker_similarity,
     compute_audio_intelligibility,
+    compute_verification_stats,
     paired_bootstrap_test,
     summarize_seeds,
     estimate_cost_per_1k_turns,
@@ -92,14 +96,18 @@ def _probe_tts_rss_mb(cfg_name: str) -> float:
     return float(json.loads(proc.stdout.strip().splitlines()[-1])["peak"])
 
 
-def _extract_f0_and_campp(wav_path: str) -> Tuple[float, List[float]]:
-    """Extracts median F0 (Hz) and 512-D WeSpeaker CAM++ embedding via existing VoiceCloner helpers."""
+def _extract_dual_embeddings(wav_path: str) -> Tuple[float, List[float], List[float]]:
+    """Extracts median F0 (Hz), CAM++-512D embedding, and ECAPA512-192D embedding cleanly."""
     prof = VoiceCloner.extract_acoustic_profile_from_wav(wav_path, profile_name="probe", save_ref_dir=None)
-    return float(prof.fundamental_freq_f0), list(prof.embedding_vector)
+    wav_16k, sr = VoiceCloner.load_audio_signal(wav_path, target_sr=16000)
+    ecapa_emb, _ = VoiceCloner.extract_speaker_embedding(
+        wav_16k, sample_rate=sr, use_neural=True, model_path=VoiceCloner.ECAPA_SPEAKER_ENCODER_PATH
+    )
+    return float(prof.fundamental_freq_f0), list(prof.embedding_vector), list(ecapa_emb)
 
 
 def _prepare_speaker_refs() -> List[Dict[str, Any]]:
-    """Loads 12 unseen LibriSpeech speakers (enroll WAV for conditioning, held-out val WAV for similarity eval)."""
+    """Loads 12 unseen LibriSpeech speakers (enroll WAV for conditioning, held-out val WAV for dual-encoder eval)."""
     items = load_manifest("librispeech_60")["items"]
     by_spk: Dict[str, Dict[str, Any]] = {}
     for it in items:
@@ -117,16 +125,19 @@ def _prepare_speaker_refs() -> List[Dict[str, Any]]:
             profile_id=f"bench_{spk}",
             save_ref_dir=None,
         )
-        # Preserve physical path to enroll reference for PocketTTS conditioning (in-memory only)
         prof.ref_audio_path = enr_abs
-        val_f0, val_emb = _extract_f0_and_campp(val_abs)
+        wav_e, sr_e = VoiceCloner.load_audio_signal(enr_abs, target_sr=16000)
+        enr_dur = round(len(wav_e) / float(sr_e), 2)
+        val_f0, val_cam, val_ecapa = _extract_dual_embeddings(val_abs)
         refs.append({
             "speaker_id": spk,
             "profile": prof,
             "enroll_path": enr_abs,
+            "enroll_dur_sec": enr_dur,
             "val_path": val_abs,
             "val_f0": val_f0,
-            "val_emb": val_emb,
+            "val_emb": val_cam,
+            "val_ecapa": val_ecapa,
         })
     return refs
 
@@ -136,12 +147,11 @@ def run_ablation() -> Dict[str, Any]:
     asr_judge = WhisperTransformerASR(model_size="tiny.en", compute_type="int8", vad_filter=False, initial_prompt="")
     asr_judge._lazy_init()
 
-    # Register ephemeral profiles in memory only during benchmark run
     for s in speakers:
         voice_cloner.profiles[s["profile"].profile_id] = s["profile"]
 
     results: Dict[str, Any] = {
-        "experiment": "layer_c_tts_cloning_ablation_v1",
+        "experiment": "layer_c_tts_cloning_ablation_v2",
         "num_speakers": len(speakers),
         "num_prompt_sets": len(PROMPT_SPLITS),
         "total_generations_per_engine": len(speakers) * len(PROMPT_SPLITS),
@@ -151,6 +161,10 @@ def run_ablation() -> Dict[str, Any]:
     }
 
     per_engine_campp: Dict[str, List[float]] = {}
+    per_engine_campp_margin: Dict[str, List[float]] = {}
+    per_engine_ecapa: Dict[str, List[float]] = {}
+    per_engine_ecapa_margin: Dict[str, List[float]] = {}
+    per_engine_spk_margin: Dict[str, List[float]] = {}
     per_engine_f0_mae: Dict[str, List[float]] = {}
     per_engine_wer: Dict[str, List[float]] = {}
     piper_raw_wavs: Dict[str, str] = {}
@@ -174,30 +188,22 @@ def run_ablation() -> Dict[str, Any]:
             else:
                 svc = EdgeTTSService()
 
-            # Warm Piper / Pocket once before timing
             if cfg["provider"] in ("piper_raw", "piper_dual_wsola", "pocket_tts"):
                 warm_p = os.path.join(tmp_dir, f"warm_{cfg_name}.wav")
-                if cfg["provider"] == "pocket_tts":
-                    svc.synthesize("Warmup synthesis.", output_path=warm_p, speaker_profile_id=speakers[0]["profile"].profile_id)
-                else:
-                    svc.synthesize("Warmup synthesis.", output_path=warm_p, speaker_profile_id=speakers[0]["profile"].profile_id)
+                svc.synthesize("Warmup synthesis.", output_path=warm_p, speaker_profile_id=speakers[0]["profile"].profile_id)
                 if os.path.exists(warm_p):
                     os.remove(warm_p)
 
-            all_campp: List[float] = []
-            all_enroll_campp: List[float] = []
-            all_f0_mae: List[float] = []
-            all_wer: List[float] = []
-            all_lat_ms: List[float] = []
-            all_durs: List[float] = []
-            wsola_stois: List[float] = []
+            all_campp, all_campp_margin, all_campp_diff_pool = [], [], []
+            all_ecapa, all_ecapa_margin, all_ecapa_diff_pool = [], [], []
+            all_enroll_campp, all_f0_mae, all_wer = [], [], []
+            all_lat_ms, all_ttfa_ms, all_durs, wsola_stois = [], [], [], []
+            short_ref_warnings = 0
+            per_spk_margins: Dict[str, List[float]] = {sp["speaker_id"]: [] for sp in speakers}
 
             split_means: Dict[str, Dict[str, float]] = {}
             for split_name, prompt_txt in PROMPT_SPLITS:
-                s_campp: List[float] = []
-                s_f0: List[float] = []
-                s_wer: List[float] = []
-
+                s_campp, s_ecapa, s_f0, s_wer = [], [], [], []
                 for spk_info in speakers:
                     spk_id = spk_info["speaker_id"]
                     pid = spk_info["profile"].profile_id
@@ -218,26 +224,46 @@ def run_ablation() -> Dict[str, Any]:
                     if res.status != "success" or not os.path.exists(out_file):
                         raise RuntimeError(f"{cfg_name} failed on {spk_id}: {res.error}")
 
-                    # Load synthesized waveform -> duration & Whisper roundtrip WER & F0 & CAM++ vs held-out val utterance
+                    rmeta = res.metadata or {}
+                    if rmeta.get("ttfa_ms") is not None:
+                        all_ttfa_ms.append(float(rmeta["ttfa_ms"]))
+                    else:
+                        all_ttfa_ms.append(round(elapsed_ms, 1))
+                    if rmeta.get("short_reference_warning"):
+                        short_ref_warnings += 1
+
                     wav_16k, sr = VoiceCloner.load_audio_signal(out_file, target_sr=16000)
                     dur_s = max(0.1, len(wav_16k) / float(sr))
 
-                    # Measure WSOLA DSP intelligibility against unconditioned Piper raw (same text, same speaker)
                     if cfg["provider"] == "piper_raw":
                         piper_raw_wavs[f"{split_name}_{spk_id}"] = out_file
                     elif cfg["provider"] == "piper_dual_wsola":
                         raw_mate = piper_raw_wavs.get(f"{split_name}_{spk_id}")
                         if raw_mate and spk_info["profile"].gender_estimate != "male":
-                            # Compare female same-model raw vs WSOLA/EQ shifted waveform preservation
                             wsola_stois.append(compute_audio_intelligibility(raw_mate, out_file))
 
-                    # CAM++ embedding on clean 16k WAV
-                    syn_f0, syn_emb = _extract_f0_and_campp(out_file)
-                    campp_val = compute_speaker_similarity(syn_emb, spk_info["val_emb"])
-                    campp_enr = compute_speaker_similarity(syn_emb, spk_info["profile"].embedding_vector)
-                    f0_err = abs(syn_f0 - spk_info["val_f0"])
+                    syn_f0, syn_cam, syn_ecapa = _extract_dual_embeddings(out_file)
+                    campp_same = compute_speaker_similarity(syn_cam, spk_info["val_emb"])
+                    ecapa_same = compute_speaker_similarity(syn_ecapa, spk_info["val_ecapa"])
+                    campp_enr = compute_speaker_similarity(syn_cam, spk_info["profile"].embedding_vector)
 
-                    # Whisper tiny.en roundtrip WER on synthesized audio
+                    cam_other = [
+                        compute_speaker_similarity(syn_cam, other["val_emb"])
+                        for other in speakers
+                        if other["speaker_id"] != spk_id
+                    ]
+                    eca_other = [
+                        compute_speaker_similarity(syn_ecapa, other["val_ecapa"])
+                        for other in speakers
+                        if other["speaker_id"] != spk_id
+                    ]
+                    cam_margin = round(campp_same - float(np.mean(cam_other)), 4)
+                    eca_margin = round(ecapa_same - float(np.mean(eca_other)), 4)
+                    all_campp_diff_pool.extend(cam_other)
+                    all_ecapa_diff_pool.extend(eca_other)
+                    per_spk_margins[spk_id].append(cam_margin)
+
+                    f0_err = abs(syn_f0 - spk_info["val_f0"])
                     asr_res = asr_judge.transcribe(
                         AudioPayload(
                             source_type="stream_buffer",
@@ -249,10 +275,15 @@ def run_ablation() -> Dict[str, Any]:
                     )
                     wer_val = compute_asr_metrics([prompt_txt], [asr_res.transcript or ""])["wer"]
 
-                    s_campp.append(campp_val)
+                    s_campp.append(campp_same)
+                    s_ecapa.append(ecapa_same)
                     s_f0.append(f0_err)
                     s_wer.append(wer_val)
-                    all_campp.append(campp_val)
+
+                    all_campp.append(campp_same)
+                    all_campp_margin.append(cam_margin)
+                    all_ecapa.append(ecapa_same)
+                    all_ecapa_margin.append(eca_margin)
                     all_enroll_campp.append(campp_enr)
                     all_f0_mae.append(f0_err)
                     all_wer.append(wer_val)
@@ -261,21 +292,32 @@ def run_ablation() -> Dict[str, Any]:
 
                 split_means[split_name] = {
                     "campp_sim_mean": round(float(np.mean(s_campp)), 4),
+                    "ecapa_sim_mean": round(float(np.mean(s_ecapa)), 4),
                     "f0_mae_hz": round(float(np.mean(s_f0)), 2),
                     "roundtrip_wer": round(float(np.mean(s_wer)), 4),
                 }
 
             rtf = round((sum(all_lat_ms) / 1000.0) / sum(all_durs), 4)
             avg_lat_ms = round(float(np.mean(all_lat_ms)), 1)
-            cloud_cost = 0.0 if cfg["provider"] != "edge_tts" else 0.0  # Free EdgeTTS neural API tier
+            cam_ver = compute_verification_stats(all_campp, all_campp_diff_pool)
+            eca_ver = compute_verification_stats(all_ecapa, all_ecapa_diff_pool)
+
             results["configs"][cfg_name] = {
                 "config": cfg,
                 "peak_rss_mb": peak_rss_mb,
                 "avg_latency_ms": avg_lat_ms,
                 "p95_latency_ms": round(float(np.percentile(all_lat_ms, 95)), 1),
+                "ttfa_ms": summarize_seeds(all_ttfa_ms),
+                "ttfa_p95_ms": round(float(np.percentile(all_ttfa_ms, 95)), 1),
+                "short_reference_warnings": short_ref_warnings,
                 "cpu_rtf": rtf,
-                "cost_per_1k_turns_usd": estimate_cost_per_1k_turns(avg_lat_ms / 1000.0, cloud_api_usd_per_1k_turns=cloud_cost),
+                "cost_per_1k_turns_usd": estimate_cost_per_1k_turns(avg_lat_ms / 1000.0, cloud_api_usd_per_1k_turns=0.0),
                 "campp_sim_heldout_val": summarize_seeds(all_campp),
+                "campp_specificity_margin": summarize_seeds(all_campp_margin),
+                "campp_verification": cam_ver,
+                "ecapa_sim_heldout_val": summarize_seeds(all_ecapa),
+                "ecapa_specificity_margin": summarize_seeds(all_ecapa_margin),
+                "ecapa_verification": eca_ver,
                 "campp_sim_enroll": summarize_seeds(all_enroll_campp),
                 "f0_mae_hz": summarize_seeds(all_f0_mae),
                 "roundtrip_wer": summarize_seeds(all_wer),
@@ -285,21 +327,29 @@ def run_ablation() -> Dict[str, Any]:
                 results["wsola_dsp_stoi"]["piper_dual_wsola_vs_raw_female"] = summarize_seeds(wsola_stois)
 
             per_engine_campp[cfg_name] = all_campp
+            per_engine_campp_margin[cfg_name] = all_campp_margin
+            per_engine_ecapa[cfg_name] = all_ecapa
+            per_engine_ecapa_margin[cfg_name] = all_ecapa_margin
+            per_engine_spk_margin[cfg_name] = [float(np.mean(per_spk_margins[sp["speaker_id"]])) for sp in speakers]
             per_engine_f0_mae[cfg_name] = all_f0_mae
             per_engine_wer[cfg_name] = all_wer
 
             print(
-                f"  CAM++(val)={results['configs'][cfg_name]['campp_sim_heldout_val']['mean']} "
-                f"(enr={results['configs'][cfg_name]['campp_sim_enroll']['mean']}) | "
-                f"F0_MAE={results['configs'][cfg_name]['f0_mae_hz']['mean']} Hz | "
-                f"WER={results['configs'][cfg_name]['roundtrip_wer']['mean']} | "
-                f"RTF={rtf} | Peak={peak_rss_mb} MB",
+                f"  CAM++={results['configs'][cfg_name]['campp_sim_heldout_val']['mean']} (margin={results['configs'][cfg_name]['campp_specificity_margin']['mean']:+.4f}, AUC={cam_ver['roc_auc']}, EER={cam_ver['eer']}, d'={cam_ver['d_prime']}) | "
+                f"ECAPA={results['configs'][cfg_name]['ecapa_sim_heldout_val']['mean']} (margin={results['configs'][cfg_name]['ecapa_specificity_margin']['mean']:+.4f}, AUC={eca_ver['roc_auc']}) | "
+                f"TTFA={results['configs'][cfg_name]['ttfa_ms']['mean']}ms | WER={results['configs'][cfg_name]['roundtrip_wer']['mean']}",
                 flush=True,
             )
 
-        # Paired bootstrap tests (N=1000, seed=42) across all 36 paired clips
+        # Bounded Paired Bootstrap tests (N=2000, Phipson-Smyth) across N=36 clips AND N=12 speakers
         for label, base_k, cand_k, data_map, hib in [
             ("pocket_vs_piper_wsola_campp", "tts_piper_dual_wsola", "tts_pocket_clone", per_engine_campp, True),
+            ("pocket_vs_piper_wsola_campp_margin", "tts_piper_dual_wsola", "tts_pocket_clone", per_engine_campp_margin, True),
+            ("pocket_vs_edgetts_campp_margin", "tts_edgetts_ref", "tts_pocket_clone", per_engine_campp_margin, True),
+            ("pocket_vs_edgetts_ecapa_margin", "tts_edgetts_ref", "tts_pocket_clone", per_engine_ecapa_margin, True),
+            ("pocket_vs_piper_wsola_ecapa_margin", "tts_piper_dual_wsola", "tts_pocket_clone", per_engine_ecapa_margin, True),
+            ("pocket_vs_piper_wsola_speaker_margin_n12", "tts_piper_dual_wsola", "tts_pocket_clone", per_engine_spk_margin, True),
+            ("pocket_vs_edgetts_speaker_margin_n12", "tts_edgetts_ref", "tts_pocket_clone", per_engine_spk_margin, True),
             ("pocket_vs_piper_raw_campp", "tts_piper_raw", "tts_pocket_clone", per_engine_campp, True),
             ("pocket_vs_pyttsx3_campp", "tts_pyttsx3", "tts_pocket_clone", per_engine_campp, True),
             ("pocket_vs_edgetts_campp", "tts_edgetts_ref", "tts_pocket_clone", per_engine_campp, True),
@@ -307,19 +357,18 @@ def run_ablation() -> Dict[str, Any]:
             ("pocket_vs_pyttsx3_wer", "tts_pyttsx3", "tts_pocket_clone", per_engine_wer, False),
         ]:
             results["paired_bootstrap"][label] = paired_bootstrap_test(
-                data_map[base_k], data_map[cand_k], n_resamples=1000, seed=42, higher_is_better=hib
+                data_map[base_k], data_map[cand_k], n_resamples=2000, seed=42, higher_is_better=hib
             )
 
         out_path = os.path.join(ROOT_DIR, "ml", "results", "tts_ablation.json")
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2)
-        print(f"\nSaved complete Layer C ablation results -> {out_path}", flush=True)
+        print(f"\nSaved complete Layer C v2 ablation results -> {out_path}", flush=True)
         return results
     finally:
         for s in speakers:
             voice_cloner.profiles.pop(s["profile"].profile_id, None)
-        import shutil
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
 

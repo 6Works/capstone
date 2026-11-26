@@ -1,8 +1,8 @@
 {
-  "experiment_id": "e2e_ablation_matrix_v1",
-  "description": "End-to-end 6-stage Audio->ASR->SLU->TTS 8-row ablation matrix (+Edge Pareto tier) across 3 seeds [42, 1337, 2026].",
+  "experiment_id": "e2e_ablation_matrix_v2",
+  "description": "End-to-end 6-stage Audio->ASR->SLU->TTS 9-row ablation matrix across 3 seeds [42, 1337, 2026] using Apache-2.0 Qwen3-4B, G2P ASR repair, Pocket TTS, and dual CAM++/ECAPA512 verification.",
   "seeds": [42, 1337, 2026],
-  "num_turns_per_seed": 20,
+  "num_turns_per_seed": 36,
   "task_success_gates": {
     "asr_entity_recall_min": 0.8,
     "asr_wer_max": 0.25,
@@ -13,12 +13,12 @@
   "rows": [
     {"id": "Baseline", "asr": "asr_tiny_baseline", "slu": "slu_qwen15b_raw", "tts": "tts_piper_dual_wsola"},
     {"id": "+A", "asr": "asr_small_improved", "slu": "slu_qwen15b_raw", "tts": "tts_piper_dual_wsola"},
-    {"id": "+B", "asr": "asr_tiny_baseline", "slu": "slu_qwen3b_repair", "tts": "tts_piper_dual_wsola"},
+    {"id": "+B", "asr": "asr_tiny_baseline", "slu": "slu_qwen3_4b_repair", "tts": "tts_piper_dual_wsola"},
     {"id": "+C", "asr": "asr_tiny_baseline", "slu": "slu_qwen15b_raw", "tts": "tts_pocket_clone"},
-    {"id": "Full (A+B+C)", "asr": "asr_small_improved", "slu": "slu_qwen3b_repair", "tts": "tts_pocket_clone"},
-    {"id": "Full - A", "asr": "asr_tiny_baseline", "slu": "slu_qwen3b_repair", "tts": "tts_pocket_clone"},
+    {"id": "Full (A+B+C)", "asr": "asr_small_improved", "slu": "slu_qwen3_4b_repair", "tts": "tts_pocket_clone"},
+    {"id": "Full - A", "asr": "asr_tiny_baseline", "slu": "slu_qwen3_4b_repair", "tts": "tts_pocket_clone"},
     {"id": "Full - B", "asr": "asr_small_improved", "slu": "slu_qwen15b_raw", "tts": "tts_pocket_clone"},
-    {"id": "Full - C", "asr": "asr_small_improved", "slu": "slu_qwen3b_repair", "tts": "tts_piper_dual_wsola"},
-    {"id": "Edge (A_tiny+B+C)", "asr": "asr_tiny_improved", "slu": "slu_qwen3b_repair", "tts": "tts_pocket_clone"}
+    {"id": "Full - C", "asr": "asr_small_improved", "slu": "slu_qwen3_4b_repair", "tts": "tts_piper_dual_wsola"},
+    {"id": "Edge (A_tiny+B+C)", "asr": "asr_tiny_improved", "slu": "slu_qwen3_4b_repair", "tts": "tts_pocket_clone"}
   ]
 }

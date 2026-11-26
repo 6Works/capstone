@@ -5,6 +5,10 @@ from .prepare_benchmarks import (
     text_sha256,
     load_manifest,
     build_all_benchmarks,
+    build_clinc_oos_full,
+    build_minds14_full,
+    build_librispeech_other_60,
+    build_svarah_test,
 )
 
 __all__ = [
@@ -12,4 +16,8 @@ __all__ = [
     "text_sha256",
     "load_manifest",
     "build_all_benchmarks",
+    "build_clinc_oos_full",
+    "build_minds14_full",
+    "build_librispeech_other_60",
+    "build_svarah_test",
 ]

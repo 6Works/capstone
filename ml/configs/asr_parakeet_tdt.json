@@ -1,0 +1,17 @@
+{
+  "experiment_id": "asr_parakeet_tdt",
+  "description": "2026 SOTA FastConformer-TDT 0.6B v3 INT8 (CC-BY-4.0, sherpa-onnx CPU) + confidence-agnostic G2P phoneme repair.",
+  "model_size": "parakeet-tdt-0.6b-v3",
+  "provider": "parakeet_tdt",
+  "device": "cpu",
+  "compute_type": "int8",
+  "vad_filter": false,
+  "beam_size": 1,
+  "prompt_mode": "none",
+  "hotwords_enabled": false,
+  "word_timestamps": false,
+  "phonetic_repair_enabled": true,
+  "phonetic_mode": "g2p",
+  "repair_confidence_threshold": 0.85,
+  "seed": 42
+}

@@ -1,0 +1,555 @@
+{
+  "name": "librispeech_other_60",
+  "source": "openslr/librispeech_asr (other/test)",
+  "license": "CC-BY-4.0",
+  "seed": 42,
+  "total_items": 60,
+  "num_speakers": 12,
+  "split_counts": {
+    "enroll": 12,
+    "val": 12,
+    "test": 36
+  },
+  "items": [
+    {
+      "id": "2033-164915-0000",
+      "speaker_id": "2033",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_2033_2033-164915-0000.flac",
+      "text": "AND ALSO THESE",
+      "text_hash": "7c254ad598a3ecf3",
+      "duration_sec": 2.05
+    },
+    {
+      "id": "2033-164915-0001",
+      "speaker_id": "2033",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_2033_2033-164915-0001.flac",
+      "text": "THEN SHE THREW HERSELF UPON HIM AND HE GATHERED HER TO HIS BOSOM AND THE TWAIN FELL DOWN IN A FAINTING FIT",
+      "text_hash": "73017006b03ae207",
+      "duration_sec": 8.94
+    },
+    {
+      "id": "2033-164915-0002",
+      "speaker_id": "2033",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_2033_2033-164915-0002.flac",
+      "text": "WHEN THE EUNUCH SAW THIS CASE HE WONDERED AT THEM AND THROWING OVER THEM SOMEWHAT TO COVER THEM WAITED TILL THEY SHOULD RECOVER",
+      "text_hash": "d57b1d4bb6ede12d",
+      "duration_sec": 10.3
+    },
+    {
+      "id": "2033-164915-0003",
+      "speaker_id": "2033",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_2033_2033-164915-0003.flac",
+      "text": "AFTER A WHILE THEY CAME TO THEMSELVES AND NUZHAT AL ZAMAN REJOICED WITH EXCEEDING JOY OPPRESSION AND DEPRESSION LEFT HER AND GLADNESS TOOK THE MASTERY OF HER AND SHE REPEATED THESE VERSES",
+      "text_hash": "4f4a8cb5630b30a6",
+      "duration_sec": 15.89
+    },
+    {
+      "id": "2033-164915-0004",
+      "speaker_id": "2033",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_2033_2033-164915-0004.flac",
+      "text": "ACCORDINGLY SHE TOLD HIM ALL THAT HAD COME TO HER SINCE THEIR SEPARATION AT THE KHAN AND WHAT HAD HAPPENED TO HER WITH THE BADAWI HOW THE MERCHANT HAD BOUGHT HER OF HIM AND HAD TAKEN HER TO HER BROTHER SHARRKAN AND HAD SOLD HER TO HIM HOW HE HAD FREED HER AT THE TIME OF BUYING HOW HE HAD MADE A MARRIAGE CONTRACT WITH HER AND HAD GONE IN TO HER AND HOW THE KING THEIR SIRE HAD SENT AND ASKED FOR HER FROM SHARRKAN",
+      "text_hash": "31ff168c5ea54660",
+      "duration_sec": 32.95
+    },
+    {
+      "id": "3080-5040-0000",
+      "speaker_id": "3080",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3080_3080-5040-0000.flac",
+      "text": "WOULD IT WOULD LEAVE ME AND THEN I COULD BELIEVE I SHALL NOT ALWAYS HAVE OCCASION FOR IT",
+      "text_hash": "7156fa7d75234ce9",
+      "duration_sec": 6.85
+    },
+    {
+      "id": "3080-5040-0001",
+      "speaker_id": "3080",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3080_3080-5040-0001.flac",
+      "text": "MY POOR LADY VAVASOUR IS CARRIED TO THE TOWER AND HER GREAT BELLY COULD NOT EXCUSE HER BECAUSE SHE WAS ACQUAINTED BY SOMEBODY THAT THERE WAS A PLOT AGAINST THE PROTECTOR AND DID NOT DISCOVER IT",
+      "text_hash": "e7cf6a2931ce283b",
+      "duration_sec": 12.95
+    },
+    {
+      "id": "3080-5040-0002",
+      "speaker_id": "3080",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3080_3080-5040-0002.flac",
+      "text": "SHE HAS TOLD NOW ALL THAT WAS TOLD HER BUT VOWS SHE WILL NEVER SAY FROM WHENCE SHE HAD IT WE SHALL SEE WHETHER HER RESOLUTIONS ARE AS UNALTERABLE AS THOSE OF MY LADY TALMASH",
+      "text_hash": "3516442a0403b9a5",
+      "duration_sec": 13.15
+    },
+    {
+      "id": "3080-5040-0003",
+      "speaker_id": "3080",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3080_3080-5040-0003.flac",
+      "text": "I WONDER HOW SHE BEHAVED HERSELF WHEN SHE WAS MARRIED",
+      "text_hash": "e983532336095d78",
+      "duration_sec": 3.67
+    },
+    {
+      "id": "3080-5040-0004",
+      "speaker_id": "3080",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3080_3080-5040-0004.flac",
+      "text": "I NEVER SAW ANY ONE YET THAT DID NOT LOOK SIMPLY AND OUT OF COUNTENANCE NOR EVER KNEW A WEDDING WELL DESIGNED BUT ONE AND THAT WAS OF TWO PERSONS WHO HAD TIME ENOUGH I CONFESS TO CONTRIVE IT AND NOBODY TO PLEASE IN'T BUT THEMSELVES",
+      "text_hash": "fb1ec0cab5f714f7",
+      "duration_sec": 16.06
+    },
+    {
+      "id": "3331-159605-0000",
+      "speaker_id": "3331",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3331_3331-159605-0000.flac",
+      "text": "SHE PULLED HER HAIR DOWN TURNED HER SKIRT BACK PUT HER FEET ON THE FENDER AND TOOK PUTTEL INTO HER LAP ALL OF WHICH ARRANGEMENTS SIGNIFIED THAT SOMETHING VERY IMPORTANT HAD GOT TO BE THOUGHT OVER AND SETTLED",
+      "text_hash": "c46ebc9870c0fb78",
+      "duration_sec": 13.67
+    },
+    {
+      "id": "3331-159605-0001",
+      "speaker_id": "3331",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3331_3331-159605-0001.flac",
+      "text": "THE MORE PROPOSALS THE MORE CREDIT",
+      "text_hash": "b3c5081cbf51aa57",
+      "duration_sec": 3.1
+    },
+    {
+      "id": "3331-159605-0002",
+      "speaker_id": "3331",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3331_3331-159605-0002.flac",
+      "text": "I VE TRIED IT AND LIKED IT AND MAYBE THIS IS THE CONSEQUENCE OF THAT NIGHT'S FUN",
+      "text_hash": "dc55b0081aa821b8",
+      "duration_sec": 6.23
+    },
+    {
+      "id": "3331-159605-0003",
+      "speaker_id": "3331",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3331_3331-159605-0003.flac",
+      "text": "JUST SUPPOSE IT IS TRUE THAT HE DOES ASK ME AND I SAY YES",
+      "text_hash": "cf53a20935878491",
+      "duration_sec": 5.58
+    },
+    {
+      "id": "3331-159605-0004",
+      "speaker_id": "3331",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3331_3331-159605-0004.flac",
+      "text": "WHAT A SPITEFUL THING I AM",
+      "text_hash": "e5db5104ac8384ec",
+      "duration_sec": 2.12
+    },
+    {
+      "id": "3528-168656-0000",
+      "speaker_id": "3528",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3528_3528-168656-0000.flac",
+      "text": "SHE HAD EVEN BEEN IN SOCIETY BEFORE THE REVOLUTION",
+      "text_hash": "5a2d5edb05fddfc9",
+      "duration_sec": 3.38
+    },
+    {
+      "id": "3528-168656-0001",
+      "speaker_id": "3528",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3528_3528-168656-0001.flac",
+      "text": "IT WAS HER PLEASURE AND HER VANITY TO DRAG IN THESE NAMES ON EVERY PRETEXT",
+      "text_hash": "8feabd763cd5e627",
+      "duration_sec": 4.34
+    },
+    {
+      "id": "3528-168656-0002",
+      "speaker_id": "3528",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3528_3528-168656-0002.flac",
+      "text": "EVERY YEAR SHE SOLEMNLY RENEWED HER VOWS AND AT THE MOMENT OF TAKING THE OATH SHE SAID TO THE PRIEST MONSEIGNEUR SAINT FRANCOIS GAVE IT TO MONSEIGNEUR SAINT JULIEN MONSEIGNEUR SAINT JULIEN GAVE IT TO MONSEIGNEUR SAINT EUSEBIUS MONSEIGNEUR SAINT EUSEBIUS GAVE IT TO MONSEIGNEUR SAINT PROCOPIUS ET CETERA ET CETERA",
+      "text_hash": "a6df60c5fa0ef0e2",
+      "duration_sec": 20.3
+    },
+    {
+      "id": "3528-168656-0003",
+      "speaker_id": "3528",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3528_3528-168656-0003.flac",
+      "text": "AND THE SCHOOL GIRLS WOULD BEGIN TO LAUGH NOT IN THEIR SLEEVES BUT UNDER THEIR VEILS CHARMING LITTLE STIFLED LAUGHS WHICH MADE THE VOCAL MOTHERS FROWN",
+      "text_hash": "40cc6e428dd786c7",
+      "duration_sec": 8.64
+    },
+    {
+      "id": "3528-168656-0004",
+      "speaker_id": "3528",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_3528_3528-168656-0004.flac",
+      "text": "IT WAS A CENTURY WHICH SPOKE THROUGH HER BUT IT WAS THE EIGHTEENTH CENTURY",
+      "text_hash": "334aead4fd946f25",
+      "duration_sec": 4.7
+    },
+    {
+      "id": "4198-12281-0000",
+      "speaker_id": "4198",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_4198_4198-12281-0000.flac",
+      "text": "ALTHOUGH THE PLAGUE WAS THERE IN THE MOST PART OF ALL THE HOUSES THEY NEVERTHELESS ENTERED EVERYWHERE THEN PLUNDERED AND CARRIED AWAY ALL THAT WAS WITHIN AND YET FOR ALL THIS NOT ONE OF THEM TOOK ANY HURT WHICH IS A MOST WONDERFUL CASE",
+      "text_hash": "836626ca630a2aa1",
+      "duration_sec": 18.73
+    },
+    {
+      "id": "4198-12281-0001",
+      "speaker_id": "4198",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_4198_4198-12281-0001.flac",
+      "text": "I BESEECH YOU THINK UPON IT",
+      "text_hash": "deacb47e4b8fd6df",
+      "duration_sec": 2.56
+    },
+    {
+      "id": "4198-12281-0002",
+      "speaker_id": "4198",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_4198_4198-12281-0002.flac",
+      "text": "NEVERTHELESS AT ALL ADVENTURES THEY RANG THE BELLS AD CAPITULUM CAPITULANTES",
+      "text_hash": "3fa1fd3d31a9f2e1",
+      "duration_sec": 8.14
+    },
+    {
+      "id": "4198-12281-0003",
+      "speaker_id": "4198",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_4198_4198-12281-0003.flac",
+      "text": "BY THE VIRTUE OF GOD WHY DO NOT YOU SING PANNIERS FAREWELL VINTAGE IS DONE",
+      "text_hash": "7ee3fe0e3a60101a",
+      "duration_sec": 8.1
+    },
+    {
+      "id": "4198-12281-0004",
+      "speaker_id": "4198",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_4198_4198-12281-0004.flac",
+      "text": "BY THE BELLY OF SANCT JAMES WHAT SHALL WE POOR DEVILS DRINK THE WHILE",
+      "text_hash": "cc1acaa5451c6a2c",
+      "duration_sec": 5.31
+    },
+    {
+      "id": "533-131564-0000",
+      "speaker_id": "533",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_533_533-131564-0000.flac",
+      "text": "VAIN HOPE I FEAR",
+      "text_hash": "6cf1189c8b78bbad",
+      "duration_sec": 2.01
+    },
+    {
+      "id": "533-131564-0001",
+      "speaker_id": "533",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_533_533-131564-0001.flac",
+      "text": "MISTER AND MISSUS HATTERSLEY HAVE BEEN STAYING AT THE GROVE A FORTNIGHT AND AS MISTER HARGRAVE IS STILL ABSENT AND THE WEATHER WAS REMARKABLY FINE I NEVER PASSED A DAY WITHOUT SEEING MY TWO FRIENDS MILICENT AND ESTHER EITHER THERE OR HERE",
+      "text_hash": "7810ecd2e398c918",
+      "duration_sec": 16.07
+    },
+    {
+      "id": "533-131564-0002",
+      "speaker_id": "533",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_533_533-131564-0002.flac",
+      "text": "NO UNLESS YOU CAN TELL ME WHEN TO EXPECT HIM HOME",
+      "text_hash": "00de6d22de7231f0",
+      "duration_sec": 3.94
+    },
+    {
+      "id": "533-131564-0003",
+      "speaker_id": "533",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_533_533-131564-0003.flac",
+      "text": "I CAN'T YOU DON'T WANT HIM DO YOU",
+      "text_hash": "b6ec79a8ba016617",
+      "duration_sec": 3.62
+    },
+    {
+      "id": "533-131564-0004",
+      "speaker_id": "533",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_533_533-131564-0004.flac",
+      "text": "IT IS A RESOLUTION YOU OUGHT TO HAVE FORMED LONG AGO",
+      "text_hash": "5a4974bcde70b479",
+      "duration_sec": 3.8
+    },
+    {
+      "id": "5484-24317-0000",
+      "speaker_id": "5484",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5484_5484-24317-0000.flac",
+      "text": "WHEN HE CAME FROM THE BATH PROCLUS VISITED HIM AGAIN",
+      "text_hash": "6a8e0d5eccef9ebb",
+      "duration_sec": 3.54
+    },
+    {
+      "id": "5484-24317-0001",
+      "speaker_id": "5484",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5484_5484-24317-0001.flac",
+      "text": "BUT HERMON WAS NOT IN THE MOOD TO SHARE A JOYOUS REVEL AND HE FRANKLY SAID SO ALTHOUGH IMMEDIATELY AFTER HIS RETURN HE HAD ACCEPTED THE INVITATION TO THE FESTIVAL WHICH THE WHOLE FELLOWSHIP OF ARTISTS WOULD GIVE THE FOLLOWING DAY IN HONOUR OF THE SEVENTIETH BIRTHDAY OF THE OLD SCULPTOR EUPHRANOR",
+      "text_hash": "cf67886afff2a748",
+      "duration_sec": 18.4
+    },
+    {
+      "id": "5484-24317-0002",
+      "speaker_id": "5484",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5484_5484-24317-0002.flac",
+      "text": "SHE WOULD APPEAR HERSELF AT DESSERT AND THE BANQUET MUST THEREFORE BEGIN AT AN UNUSUALLY EARLY HOUR",
+      "text_hash": "9e7ace4ebf16dea3",
+      "duration_sec": 6.67
+    },
+    {
+      "id": "5484-24317-0003",
+      "speaker_id": "5484",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5484_5484-24317-0003.flac",
+      "text": "SO THE ARTIST FOUND HIMSELF OBLIGED TO RELINQUISH HIS OPPOSITION",
+      "text_hash": "53790d758f7028c2",
+      "duration_sec": 4.18
+    },
+    {
+      "id": "5484-24317-0004",
+      "speaker_id": "5484",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5484_5484-24317-0004.flac",
+      "text": "THE BANQUET WAS TO BEGIN IN A FEW HOURS YET HE COULD NOT LET THE DAY PASS WITHOUT SEEING DAPHNE AND TELLING HER THE WORDS OF THE ORACLE",
+      "text_hash": "06a27cbaedad3080",
+      "duration_sec": 8.2
+    },
+    {
+      "id": "5764-299665-0000",
+      "speaker_id": "5764",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5764_5764-299665-0000.flac",
+      "text": "AFTERWARD IT WAS SUPPOSED THAT HE WAS SATISFIED WITH THE BLOOD OF OXEN LAMBS AND DOVES AND THAT IN EXCHANGE FOR OR ON ACCOUNT OF THESE SACRIFICES THIS GOD GAVE RAIN SUNSHINE AND HARVEST",
+      "text_hash": "afe69b2259177a66",
+      "duration_sec": 17.26
+    },
+    {
+      "id": "5764-299665-0001",
+      "speaker_id": "5764",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5764_5764-299665-0001.flac",
+      "text": "WHETHER HE WAS THE CREATOR OF YOURSELF AND MYSELF",
+      "text_hash": "fa7d31b2a910325c",
+      "duration_sec": 3.92
+    },
+    {
+      "id": "5764-299665-0002",
+      "speaker_id": "5764",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5764_5764-299665-0002.flac",
+      "text": "WHETHER ANY PRAYER WAS EVER ANSWERED",
+      "text_hash": "da448b4b6d1d90b0",
+      "duration_sec": 4.02
+    },
+    {
+      "id": "5764-299665-0003",
+      "speaker_id": "5764",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5764_5764-299665-0003.flac",
+      "text": "WHY DID HE CREATE THE INTELLECTUALLY INFERIOR",
+      "text_hash": "6bbd7e4b4fe849d2",
+      "duration_sec": 3.73
+    },
+    {
+      "id": "5764-299665-0004",
+      "speaker_id": "5764",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_5764_5764-299665-0004.flac",
+      "text": "WHY DID HE CREATE THE DEFORMED AND HELPLESS WHY DID HE CREATE THE CRIMINAL THE IDIOTIC THE INSANE",
+      "text_hash": "e2e607923b120631",
+      "duration_sec": 9.46
+    },
+    {
+      "id": "6128-63240-0000",
+      "speaker_id": "6128",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_6128_6128-63240-0000.flac",
+      "text": "THE GENTLEMAN HAD NOT EVEN NEEDED TO SIT DOWN TO BECOME INTERESTED APPARENTLY HE HAD TAKEN UP THE VOLUME FROM A TABLE AS SOON AS HE CAME IN AND STANDING THERE AFTER A SINGLE GLANCE ROUND THE APARTMENT HAD LOST HIMSELF IN ITS PAGES",
+      "text_hash": "930c963511c1de4b",
+      "duration_sec": 14.59
+    },
+    {
+      "id": "6128-63240-0001",
+      "speaker_id": "6128",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_6128_6128-63240-0001.flac",
+      "text": "THAT HAS AN UNFLATTERING SOUND FOR ME SAID THE YOUNG MAN",
+      "text_hash": "d8b059f92ca95fd9",
+      "duration_sec": 4.33
+    },
+    {
+      "id": "6128-63240-0002",
+      "speaker_id": "6128",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_6128_6128-63240-0002.flac",
+      "text": "SHE IS WILLING TO RISK THAT",
+      "text_hash": "004f0bccc127dd2e",
+      "duration_sec": 2.38
+    },
+    {
+      "id": "6128-63240-0003",
+      "speaker_id": "6128",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_6128_6128-63240-0003.flac",
+      "text": "JUST AS I AM THE VISITOR INQUIRED PRESENTING HIMSELF WITH RATHER A WORK A DAY ASPECT",
+      "text_hash": "e893975a2aa98de9",
+      "duration_sec": 7.0
+    },
+    {
+      "id": "6128-63240-0004",
+      "speaker_id": "6128",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_6128_6128-63240-0004.flac",
+      "text": "HE WAS TALL AND LEAN AND DRESSED THROUGHOUT IN BLACK HIS SHIRT COLLAR WAS LOW AND WIDE AND THE TRIANGLE OF LINEN A LITTLE CRUMPLED EXHIBITED BY THE OPENING OF HIS WAISTCOAT WAS ADORNED BY A PIN CONTAINING A SMALL RED STONE",
+      "text_hash": "e39f57ae60e4f392",
+      "duration_sec": 15.87
+    },
+    {
+      "id": "7018-75788-0000",
+      "speaker_id": "7018",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7018_7018-75788-0000.flac",
+      "text": "THEN I TOOK UP A GREAT STONE FROM AMONG THE TREES AND COMING UP TO HIM SMOTE HIM THEREWITH ON THE HEAD WITH ALL MY MIGHT AND CRUSHED IN HIS SKULL AS HE LAY DEAD DRUNK",
+      "text_hash": "f0d6657cb77d865c",
+      "duration_sec": 10.73
+    },
+    {
+      "id": "7018-75788-0001",
+      "speaker_id": "7018",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7018_7018-75788-0001.flac",
+      "text": "BEHOLD A SHIP WAS MAKING FOR THE ISLAND THROUGH THE DASHING SEA AND CLASHING WAVES",
+      "text_hash": "e6e85bcbc0c93675",
+      "duration_sec": 5.91
+    },
+    {
+      "id": "7018-75788-0002",
+      "speaker_id": "7018",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7018_7018-75788-0002.flac",
+      "text": "HEARING THIS I WAS SORE TROUBLED REMEMBERING WHAT I HAD BEFORE SUFFERED FROM THE APE KIND",
+      "text_hash": "d2751ca58b08fa3f",
+      "duration_sec": 6.1
+    },
+    {
+      "id": "7018-75788-0003",
+      "speaker_id": "7018",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7018_7018-75788-0003.flac",
+      "text": "UPON THIS HE BROUGHT ME A COTTON BAG AND GIVING IT TO ME SAID TAKE THIS BAG AND FILL IT WITH PEBBLES FROM THE BEACH AND GO FORTH WITH A COMPANY OF THE TOWNSFOLK TO WHOM I WILL GIVE A CHARGE RESPECTING THEE",
+      "text_hash": "4673620fd64cb802",
+      "duration_sec": 13.34
+    },
+    {
+      "id": "7018-75788-0004",
+      "speaker_id": "7018",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7018_7018-75788-0004.flac",
+      "text": "DO AS THEY DO AND BELIKE THOU SHALT GAIN WHAT MAY FURTHER THY RETURN VOYAGE TO THY NATIVE LAND",
+      "text_hash": "90adad14f7be2b96",
+      "duration_sec": 6.84
+    },
+    {
+      "id": "7902-96591-0000",
+      "speaker_id": "7902",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7902_7902-96591-0000.flac",
+      "text": "I AM FROM THE CUTTER LYING OFF THE COAST",
+      "text_hash": "c896123c6ede7b4f",
+      "duration_sec": 2.1
+    },
+    {
+      "id": "7902-96591-0001",
+      "speaker_id": "7902",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7902_7902-96591-0001.flac",
+      "text": "DON'T CRY HE SAID I WAS OBLIGED TO COME",
+      "text_hash": "16830f24caa919bb",
+      "duration_sec": 2.51
+    },
+    {
+      "id": "7902-96591-0002",
+      "speaker_id": "7902",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7902_7902-96591-0002.flac",
+      "text": "AND AND YOU HAVE NOT FOUND OUT ANYTHING CAME IN QUICK FRIGHTENED TONES",
+      "text_hash": "74e07cc73422e33b",
+      "duration_sec": 5.02
+    },
+    {
+      "id": "7902-96591-0003",
+      "speaker_id": "7902",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7902_7902-96591-0003.flac",
+      "text": "I WISH YOU WOULD BELIEVE ME THAT I AM IN AS GREAT TROUBLE ABOUT IT AS YOU ARE",
+      "text_hash": "616ad2ad9a432e19",
+      "duration_sec": 3.83
+    },
+    {
+      "id": "7902-96591-0004",
+      "speaker_id": "7902",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_7902_7902-96591-0004.flac",
+      "text": "THAT MY FATHER SIR RISDON GRAEME HAS SMUGGLED GOODS HERE",
+      "text_hash": "cfde6df0f213d117",
+      "duration_sec": 3.6
+    },
+    {
+      "id": "8280-266249-0000",
+      "speaker_id": "8280",
+      "split": "enroll",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_8280_8280-266249-0000.flac",
+      "text": "OLD MISTER DINSMORE HAD ACCEPTED A PRESSING INVITATION FROM HIS GRANDDAUGHTER AND HER HUSBAND TO JOIN THE PARTY AND WITH THE ADDITION OF SERVANTS IT WAS A LARGE ONE",
+      "text_hash": "8584896fdcccb883",
+      "duration_sec": 9.55
+    },
+    {
+      "id": "8280-266249-0001",
+      "speaker_id": "8280",
+      "split": "val",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_8280_8280-266249-0001.flac",
+      "text": "AS THEY WERE IN NO HASTE AND THE CONFINEMENT OF A RAILROAD CAR WOULD BE VERY IRKSOME TO THE YOUNGER CHILDREN IT HAD BEEN DECIDED TO MAKE THE JOURNEY BY WATER",
+      "text_hash": "c3d84d885a6408c7",
+      "duration_sec": 9.2
+    },
+    {
+      "id": "8280-266249-0002",
+      "speaker_id": "8280",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_8280_8280-266249-0002.flac",
+      "text": "THERE WERE NO SAD LEAVE TAKINGS TO MAR THEIR PLEASURE THE CHILDREN WERE IN WILD SPIRITS AND ALL SEEMED CHEERFUL AND HAPPY AS THEY SAT OR STOOD UPON THE DECK WATCHING THE RECEDING SHORE AS THE VESSEL STEAMED OUT OF THE HARBOR",
+      "text_hash": "5e5bb00d9f5b0c2e",
+      "duration_sec": 13.25
+    },
+    {
+      "id": "8280-266249-0003",
+      "speaker_id": "8280",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_8280_8280-266249-0003.flac",
+      "text": "AT LENGTH THE LAND HAD QUITE DISAPPEARED NOTHING COULD BE SEEN BUT THE SKY OVERHEAD AND A VAST EXPANSE OF WATER ALL AROUND AND THE PASSENGERS FOUND LEISURE TO TURN THEIR ATTENTION UPON EACH OTHER",
+      "text_hash": "d16799ea6ac668d3",
+      "duration_sec": 12.58
+    },
+    {
+      "id": "8280-266249-0004",
+      "speaker_id": "8280",
+      "split": "test",
+      "audio_path": "storage/benchmarks/librispeech_other_60/spk_8280_8280-266249-0004.flac",
+      "text": "THERE ARE SOME NICE LOOKING PEOPLE ON BOARD REMARKED MISTER TRAVILLA IN AN UNDERTONE TO HIS WIFE",
+      "text_hash": "40905e73d7ec9889",
+      "duration_sec": 5.87
+    }
+  ]
+}

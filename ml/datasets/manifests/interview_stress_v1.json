@@ -1,7 +1,7 @@
 {
   "name": "interview_stress_v1",
-  "source": "Synthetic domain corpus rendered via held-out Azure EdgeTTS (en-IN / en-US)",
-  "license": "MIT",
+  "source": "Synthetic domain corpus rendered via EdgeTTS consumer endpoint (en-IN / en-US)",
+  "license": "Research-Only Synthetic Proxy (non-commercial consumer endpoint; replaced by CC-BY-4.0 real speech benchmarks)",
   "seed": 42,
   "total_items": 65,
   "subset_counts": {

@@ -1,0 +1,15 @@
+{
+  "experiment_id": "slu_llama3b_calibrated_repair",
+  "description": "Tuned Llama 3.2 3B with disambiguation prompt + GBNF JSON-Schema + shared repair + ASR G2P pre-repair + logprob OOS check.",
+  "provider": "ollama",
+  "model_name": "llama3.2:3b",
+  "use_json_mode": true,
+  "use_schema_mode": true,
+  "calibrated_prompt": true,
+  "enable_schema_repair": true,
+  "enable_repair_retry": true,
+  "asr_pre_repair": true,
+  "use_logprobs": true,
+  "seeds": [42, 1337, 2026],
+  "temperature": 0.1
+}

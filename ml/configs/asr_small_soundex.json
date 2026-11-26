@@ -1,0 +1,17 @@
+{
+  "experiment_id": "asr_small_soundex",
+  "description": "Layer A ablation control: small.en + Silero VAD + dynamic prompt + hotwords + legacy American Soundex repair (for Soundex vs G2P ablation).",
+  "model_size": "small.en",
+  "provider": "whisper",
+  "device": "cpu",
+  "compute_type": "int8",
+  "vad_filter": true,
+  "beam_size": 5,
+  "prompt_mode": "dynamic",
+  "hotwords_enabled": true,
+  "word_timestamps": true,
+  "phonetic_repair_enabled": true,
+  "phonetic_mode": "soundex",
+  "repair_confidence_threshold": 0.85,
+  "seed": 42
+}

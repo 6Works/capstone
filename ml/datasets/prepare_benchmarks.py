@@ -474,8 +474,8 @@ def build_interview_stress_v1(seed: int = 42) -> Dict[str, Any]:
 
     payload = {
         "name": "interview_stress_v1",
-        "source": "Synthetic domain corpus rendered via held-out Azure EdgeTTS (en-IN / en-US)",
-        "license": "MIT",
+        "source": "Synthetic domain corpus rendered via EdgeTTS consumer endpoint (en-IN / en-US)",
+        "license": "Research-Only Synthetic Proxy (non-commercial consumer endpoint; replaced by CC-BY-4.0 real speech benchmarks)",
         "seed": seed,
         "total_items": len(items),
         "subset_counts": {
@@ -489,12 +489,285 @@ def build_interview_stress_v1(seed: int = 42) -> Dict[str, Any]:
     return payload
 
 
-def build_all_benchmarks(seed: int = 42) -> Dict[str, Any]:
-    """Builds all 4 Session 4 manifests and prints storage & split summary."""
+def build_clinc_oos_full(seed: int = 42) -> Dict[str, Any]:
+    """
+    Loads the FULL clinc/clinc_oos (small) train, validation, and test splits via HF Parquet
+    with strict text_sha256 zero-leakage deduplication across all splits.
+    """
+    cached = _cached_manifest_if_complete("clinc_oos_full", check_audio=False)
+    if cached is not None and cached.get("total_items", 0) > 10000:
+        return cached
+
+    import pyarrow.parquet as pq
+    import io
+
+    info = requests.get("https://datasets-server.huggingface.co/info?dataset=clinc/clinc_oos&config=small", timeout=20).json()
+    names = info["dataset_info"]["features"]["intent"]["names"]
+    pq_urls = requests.get("https://huggingface.co/api/datasets/clinc/clinc_oos/parquet/small", timeout=20).json()
+
+    items: List[Dict[str, Any]] = []
+    seen_hashes = set()
+    # Process test & val before train so zero train item ever leaks into official val/test splits
+    for split_key, norm_split in [("test", "test"), ("validation", "val"), ("train", "train")]:
+        urls = pq_urls.get(split_key, [])
+        for part_idx, u in enumerate(urls):
+            raw = requests.get(u, timeout=60).content
+            table = pq.read_table(io.BytesIO(raw))
+            texts = table["text"].to_pylist()
+            intents = table["intent"].to_pylist()
+            for r_i, (txt, cls_id) in enumerate(zip(texts, intents)):
+                h = text_sha256(txt)
+                if h in seen_hashes:
+                    continue
+                seen_hashes.add(h)
+                items.append({
+                    "id": f"{norm_split}_{part_idx}_{r_i}",
+                    "split": norm_split,
+                    "intent_label": names[int(cls_id)],
+                    "text": txt,
+                    "text_hash": h,
+                })
+
+    payload = {
+        "name": "clinc_oos_full",
+        "source": "clinc/clinc_oos (small: full train/validation/test)",
+        "license": "CC-BY-3.0",
+        "seed": seed,
+        "num_intents": len(names),
+        "intent_labels": names,
+        "total_items": len(items),
+        "split_counts": {s: sum(1 for x in items if x["split"] == s) for s in ["train", "val", "test"]},
+        "items": items,
+    }
+    _save_manifest("clinc_oos_full", payload)
+    return payload
+
+
+def build_minds14_full(seed: int = 42) -> Dict[str, Any]:
+    """
+    Loads ALL deduplicated English human recordings from PolyAI/minds14 (en-US, en-GB, en-AU)
+    via HF Parquet, stratified across dev (~55%), val (~15%), and test (~30%) with zero text leakage.
+    """
+    cached = _cached_manifest_if_complete("minds14_en_full", check_audio=True)
+    if cached is not None and cached.get("total_items", 0) > 1000:
+        return cached
+
+    import pyarrow.parquet as pq
+    import io
+    import soundfile as sf
+
+    cache_dir = os.path.join(AUDIO_CACHE_DIR, "minds14_en_full")
+    os.makedirs(cache_dir, exist_ok=True)
+    info = requests.get("https://datasets-server.huggingface.co/info?dataset=PolyAI/minds14&config=en-US", timeout=20).json()
+    label_names = info["dataset_info"]["features"]["intent_class"]["names"]
+
+    rng = random.Random(seed)
+    pools: Dict[int, List[Dict[str, Any]]] = {i: [] for i in range(len(label_names))}
+    seen_hashes = set()
+
+    for accent in ["en-US", "en-GB", "en-AU"]:
+        pq_urls = requests.get(f"https://huggingface.co/api/datasets/PolyAI/minds14/parquet/{accent}", timeout=20).json()
+        for part_idx, u in enumerate(pq_urls.get("train", [])):
+            raw = requests.get(u, timeout=120).content
+            table = pq.read_table(io.BytesIO(raw))
+            for r_i in range(table.num_rows):
+                cls_id = int(table["intent_class"][r_i].as_py())
+                trans = str(table["transcription"][r_i].as_py() or "").strip()
+                h = text_sha256(trans)
+                if not trans or h in seen_hashes:
+                    continue
+                seen_hashes.add(h)
+                aud_obj = table["audio"][r_i].as_py()
+                aud_bytes = aud_obj.get("bytes") if isinstance(aud_obj, dict) else None
+                if not aud_bytes:
+                    continue
+                uid = f"{accent}_{part_idx}_{r_i}_{cls_id}"
+                pools[cls_id].append({
+                    "uid": uid,
+                    "accent": accent,
+                    "intent_id": cls_id,
+                    "intent_label": label_names[cls_id],
+                    "transcription": trans,
+                    "text_hash": h,
+                    "audio_bytes": aud_bytes,
+                })
+
+    selected: List[Dict[str, Any]] = []
+    for cls_id in sorted(pools.keys()):
+        cands = pools[cls_id]
+        rng.shuffle(cands)
+        n_c = len(cands)
+        n_dev = max(1, int(round(n_c * 0.55)))
+        n_val = max(1, int(round(n_c * 0.15)))
+        for k, row in enumerate(cands):
+            split = "dev" if k < n_dev else ("val" if k < n_dev + n_val else "test")
+            local_wav = os.path.join(cache_dir, f"{row['uid']}.wav")
+            if not os.path.exists(local_wav) or os.path.getsize(local_wav) < 200:
+                data_arr, sr_in = sf.read(io.BytesIO(row["audio_bytes"]), dtype="float32")
+                if data_arr.ndim > 1:
+                    data_arr = data_arr.mean(axis=1)
+                if sr_in != 16000:
+                    import scipy.signal as sig
+                    data_arr = sig.resample(data_arr, int(len(data_arr) * 16000 / sr_in)).astype(np.float32)
+                sf.write(local_wav, data_arr, 16000, subtype="PCM_16")
+            selected.append({
+                "id": row["uid"],
+                "accent": row["accent"],
+                "intent_label": row["intent_label"],
+                "split": split,
+                "audio_path": os.path.relpath(local_wav, ROOT_DIR).replace("\\", "/"),
+                "text": row["transcription"],
+                "text_hash": row["text_hash"],
+                "duration_sec": _audio_duration(local_wav),
+            })
+
+    payload = {
+        "name": "minds14_en_full",
+        "source": "PolyAI/minds14 (full en-US, en-GB, en-AU real human speech)",
+        "license": "CC-BY-4.0",
+        "seed": seed,
+        "num_intents": len(label_names),
+        "intent_labels": label_names,
+        "total_items": len(selected),
+        "split_counts": {s: sum(1 for x in selected if x["split"] == s) for s in ["dev", "val", "test"]},
+        "accent_counts": {a: sum(1 for x in selected if x["accent"] == a) for a in ["en-US", "en-GB", "en-AU"]},
+        "items": selected,
+    }
+    _save_manifest("minds14_en_full", payload)
+    return payload
+
+
+def build_librispeech_other_60(seed: int = 42, num_speakers: int = 12, utts_per_spk: int = 5) -> Dict[str, Any]:
+    """Curates 60 LibriSpeech test-other challenging real-human utterances across 12 unseen speakers."""
+    cached = _cached_manifest_if_complete("librispeech_other_60", check_audio=True)
+    if cached is not None:
+        return cached
+    cache_dir = os.path.join(AUDIO_CACHE_DIR, "librispeech_other_60")
+    os.makedirs(cache_dir, exist_ok=True)
+
+    buckets: Dict[str, List[Dict[str, Any]]] = {}
+    seen_hashes = set()
+    offset = 0
+    while len([s for s, v in buckets.items() if len(v) >= utts_per_spk]) < num_speakers and offset < 1200:
+        rows = _hf_rows("openslr/librispeech_asr", "other", "test", offset=offset, length=100)
+        if not rows:
+            break
+        for row in rows:
+            spk = str(row["speaker_id"])
+            h = text_sha256(row["text"])
+            if h in seen_hashes:
+                continue
+            bucket = buckets.setdefault(spk, [])
+            if len(bucket) < utts_per_spk:
+                seen_hashes.add(h)
+                fname = f"spk_{spk}_{row['id']}.flac"
+                local_path = os.path.join(cache_dir, fname)
+                _download_file(row["audio"][0]["src"], local_path)
+                split_role = "enroll" if len(bucket) == 0 else ("val" if len(bucket) == 1 else "test")
+                bucket.append({
+                    "id": str(row["id"]),
+                    "speaker_id": spk,
+                    "split": split_role,
+                    "audio_path": os.path.relpath(local_path, ROOT_DIR).replace("\\", "/"),
+                    "text": row["text"],
+                    "text_hash": h,
+                    "duration_sec": _audio_duration(local_path),
+                })
+        offset += 100
+
+    items = []
+    for spk in sorted(buckets.keys()):
+        if len(buckets[spk]) >= utts_per_spk:
+            items.extend(buckets[spk][:utts_per_spk])
+            if len(items) >= num_speakers * utts_per_spk:
+                break
+
+    payload = {
+        "name": "librispeech_other_60",
+        "source": "openslr/librispeech_asr (other/test)",
+        "license": "CC-BY-4.0",
+        "seed": seed,
+        "total_items": len(items),
+        "num_speakers": len({x["speaker_id"] for x in items}),
+        "split_counts": {s: sum(1 for x in items if x["split"] == s) for s in ["enroll", "val", "test"]},
+        "items": items,
+    }
+    _save_manifest("librispeech_other_60", payload)
+    return payload
+
+
+def build_svarah_test(hf_token: Optional[str] = None, max_items: int = 500) -> Dict[str, Any]:
+    """
+    Test-only manifest loader for ai4bharat/Svarah (CC-BY-4.0, 117 Indian-English speakers, 9.6 hrs).
+    Requires HF authentication because ai4bharat/Svarah is license-click-gated on HuggingFace Hub.
+    """
+    cached = _cached_manifest_if_complete("svarah_test", check_audio=True)
+    if cached is not None:
+        return cached
+    tok = hf_token or os.getenv("HF_TOKEN")
+    if not tok:
+        raise PermissionError(
+            "ai4bharat/Svarah is gated on HuggingFace Hub. Accept the CC-BY-4.0 card terms at "
+            "https://huggingface.co/datasets/ai4bharat/Svarah and supply HF_TOKEN or `hf auth login`."
+        )
+    import io
+    import soundfile as sf
+    from huggingface_hub import hf_hub_download
+    import pyarrow.parquet as pq
+
+    cache_dir = os.path.join(AUDIO_CACHE_DIR, "svarah_test")
+    os.makedirs(cache_dir, exist_ok=True)
+    pq_file = hf_hub_download(repo_id="ai4bharat/Svarah", repo_type="dataset", filename="data/test-00000-of-00001.parquet", token=tok)
+    table = pq.read_table(pq_file)
+    items = []
+    seen_hashes = set()
+    for i in range(min(max_items, table.num_rows)):
+        txt = str(table["text"][i].as_py() or "").strip()
+        h = text_sha256(txt)
+        if not txt or h in seen_hashes:
+            continue
+        seen_hashes.add(h)
+        aud = table["audio"][i].as_py()
+        out_wav = os.path.join(cache_dir, f"svarah_{i:04d}.wav")
+        data_arr, sr_in = sf.read(io.BytesIO(aud["bytes"]), dtype="float32")
+        if data_arr.ndim > 1:
+            data_arr = data_arr.mean(axis=1)
+        if sr_in != 16000:
+            import scipy.signal as sig
+            data_arr = sig.resample(data_arr, int(len(data_arr) * 16000 / sr_in)).astype(np.float32)
+        sf.write(out_wav, data_arr, 16000, subtype="PCM_16")
+        items.append({
+            "id": f"svarah_{i:04d}",
+            "split": "test",
+            "speaker_id": str(table["speaker_id"][i].as_py()) if "speaker_id" in table.column_names else "unknown",
+            "audio_path": os.path.relpath(out_wav, ROOT_DIR).replace("\\", "/"),
+            "text": txt,
+            "text_hash": h,
+            "duration_sec": _audio_duration(out_wav),
+        })
+    payload = {
+        "name": "svarah_test",
+        "source": "ai4bharat/Svarah (test-only Indian-English human corpus)",
+        "license": "CC-BY-4.0",
+        "total_items": len(items),
+        "split_counts": {"test": len(items)},
+        "items": items,
+    }
+    _save_manifest("svarah_test", payload)
+    return payload
+
+
+def build_all_benchmarks(seed: int = 42, include_full_real: bool = True) -> Dict[str, Any]:
+    """Builds legacy + expanded full real-speech manifests and prints storage summary."""
     ls = build_librispeech_60(seed=seed)
     m14 = build_minds14_140(seed=seed)
     cl = build_clinc_oos_200(seed=seed)
     isv = build_interview_stress_v1(seed=seed)
+    built = [ls, m14, cl, isv]
+    if include_full_real:
+        built.append(build_clinc_oos_full(seed=seed))
+        built.append(build_minds14_full(seed=seed))
+        built.append(build_librispeech_other_60(seed=seed))
 
     total_bytes = 0
     for root, _, files in os.walk(AUDIO_CACHE_DIR):
@@ -505,11 +778,11 @@ def build_all_benchmarks(seed: int = 42) -> Dict[str, Any]:
         "total_disk_mb": round(total_bytes / (1024 * 1024), 2),
         "manifests": {
             m["name"]: {"total": m["total_items"], "splits": m["split_counts"]}
-            for m in (ls, m14, cl, isv)
+            for m in built
         },
     }
 
 
 if __name__ == "__main__":
-    summary = build_all_benchmarks(seed=42)
+    summary = build_all_benchmarks(seed=42, include_full_real=True)
     print(json.dumps(summary, indent=2))

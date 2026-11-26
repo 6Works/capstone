@@ -1,0 +1,15 @@
+{
+  "experiment_id": "slu_qwen15b_schema",
+  "description": "Fair baseline: Qwen 2.5 Coder 1.5B with Ollama native GBNF JSON-Schema constrained decoding (no syntax repair, no retry, no ASR pre-repair).",
+  "provider": "ollama",
+  "model_name": "qwen2.5-coder:1.5b",
+  "use_json_mode": true,
+  "use_schema_mode": true,
+  "calibrated_prompt": true,
+  "enable_schema_repair": false,
+  "enable_repair_retry": false,
+  "asr_pre_repair": false,
+  "use_logprobs": false,
+  "seeds": [42, 1337, 2026],
+  "temperature": 0.1
+}

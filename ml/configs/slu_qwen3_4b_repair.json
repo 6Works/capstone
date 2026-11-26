@@ -1,0 +1,15 @@
+{
+  "experiment_id": "slu_qwen3_4b_repair",
+  "description": "Commercially permissive Apache-2.0 Qwen3-4B with GBNF JSON-Schema, calibrated prompt, schema repair, ASR G2P pre-repair, and logprob calibration.",
+  "provider": "ollama",
+  "model_name": "qwen3:4b",
+  "use_json_mode": true,
+  "use_schema_mode": true,
+  "calibrated_prompt": true,
+  "enable_schema_repair": true,
+  "enable_repair_retry": true,
+  "asr_pre_repair": true,
+  "use_logprobs": true,
+  "seeds": [42, 1337, 2026],
+  "temperature": 0.1
+}

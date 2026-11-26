@@ -1,0 +1,19 @@
+{
+  "experiment_id": "slu_hybrid_cascade",
+  "description": "Confidence-gated 2-tier SLU Cascade: DistilBERT-LoRA (30ms CPU) exits when confidence >= 0.85 & margin >= 0.25, escalating uncertain/OOS/open-taxonomy turns to Qwen3-4B (Apache-2.0).",
+  "provider": "hybrid_cascade",
+  "model_name": "models/slu_lora_adapter",
+  "slow_model_name": "qwen3:4b",
+  "confidence_threshold": 0.85,
+  "margin_threshold": 0.25,
+  "escalate_on_oos": true,
+  "use_json_mode": true,
+  "use_schema_mode": true,
+  "calibrated_prompt": true,
+  "enable_schema_repair": true,
+  "enable_repair_retry": true,
+  "asr_pre_repair": true,
+  "use_logprobs": true,
+  "seeds": [42, 1337, 2026],
+  "temperature": 0.1
+}
