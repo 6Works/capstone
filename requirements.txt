@@ -20,4 +20,5 @@ jiwer>=4.0.0
 pystoi>=0.4.1
 scikit-learn>=1.6.1
 rapidfuzz>=3.14.0
+g2p-en>=2.1.0
 matplotlib>=3.8.0

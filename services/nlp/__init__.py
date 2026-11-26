@@ -1,3 +1,15 @@
-from .nlp_services import RuleBasedNLPService, LLMNLPService, preprocess_asr_transcript
+from .nlp_services import (
+    RuleBasedNLPService,
+    LLMNLPService,
+    TrainedDistilBertSLUService,
+    HybridConfidenceSLUService,
+    preprocess_asr_transcript,
+)
 
-__all__ = ["RuleBasedNLPService", "LLMNLPService", "preprocess_asr_transcript"]
+__all__ = [
+    "RuleBasedNLPService",
+    "LLMNLPService",
+    "TrainedDistilBertSLUService",
+    "HybridConfidenceSLUService",
+    "preprocess_asr_transcript",
+]

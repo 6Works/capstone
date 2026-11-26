@@ -595,6 +595,7 @@ class PocketTTSCloningService(ITTSService):
             import sherpa_onnx
 
             ref_audio, ref_sr = VoiceCloner.load_audio_signal(ref_path, target_sr=24000)
+            ref_duration_sec = round(float(len(ref_audio)) / float(ref_sr), 3)
             max_ref_samples = int(ref_sr * 10)  # Cap conditioning prompt at 10s for bounded latency
             if len(ref_audio) > max_ref_samples:
                 ref_audio = ref_audio[:max_ref_samples]
@@ -605,7 +606,16 @@ class PocketTTSCloningService(ITTSService):
             gen_cfg.num_steps = self.num_steps
             gen_cfg.speed = self.speed
 
-            audio_out = tts.generate(processed_text, config=gen_cfg)
+            # Track genuine Time-to-First-Audio (TTFA) via sherpa_onnx streaming callback
+            chunk_times: List[float] = []
+            gen_start = time.perf_counter()
+
+            def _on_chunk(chunk_samples, progress: float) -> int:
+                if not chunk_times:
+                    chunk_times.append((time.perf_counter() - gen_start) * 1000.0)
+                return 1
+
+            audio_out = tts.generate(processed_text, config=gen_cfg, callback=_on_chunk)
             samples = np.asarray(audio_out.samples, dtype=np.float32)
             if samples.size == 0:
                 raise RuntimeError("Pocket TTS returned empty audio buffer.")
@@ -617,6 +627,7 @@ class PocketTTSCloningService(ITTSService):
             sherpa_onnx.write_wave(output_path, samples, int(audio_out.sample_rate))
             elapsed = round(time.time() - start_time, 3)
             audio_dur = round(float(samples.size) / float(audio_out.sample_rate), 3)
+            ttfa_ms = round(chunk_times[0], 1) if chunk_times else round(elapsed * 1000.0, 1)
 
             return TTSResult(
                 file_path=output_path,
@@ -629,9 +640,13 @@ class PocketTTSCloningService(ITTSService):
                     "normalized_text": processed_text,
                     "speaker_profile": profile.to_dict() if profile else {},
                     "reference_audio": ref_path,
+                    "reference_duration_sec": ref_duration_sec,
+                    "short_reference_warning": ref_duration_sec < 5.0,
                     "num_steps": self.num_steps,
                     "audio_duration_sec": audio_dur,
                     "rtf": round(elapsed / max(audio_dur, 1e-4), 3),
+                    "ttfa_ms": ttfa_ms,
+                    "num_stream_callbacks": len(chunk_times) or 1,
                     "f0_hz": profile.fundamental_freq_f0 if profile else 175.0,
                     "spectral_centroid": profile.spectral_centroid if profile else 2000.0,
                 },

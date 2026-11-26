@@ -16,10 +16,11 @@ class OllamaLLMProvider(ILanguageModelProvider):
     """Local Ollama Provider communicating via http://127.0.0.1:11434."""
 
     DEFAULT_FALLBACK_MODELS = [
+        "qwen3:4b",
+        "phi4-mini:latest",
         "llama3.2:latest",
         "llama3.2:3b",
         "llama3.1:latest",
-        "qwen2.5:3b",
         "qwen2.5-coder:1.5b"
     ]
 
@@ -156,8 +157,20 @@ class OllamaLLMProvider(ILanguageModelProvider):
             "options": options,
         }
 
-        if json_mode:
+        response_schema = kwargs.get("response_schema")
+        if isinstance(response_schema, dict) and response_schema:
+            # Native Ollama GBNF schema-constrained decoding (docs.ollama.com/capabilities/structured-outputs)
+            payload["format"] = response_schema
+        elif json_mode:
             payload["format"] = "json"
+
+        if "qwen3" in active_model.lower() and "think" not in payload:
+            payload["think"] = bool(kwargs.get("think", False))
+
+        if kwargs.get("logprobs"):
+            payload["logprobs"] = True
+            if kwargs.get("top_logprobs") is not None:
+                payload["top_logprobs"] = int(kwargs["top_logprobs"])
 
         last_err = None
         for base in self._get_candidate_urls():
@@ -172,6 +185,17 @@ class OllamaLLMProvider(ILanguageModelProvider):
                     prompt_eval = data.get("prompt_eval_count", 0)
                     eval_count = data.get("eval_count", 0)
 
+                    raw_meta: Dict[str, Any] = {"total_duration": data.get("total_duration", 0)}
+                    tok_logprobs = data.get("logprobs")
+                    if isinstance(tok_logprobs, list) and tok_logprobs:
+                        import math
+                        lp_vals = [float(t["logprob"]) for t in tok_logprobs if isinstance(t, dict) and "logprob" in t]
+                        if lp_vals:
+                            raw_meta["mean_logprob"] = round(sum(lp_vals) / len(lp_vals), 4)
+                            raw_meta["min_logprob"] = round(min(lp_vals), 4)
+                            raw_meta["seq_prob"] = round(float(math.exp(max(sum(lp_vals) / len(lp_vals), -20.0))), 4)
+                            raw_meta["token_logprobs"] = tok_logprobs
+
                     self.base_url = base
                     return LLMResponse(
                         content=content,
@@ -181,7 +205,7 @@ class OllamaLLMProvider(ILanguageModelProvider):
                         tokens_prompt=prompt_eval,
                         tokens_completion=eval_count,
                         fallback_used=False,
-                        raw_metadata={"total_duration": data.get("total_duration", 0)}
+                        raw_metadata=raw_meta,
                     )
                 else:
                     last_err = RuntimeError(f"Ollama returned HTTP {resp.status_code}: {resp.text}")

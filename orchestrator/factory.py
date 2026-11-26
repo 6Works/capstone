@@ -18,10 +18,11 @@ from services.audio_input import MicrophoneAudioInput, FileAudioInput, Synthetic
 from services.asr import (
     GoogleWebSpeechASR,
     WhisperTransformerASR,
+    ParakeetTDTASR,
     MockASR,
     build_dynamic_bias_prompt,
 )
-from services.nlp import RuleBasedNLPService, LLMNLPService
+from services.nlp import RuleBasedNLPService, LLMNLPService, TrainedDistilBertSLUService, HybridConfidenceSLUService
 from services.dialogue import ModularDialogueManager, LLMDialogueManager
 from services.tts import (
     Pyttsx3TTSService,
@@ -86,6 +87,12 @@ class PipelineFactory:
                 no_repeat_ngram_size=4,
                 hallucination_silence_threshold=0.4,
             )
+        if asr_provider in ["parakeet", "parakeet_tdt"]:
+            return ParakeetTDTASR(
+                decoding_method="greedy_search",
+                phonetic_mode="g2p",
+                repair_lexicon=DEFAULT_DOMAIN_LEXICON,
+            )
         if asr_provider == "mock":
             return MockASR(fixed_transcript=fixed_transcript)
         lang_code = "en-US" if language == "en" else language
@@ -117,14 +124,36 @@ class PipelineFactory:
         asr = PipelineFactory.build_asr_service(asr_provider=asr_provider)
 
         # 3. Resolve NLP (Session 6 shared JSON repair + single-retry + ASR pre-repair defaults)
-        if nlp_provider == "llm":
-            resolved_model = slu_model_name or os.getenv("CAPSTONE_SLU_MODEL", None)
-            nlp: INLPService = LLMNLPService(
+        resolved_model = slu_model_name or os.getenv("CAPSTONE_SLU_MODEL", None)
+        if nlp_provider in ("hybrid", "hybrid_cascade"):
+            fast_slu = TrainedDistilBertSLUService(
+                model_dir="models/slu_lora_adapter",
+                repair_lexicon=DEFAULT_DOMAIN_LEXICON,
+                use_conf_tags=True,
+            )
+            slow_slu = LLMNLPService(
+                model_name=resolved_model or "qwen3:4b",
+                repair_lexicon=DEFAULT_DOMAIN_LEXICON,
+                enable_schema_repair=True,
+                enable_repair_retry=True,
+                use_json_mode=True,
+                calibrated_prompt=True,
+            )
+            nlp: INLPService = HybridConfidenceSLUService(fast_service=fast_slu, slow_service=slow_slu)
+        elif nlp_provider in ("distilbert", "distilbert_lora"):
+            nlp = TrainedDistilBertSLUService(
+                model_dir="models/slu_lora_adapter",
+                repair_lexicon=DEFAULT_DOMAIN_LEXICON,
+                use_conf_tags=True,
+            )
+        elif nlp_provider == "llm":
+            nlp = LLMNLPService(
                 model_name=resolved_model,
                 repair_lexicon=DEFAULT_DOMAIN_LEXICON,
                 enable_schema_repair=True,
                 enable_repair_retry=True,
                 use_json_mode=True,
+                calibrated_prompt=True,
             )
         else:
             nlp = RuleBasedNLPService(repair_lexicon=DEFAULT_DOMAIN_LEXICON)
@@ -167,19 +196,20 @@ class PipelineFactory:
     @staticmethod
     def create_preset(tier: str = "full", **overrides) -> DecoupledVoicePipeline:
         """
-        Instantiates empirically validated Pareto pipeline profiles from Session 8:
-          - 'full': small.en + hotwords/repair + qwen2.5:3b/repaired + Pocket TTS INT8 (peak accuracy)
-          - 'edge': tiny.en + anti-loop/repair + qwen2.5:3b/repaired + Pocket TTS INT8 (48% lower cost)
+        Instantiates empirically validated Pareto pipeline profiles:
+          - 'full': small.en + G2P hotwords/repair + qwen3:4b (Apache-2.0) + Pocket TTS INT8 (peak accuracy)
+          - 'hybrid': small.en + DistilBERT-LoRA (30ms) -> Qwen3-4B confidence cascade + Pocket TTS INT8
+          - 'edge': tiny.en + anti-loop/G2P repair + qwen3:4b (Apache-2.0) + Pocket TTS INT8 (lower cost & latency)
         """
         chosen = (tier or os.getenv("CAPSTONE_PIPELINE_TIER", "full")).lower()
         defaults = {
             "asr_provider": "whisper_tiny" if chosen == "edge" else "whisper",
             "tts_provider": "pocket_tts",
-            "nlp_provider": "llm",
+            "nlp_provider": "hybrid" if chosen == "hybrid" else "llm",
             "dialogue_provider": "llm",
             "input_provider": "file",
             "output_provider": "web",
-            "slu_model_name": overrides.pop("slu_model_name", os.getenv("CAPSTONE_SLU_MODEL", "qwen2.5:3b")),
+            "slu_model_name": overrides.pop("slu_model_name", os.getenv("CAPSTONE_SLU_MODEL", "qwen3:4b")),
         }
         defaults.update(overrides)
         return PipelineFactory.create_pipeline(**defaults)

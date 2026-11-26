@@ -37,13 +37,15 @@ Thumbs.db
 # Logs
 *.log
 
-# ML model artifacts
+# ML model & checkpoint artifacts
 *.h5
 *.pth
 *.pt
 *.ckpt
 *.onnx
+*.safetensors
 models/
+ml/results/checkpoints/
 
 # Temporary files
 tmp/

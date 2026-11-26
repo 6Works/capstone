@@ -91,13 +91,16 @@ def get_available_providers():
         },
         "available_providers": {
             "asr": [
-                {"id": "whisper", "name": "faster-whisper Small.en INT8 (High Accuracy - Name Optimized)", "status": "active"},
-                {"id": "whisper_tiny", "name": "faster-whisper Tiny.en INT8 (Offline Ultra-Fast ~200ms)", "status": "active"},
+                {"id": "whisper", "name": "faster-whisper Small.en INT8 (High Accuracy - G2P + Hotwords)", "status": "active"},
+                {"id": "whisper_tiny", "name": "faster-whisper Tiny.en INT8 (Offline Fast Edge + G2P)", "status": "active"},
+                {"id": "parakeet", "name": "NVIDIA Parakeet-TDT-0.6B-v3 INT8 (CC-BY-4.0 CPU)", "status": "active"},
                 {"id": "google", "name": "Google Web Speech (Fast cloud free)", "status": "active"},
                 {"id": "mock", "name": "Mock ASR (Synthetic deterministic)", "status": "testing"}
             ],
             "nlp": [
-                {"id": "llm", "name": "LLM Intent & Tool Engine (Gemini / OpenAI / Ollama)", "status": "active"},
+                {"id": "llm", "name": "LLM Intent & Tool Engine (Ollama Qwen3-4B / Phi-4-mini / Cloud)", "status": "active"},
+                {"id": "hybrid", "name": "Hybrid Confidence Cascade (DistilBERT-LoRA 30ms -> Qwen3-4B)", "status": "active"},
+                {"id": "distilbert_lora", "name": "DistilBERT-LoRA SLU Adapter (30ms Local CPU)", "status": "active"},
                 {"id": "rule_based", "name": "Rule-Based Intent & Entity NLU", "status": "active"}
             ],
             "dialogue": [
@@ -105,7 +108,8 @@ def get_available_providers():
                 {"id": "modular", "name": "Decoupled Memory & State Machine (Deterministic)", "status": "active"}
             ],
             "tts": [
-                {"id": "neural_vits", "name": "Neural VITS & Voice Cloning (Zero-Shot Local ONNX)", "status": "active"},
+                {"id": "pocket_tts", "name": "Kyutai Pocket TTS INT8 (Flow-Matching Zero-Shot Cloning)", "status": "active"},
+                {"id": "neural_vits", "name": "Neural VITS (Piper Local ONNX Fallback)", "status": "active"},
                 {"id": "pyttsx3", "name": "pyttsx3 SAPI5 (Offline native Windows)", "status": "active"},
                 {"id": "elevenlabs", "name": "ElevenLabs (Human Cadence & Natural Pauses)", "status": "ready"},
                 {"id": "gtts", "name": "Google Text-To-Speech (MP3)", "status": "active"}

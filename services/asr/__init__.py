@@ -1,6 +1,7 @@
 from .asr_services import (
     GoogleWebSpeechASR,
     WhisperTransformerASR,
+    ParakeetTDTASR,
     MockASR,
     build_dynamic_bias_prompt,
     phonetic_repair,
@@ -9,6 +10,7 @@ from .asr_services import (
 __all__ = [
     "GoogleWebSpeechASR",
     "WhisperTransformerASR",
+    "ParakeetTDTASR",
     "MockASR",
     "build_dynamic_bias_prompt",
     "phonetic_repair",

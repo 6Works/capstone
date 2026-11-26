@@ -176,10 +176,12 @@ class RoleService:
         mode: Optional[str] = None,
         model_name: Optional[str] = None,
         use_json_mode: bool = True,
+        use_schema_mode: bool = False,
         enable_schema_repair: bool = True,
         enable_repair_retry: bool = True,
         seed: Optional[int] = None,
         temperature: Optional[float] = None,
+        calibrated_rubric: bool = True,
     ) -> Dict[str, Any]:
         """
         Executes an interview evaluation turn under either 'solo' or 'copilot' mode.
@@ -252,12 +254,20 @@ class RoleService:
 
         # Attempt deep LLM reasoning via LLMGateway
         try:
+            rubric_block = ""
+            if calibrated_rubric:
+                rubric_block = """
+Scoring Calibration Rubric (evaluate technical substance across their stated engineering topic on the full 1-10 integer scale; candidates answer in concise spoken 1-2 sentence turns, so score architectural specificity rather than essay length):
+- 1-4 (Weak / Unsure): Admits uncertainty, lacks failure/testing discipline, or gives generic vague remarks with no concrete mechanism.
+- 5-7 (Adequate / Standard): Names sensible everyday building blocks (e.g., load balancer, SQL + async queue, basic validation) without quantitative targets, failover clarity, or architectural trade-offs.
+- 8-10 (Strong / Specific): Articulates concrete architectural mechanisms, resilience patterns, decoupled ML/system designs, rollback/chaos mitigation, or quantitative latency/consistency targets with clear cause-and-effect. Do not penalize strong technical answers that focus on caching, storage, or ML architecture instead of the prompt topic.
+"""
             sys_prompt = f"""You are Mira, a Senior Staff Technical Interviewer evaluating a candidate's response.
 Current Interview Stage: {current_stage['stage_name']}
 Current Question Asked: "{current_stage['question']}"
 Next Scheduled Stage: "{next_stage['stage_name']}" - "{next_stage['question']}"
 
-{context_prompt_block}
+{context_prompt_block}{rubric_block}
 
 Analyze the candidate's answer and produce ONLY a valid JSON object matching this schema:
 {{
@@ -277,6 +287,22 @@ Return ONLY valid JSON."""
             gen_kwargs: Dict[str, Any] = {}
             if seed is not None:
                 gen_kwargs["seed"] = seed
+            if use_schema_mode:
+                gen_kwargs["response_schema"] = {
+                    "type": "object",
+                    "properties": {
+                        "overall_score": {"type": "number"},
+                        "clarity_score": {"type": "number"},
+                        "depth_score": {"type": "number"},
+                        "system_design_score": {"type": "number"},
+                        "strengths": {"type": "array", "items": {"type": "string"}},
+                        "areas_for_growth": {"type": "array", "items": {"type": "string"}},
+                        "fact_check_note": {"type": "string"},
+                        "bot_response": {"type": "string"},
+                        "suggested_probes": {"type": "array", "items": {"type": "string"}},
+                    },
+                    "required": ["overall_score", "bot_response"],
+                }
             llm_res = llm_gateway.generate(
                 messages=[llm_msg],
                 model=model_name,
@@ -316,10 +342,10 @@ Return ONLY valid JSON."""
             if parsed is None:
                 raise ValueError("Invalid interview JSON after schema repair")
 
-            overall_score = int(parsed.get("overall_score", overall_score))
-            clarity_score = int(parsed.get("clarity_score", clarity_score))
-            depth_score = int(parsed.get("depth_score", depth_score))
-            design_score = int(parsed.get("system_design_score", design_score))
+            overall_score = max(1, min(10, int(parsed.get("overall_score", overall_score))))
+            clarity_score = max(1, min(10, int(parsed.get("clarity_score", clarity_score))))
+            depth_score = max(1, min(10, int(parsed.get("depth_score", depth_score))))
+            design_score = max(1, min(10, int(parsed.get("system_design_score", design_score))))
             if parsed.get("strengths"):
                 strengths = parsed["strengths"]
             if parsed.get("areas_for_growth"):

@@ -39,6 +39,8 @@ class SpeakerProfile:
     ref_audio_path: Optional[str] = None # Path to original recorded reference sample
     eleven_voice_id: Optional[str] = None # Cloned voice ID on ElevenLabs if synced
     encoder_backend: str = "random_proj_baseline" # "wespeaker_campp_lm" or "random_proj_baseline"
+    spectral_rolloff_95_hz: float = 0.0
+    narrowband_warning: bool = False
     created_at: float = field(default_factory=time.time)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -61,8 +63,10 @@ class VoiceCloner:
     PRESET_IDS = {"mira_neural", "alex_interviewer", "sarah_executive", "david_architect"}
     BASE_F0 = 175.0  # Base reference pitch of default Lessac model (Hz)
     DEFAULT_SPEAKER_ENCODER_PATH = "models/speaker/wespeaker_en_voxceleb_CAM++_LM.onnx"
+    ECAPA_SPEAKER_ENCODER_PATH = "models/speaker/voxceleb_ECAPA512_LM.onnx"
     _cached_speaker_extractor = None
     _cached_speaker_model_path = None
+    _speaker_extractors: Dict[str, Any] = {}
 
     def __init__(self, profiles_dir: str = "storage/cloned_voices"):
         self.profiles_dir = profiles_dir
@@ -379,7 +383,7 @@ class VoiceCloner:
             f0_mean = 160.0
             f0_std = 18.0
 
-        # 2. Spectral Analysis (Centroid, Flatness)
+        # 2. Spectral Analysis (Centroid, Flatness, 95% Rolloff & Narrowband Check)
         freqs, psd = signal.welch(audio, fs=sample_rate, nperseg=min(len(audio), 2048))
         psd_sum = np.sum(psd)
         if psd_sum > 0:
@@ -388,9 +392,15 @@ class VoiceCloner:
             geom_mean = np.exp(np.mean(np.log(psd + 1e-12)))
             arith_mean = np.mean(psd) + 1e-12
             spectral_flatness = float(min(1.0, geom_mean / arith_mean))
+            cum_energy = np.cumsum(psd) / psd_sum
+            rolloff_idx = min(int(np.searchsorted(cum_energy, 0.95)), len(freqs) - 1)
+            spectral_rolloff_95_hz = float(freqs[rolloff_idx])
+            narrowband_warning = bool(spectral_rolloff_95_hz <= 3600.0)
         else:
             spectral_centroid = 2000.0
             spectral_flatness = 0.04
+            spectral_rolloff_95_hz = 4000.0
+            narrowband_warning = False
 
         # 3. Classify gender estimate & semitone pitch shift relative to baseline model
         gender_est = "female" if f0_mean > 175.0 else ("male" if f0_mean < 155.0 else "neutral")
@@ -435,10 +445,11 @@ class VoiceCloner:
                 print(f"[VoiceCloner] Warning: Failed to persist reference audio: {ref_err}")
                 ref_path = None
 
+        nb_note = ", Narrowband (<3.5kHz)" if narrowband_warning else ""
         return SpeakerProfile(
             profile_id=final_pid,
             name=profile_name,
-            description=f"Cloned voice from audio ({gender_est}, F0: {f0_mean:.1f}Hz, Centroid: {spectral_centroid:.0f}Hz)",
+            description=f"Cloned voice from audio ({gender_est}, F0: {f0_mean:.1f}Hz, Centroid: {spectral_centroid:.0f}Hz{nb_note})",
             gender_estimate=gender_est,
             fundamental_freq_f0=round(f0_mean, 1),
             pitch_variability_std=round(f0_std, 1),
@@ -450,17 +461,21 @@ class VoiceCloner:
             noise_w_scale=round(noise_w_scale, 3),
             embedding_vector=embedding,
             ref_audio_path=ref_path,
-            encoder_backend=encoder_backend
+            encoder_backend=encoder_backend,
+            spectral_rolloff_95_hz=round(spectral_rolloff_95_hz, 1),
+            narrowband_warning=narrowband_warning,
         )
 
     @classmethod
     def _get_speaker_extractor(cls, model_path: Optional[str] = None):
-        """Lazy-loads and caches the sherpa-onnx WeSpeaker CAM++ speaker embedding extractor."""
+        """Lazy-loads and caches sherpa-onnx speaker embedding extractors (CAM++ or ECAPA-TDNN512)."""
         target_path = model_path or cls.DEFAULT_SPEAKER_ENCODER_PATH
         if not os.path.exists(target_path):
             return None
-        if cls._cached_speaker_extractor is not None and cls._cached_speaker_model_path == target_path:
-            return cls._cached_speaker_extractor
+        if target_path in cls._speaker_extractors:
+            cls._cached_speaker_extractor = cls._speaker_extractors[target_path]
+            cls._cached_speaker_model_path = target_path
+            return cls._speaker_extractors[target_path]
         try:
             import sherpa_onnx
             cfg = sherpa_onnx.SpeakerEmbeddingExtractorConfig(
@@ -468,9 +483,11 @@ class VoiceCloner:
             )
             if not cfg.validate():
                 return None
-            cls._cached_speaker_extractor = sherpa_onnx.SpeakerEmbeddingExtractor(cfg)
+            ext = sherpa_onnx.SpeakerEmbeddingExtractor(cfg)
+            cls._speaker_extractors[target_path] = ext
+            cls._cached_speaker_extractor = ext
             cls._cached_speaker_model_path = target_path
-            return cls._cached_speaker_extractor
+            return ext
         except Exception as e:
             print(f"[VoiceCloner] Neural speaker extractor unavailable ({e}); using baseline.")
             return None
@@ -483,12 +500,14 @@ class VoiceCloner:
         use_neural: bool = True,
         freqs: Optional[np.ndarray] = None,
         psd: Optional[np.ndarray] = None,
-        f0_mean: float = 160.0
+        f0_mean: float = 160.0,
+        model_path: Optional[str] = None,
     ) -> Tuple[List[float], str]:
-        """Extracts unit-normalized speaker embedding using WeSpeaker CAM++ LM ONNX or 128-D Mel baseline."""
+        """Extracts unit-normalized speaker embedding using WeSpeaker CAM++/ECAPA ONNX or 128-D Mel baseline."""
         audio_1d = np.asarray(audio, dtype=np.float32).reshape(-1)
         if use_neural:
-            extractor = cls._get_speaker_extractor()
+            target = model_path or cls.DEFAULT_SPEAKER_ENCODER_PATH
+            extractor = cls._get_speaker_extractor(model_path=target)
             if extractor is not None and audio_1d.size > 0:
                 stream = extractor.create_stream()
                 stream.accept_waveform(int(sample_rate), audio_1d)
@@ -498,7 +517,8 @@ class VoiceCloner:
                     norm = float(np.linalg.norm(raw_emb))
                     if norm > 1e-12:
                         raw_emb = raw_emb / norm
-                    return raw_emb.tolist(), "wespeaker_campp_lm"
+                    backend_id = "wespeaker_ecapa512_lm" if "ECAPA" in os.path.basename(target) else "wespeaker_campp_lm"
+                    return raw_emb.tolist(), backend_id
 
         if freqs is None or psd is None:
             freqs, psd = signal.welch(audio_1d, fs=sample_rate, nperseg=min(max(len(audio_1d), 8), 2048))
