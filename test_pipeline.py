@@ -1221,6 +1221,119 @@ class TestSession9ProductionHardening:
             assert "fastapi" in body.get("transcript", "").lower()
 
 
+class TestPreUpgradeSafeguardsAndHybridRouting:
+    """Targeted regression tests for v1.x -> v2.0 hardening fixes and pre-upgrade baseline docs."""
+
+    def test_phonetic_repair_inflection_determiner_and_prose_guards(self):
+        from services.asr import phonetic_repair
+
+        banking_lex = ["card", "debit", "address", "account", "freeze", "payment", "limit"]
+        clean_utterance = "cards debits addresses amount fees a payment a limit"
+        repaired, fixes = phonetic_repair(clean_utterance, lexicon=banking_lex, words_meta=None)
+        assert repaired == clean_utterance
+        assert fixes == []
+
+        noisy_rep, noisy_fixes = phonetic_repair("I want to phrase my lost card", lexicon=banking_lex, words_meta=None)
+        assert "freeze" in noisy_rep and len(noisy_fixes) >= 1
+
+    def test_calibrated_rubric_prompt_and_narrowband_detection(self, monkeypatch):
+        import tempfile
+        import numpy as np
+        import soundfile as sf
+        import scipy.signal as sig
+        from services.roles.role_service import RoleService
+        from services.tts import VoiceCloner
+        from services.llm.gateway import llm_gateway
+        from services.llm.llm_contracts import LLMResponse
+
+        captured = {}
+
+        def fake_eval(*args, **kwargs):
+            captured["sys"] = kwargs.get("system_prompt", "")
+            return LLMResponse(
+                content='{"overall_score": 14, "clarity_score": 8, "depth_score": 9, "system_design_score": 9}',
+                provider="mock", model="qwen3:4b", fallback_used=False,
+            )
+
+        monkeypatch.setattr(llm_gateway, "generate", fake_eval)
+        out = RoleService().process_interviewer_turn("Used consistent hashing shards.", mode="solo", calibrated_rubric=True)
+        assert "Scoring Calibration Rubric" in captured["sys"]
+        assert "1-4 (Weak" in captured["sys"] and "8-10 (Strong" in captured["sys"]
+        assert out["evaluation"]["overall_score"] == 10  # clamped cleanly to [1, 10]
+
+        sr = 16000
+        t = np.linspace(0, 1.5, int(1.5 * sr), endpoint=False)
+        wb_sig = (0.2 * np.sin(2 * np.pi * 220 * t) + 0.1 * np.sin(2 * np.pi * 4500 * t)).astype(np.float32)
+        b, a = sig.butter(6, 3400 / (sr / 2), btype="low")
+        nb_sig = sig.lfilter(b, a, wb_sig).astype(np.float32)
+        fd1, p1 = tempfile.mkstemp(suffix=".wav"); os.close(fd1)
+        fd2, p2 = tempfile.mkstemp(suffix=".wav"); os.close(fd2)
+        try:
+            sf.write(p1, wb_sig, sr)
+            sf.write(p2, nb_sig, sr)
+            assert VoiceCloner.extract_acoustic_profile_from_wav(p1).narrowband_warning is False
+            nb_prof = VoiceCloner.extract_acoustic_profile_from_wav(p2)
+            assert nb_prof.narrowband_warning is True and nb_prof.spectral_rolloff_95_hz <= 3600.0
+        finally:
+            for p in (p1, p2):
+                if os.path.exists(p):
+                    os.remove(p)
+
+    def test_hybrid_cascade_itn_and_upgrade_baseline_docs(self):
+        from services.nlp import HybridConfidenceSLUService
+        from services.contracts import NLPResult
+        from orchestrator.factory import PipelineFactory
+        from fastapi.testclient import TestClient
+        from server import app
+        from ml.metrics import compute_itn_wer, tost_non_inferiority, paired_bootstrap_test
+
+        class _MockFast:
+            def __init__(self, label2id, conf, margin, intent="balance", oos_gated=False):
+                self._bundle = (None, None, label2id, {v: k for k, v in label2id.items()}, 0.0)
+                self.allowed_intents = sorted(label2id.keys())
+                self._conf, self._margin, self._intent, self._oos = conf, margin, intent, oos_gated
+
+            def _get_loaded(self):
+                return self._bundle
+
+            def parse(self, text, words_meta=None):
+                return NLPResult(
+                    cleaned_text=text, intent=self._intent, confidence=self._conf,
+                    provider="distilbert_lora_slu", metadata={"margin": self._margin, "oos_gated": self._oos},
+                )
+
+        class _MockSlow:
+            def parse(self, text):
+                return NLPResult(cleaned_text=text, intent="freeze", confidence=0.92, provider="mock_slow", metadata={})
+
+        # Confident fast-path exits cleanly without hitting slow LLM
+        fast_ok = HybridConfidenceSLUService(_MockFast({"balance": 0, "freeze": 1}, 0.94, 0.70), _MockSlow())
+        r_fast = fast_ok.parse("check my balance")
+        assert r_fast.provider == "hybrid_fast_distilbert" and r_fast.metadata["cascaded_to_slow"] is False
+
+        # Low-confidence / narrow-margin cascades to slow LLM
+        fast_low = HybridConfidenceSLUService(_MockFast({"balance": 0, "freeze": 1}, 0.62, 0.10), _MockSlow())
+        r_slow = fast_low.parse("unclear banking request")
+        assert r_slow.intent == "freeze" and r_slow.metadata["cascaded_to_slow"] is True
+
+        itn = compute_itn_wer(["Calculate 95 minus 28 percent"], ["Calculate 95-28%"])
+        assert itn["itn_wer"] < 0.30
+        pb = paired_bootstrap_test([0.0, 0.0, 0.0], [1.0, 1.0, 1.0], n_resamples=200, seed=42)
+        assert pb["p_value"] >= (1.0 / 201.0)
+        tost = tost_non_inferiority([1.0] * 20, [1.0] * 20, margin=-0.05, n_resamples=200, seed=42)
+        assert tost["non_inferior"] is True
+
+        hybrid_pipe = PipelineFactory.create_preset("hybrid")
+        assert isinstance(hybrid_pipe.nlp, HybridConfidenceSLUService)
+        provs = TestClient(app).get("/api/pipeline/providers").json()["available_providers"]
+        assert any(p["id"] == "parakeet" for p in provs["asr"])
+        assert any(p["id"] == "hybrid" for p in provs["nlp"])
+
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        assert os.path.getsize(os.path.join(root_dir, "docs", "ARCHITECTURE_UPGRADE_BASELINE.md")) > 4000
+
+
+
 
 
 

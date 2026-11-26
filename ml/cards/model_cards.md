@@ -1,48 +1,53 @@
-# Model Cards — Decoupled 6-Stage Voice AI Interview Assistant
+# Model Cards — Decoupled 6-Stage Voice AI Interview Assistant (`Pre-Upgrade Snapshot`)
 
-This document provides structured model cards for every machine learning component evaluated and deployed in the pipeline (`orchestrator/factory.py`), grounded exclusively in directly observed telemetry from `ml/results/*.json`.
-
----
-
-## 1. Layer A — Whisper `small.en` & `tiny.en` INT8 + Contextual Biasing & Phonetic Repair
-
-- **Backbones**: `Systran/faster-whisper-small.en` (`244M` params, `463.58 MB` disk, `718.36 MB` Peak RSS) and `Systran/faster-whisper-tiny.en` (`39M` params, `74.47 MB` disk, `266.91 MB` Peak RSS) executed on CPU INT8 via `CTranslate2` (`faster-whisper`).
-- **License**: `MIT` (OpenAI Whisper weights & Systran CTranslate2 conversion).
-- **Layer A Modifications**:
-  - `small.en` (`asr_small_improved`): Silero VAD + Role/Candidate dynamic `initial_prompt` + CTranslate2 trie `hotwords` + word-confidence gated Soundex/Rapidfuzz (`phonetic_repair`, bigram join & hyphenated sub-token repair).
-  - `tiny.en` (`asr_tiny_improved`): **Capacity-Gated Conditioning** (disables dense `hotwords` to prevent 39M echo hallucination loops, enforces `condition_on_previous_text=False`, `repetition_penalty=1.1`, `no_repeat_ngram_size=4`, `hallucination_silence_threshold=0.4`) + dynamic `initial_prompt` + `phonetic_repair`.
-- **Observed Benchmarks**:
-  - `asr_small_improved`: Interview Clean WER **`0.0435`** (`-48.8%` vs baseline `0.0849`, `p=0.0`), Proper-Noun Clean Recall **`0.9565`** (`20 dB`: **`0.9783`**, `10 dB`: **`0.9130`**), LibriSpeech Clean WER **`0.0306`**, MINDS-14 Accent WER **`0.2239`**, CPU RTF `0.8857`, Cost `$0.0602 / 1k turns`.
-  - `asr_tiny_improved`: Proper-Noun Clean Recall **`0.9130`** (beats `small_baseline` `0.7391` at `p=0.018` with `2.7x` less RAM and `2.3x` faster CPU `RTF=0.2660`), Cost `$0.0181 / 1k turns`.
-- **Contamination, Bias & Risks**: Pretrained on public English web speech (overlap risk on LibriSpeech); exhibits higher baseline WER on `en-GB`/`en-AU` accents vs `en-US`; `en-IN` onset stops (`Pooja -> Ujha`) can still bypass Soundex when leading consonant drops. Intended solely for interview transcription assistance with human review.
+Structured model cards for all ML/neural components evaluated or deployed prior to the `v2.0` architecture overhaul, grounded strictly in observed telemetry under `ml/results/*.json`.
 
 ---
 
-## 2. Layer B — Quantized Local SLMs (`Qwen 2.5 3B`, `Llama 3.2 3B`, `Qwen 2.5 Coder 1.5B`) + Schema Repair
+## 1. Layer A — `Whisper INT8`, `Parakeet-TDT-0.6B-v3`, `Whisper-large-v3-turbo` & G2P Phonetic Repair
 
-- **Backbones**: `qwen2.5:3b` (`Q4_K_M`, `1.80 GB` disk, `2.23 GB` VRAM), `llama3.2:3b` (`Q4_K_M`, `1.88 GB` disk, `2.56 GB` VRAM), `qwen2.5-coder:1.5b` (`Q4_K_M`, `0.92 GB` disk, `1.31 GB` VRAM), benchmarked against `llama3.1:latest` (`8B`, `4.58 GB` disk, `3.14 GB` VRAM + CPU offload).
-- **Licenses**: `Qwen 2.5 (3B)` & `Qwen 2.5 Coder (1.5B)` under **`Apache-2.0`** (permissive commercial startup use); `Llama 3.2 (3B)` & `Llama 3.1 (8B)` under **Meta Llama Community License**. Consequently **`qwen2.5:3b` (`slu_qwen3b_repair`)** is both technically Pareto-optimal and license-safest for commercial packaging.
-- **Layer B Modifications**: Shared `extract_and_repair_json` + `repair_and_parse_with_retry` in `services/llm/json_utils.py` (markdown fence stripping, balanced/truncated brace recovery, trailing comma & Python-literal normalization, max 1 constrained retry) + `preprocess_asr_transcript` lexical recovery hook across Stage 3 (`LLMNLPService`) and Stage 4 (`RoleService`).
-- **Observed Benchmarks (3 Seeds `[42, 1337, 2026]`)**:
-  - `slu_qwen3b_repair`: MINDS-14 Macro-F1 **`0.8667 ± 0.0000`** (`p=0.798` vs `8B`, `p=0.0` vs RuleBased), CLINC-OOS Macro-F1 **`0.7972 ± 0.0192`**, Interview SLU F1 **`0.7606 ± 0.0273`** (beats `8B` `0.6939`), Interview Rubric Spearman rho **`0.6897`** (beats `8B` `0.4188` and `llama3.2:3b` `0.3941`), `100.0%` schema compliance, latency `1258 ms`, Cost **`$0.0172 / 1k turns`** (9.9x cheaper than `8B` `$0.1698`). Cross-layer ASR pre-repair raised noisy `tiny_asr` MINDS-14 F1 `0.9238 -> 0.9619`.
-- **Known Limitations**: Closed-list `qwen2.5:3b` prompts over-commit to in-domain labels on true Out-of-Scope inputs (`clinc_oos` OOS F1 = `0.0` vs `0.4444` on Llama); interview scoring outputs must act as co-pilot decision support, never unreviewed automated hiring decisions.
-
----
-
-## 3. Layer C — Zero-Shot Neural Voice Cloning (`Kyutai Pocket TTS INT8`) & `Piper VITS` Fallback
-
-- **Backbones**: `Kyutai Pocket TTS INT8` via `sherpa-onnx` (`lm_flow.int8.onnx`, `lm_main.int8.onnx`, `encoder.onnx`, `decoder.int8.onnx`, `text_conditioner.onnx`; `~189 MB` ONNX, `239.96 MB` Peak RSS, `24 kHz`), falling back seamlessly to offline `Piper VITS` (`en_US-lessac-low`, `en_US-ryan-low`, `MIT`) or Windows `SAPI5`.
-- **License**: `CC-BY-4.0` weights + `Apache-2.0` (`sherpa-onnx`) runtime — permissive commercial readiness.
-- **Observed Benchmarks (12 Unseen LibriSpeech Speakers x 3 Utterances)**:
-  - Held-out `WeSpeaker CAM++` similarity: **`0.5651`** (`0.5896` vs enroll ref; studio WAV `bria.wav = 0.7444`), outperforming DSP `Piper dual+WSOLA` (`0.4159`, **`+0.1493`**, **`p=0.0`**) and `Pyttsx3` (`0.4776`, `p=0.004`), at CPU `RTF = 0.4384`.
-  - Diagnosed why `Piper + WSOLA` failed: WSOLA phase vocoding yielded `STOI = 0.2843` waveform distortion and smeared F2/F3 formants.
-- **Ethical Safeguards**: Requires explicit user-uploaded reference audio per cloned voice; custom profiles stored locally (`storage/cloned_voices/`, gitignored) with user rename/delete lifecycle APIs and protected non-impersonation presets.
+- **Models & Licenses:**
+  - `Systran/faster-whisper-small.en` (`244M`, `463.58 MB` disk, `718.46 MB` Peak RSS, `MIT`, CPU `INT8`).
+  - `Systran/faster-whisper-tiny.en` (`39M`, `74.47 MB` disk, `266.72 MB` Peak RSS, `MIT`, CPU `INT8`).
+  - `nvidia/parakeet-tdt-0.6b-v3` (`600M`, `640.24 MB` disk, `843.89 MB` Peak RSS, `CC-BY-4.0`, `sherpa-onnx` CPU `INT8`). Note: exported ONNX bundle excludes `bpe.vocab`; quiet inputs (`peak < 0.05`) are gain-normalized in `services/asr/asr_services.py`.
+  - `openai/whisper-large-v3-turbo` (`809M`, `MIT`, Kaggle T4 FP16).
+- **Layer A Modifications (`services/asr/asr_services.py`):**
+  - `small_improved`: Silero VAD + dynamic prompt + CTranslate2 trie `hotwords` + word-confidence gated **`g2p_en` ARPAbet (`Apache-2.0`) + Rapidfuzz** `phonetic_repair()`.
+  - `tiny_improved`: Capacity-gated conditioning (`hotwords_enabled=False`, `condition_on_previous_text=False`, `repetition_penalty=1.1`, `no_repeat_ngram_size=4`, `hallucination_silence_threshold=0.4`).
+  - *Post-audit hotfix (`2026-11-26`)*: Added `_is_morphological_inflection()`, expanded `_COMMON_PROSE_GUARD`, added `_FUNCTION_BIGRAM_GUARD` (`"a", "the", ...`), and enforced strict matching when `words_meta=None`.
+- **Observed Pre-Fix Benchmarks:**
+  - `asr_small_improved`: Clean IV WER **`0.0435`** (`p<0.001` vs `0.0849`), `R_ent` **`0.9783`** (`20 dB: 0.9783`, `10 dB: 0.9348`, closed `0.9643`, unseen `0.6111`), `LibriSpeech-clean` `0.0306` / `other` `0.0958`, `CPU RTF = 0.8958`; pre-fix `MINDS-14 (498)` `0.2500` (`36` repairs).
+  - `asr_tiny_improved`: `R_ent` **`0.9130`** (`10 dB: 0.8043`), `CPU RTF = 0.2801`, `2.7x` lower RSS than `small.en`.
+  - `asr_parakeet_tdt`: **`LibriSpeech-clean = 0.0221`**, **`LibriSpeech-other = 0.0605`** (`-36.8%` vs `small.en`, `p<0.001`), `IV = 0.0642`, **`CPU RTF = 0.1564`**; pre-fix `MINDS-14 (498) = 0.3018` (`155` un-guarded repairs — fixed in code).
+  - `whisper-large-v3-turbo` (`T4`): **`ai4bharat/Svarah` (`N=1,000 en-IN`) = `0.0888`** vs `small.en` `0.1521` (`-41.6%`, `p<0.001`); `MINDS-14 (498) = 0.2517` (reflects noisy ground-truth refs); `IV_50 = 0.0787`.
 
 ---
 
-## 4. Speaker Verification Encoder — `WeSpeaker CAM++ LM` (`512-D ONNX`)
+## 2. Layer B — `Qwen3-4B`, `DistilBERT-LoRA`, `Qwen3-4B QLoRA`, `Phi-4-mini` & Hybrid Cascade
 
-- **Model & License**: `wespeaker_en_voxceleb_CAM++_LM.onnx` (`27.93 MB`, `512-D` L2-normalized embedding, `Apache-2.0` / `CC-BY-4.0`).
-- **Observed Benchmarks**: Clean separation gap **`0.3016`** (`vs 0.0070` for 128-D Welch RandomProj, `p=0.0`), Clean+EQ-tilt separation gap **`0.2781`** (`vs 0.0060`), warm latency `109.2 ms`.
-- **Explainability**: 8-band spectral occlusion (`fig2`) establishes F3/F2 vocal-tract formants (`1.8–3.0 kHz`: `0.769` drop; `1.0–1.8 kHz`: `0.651` drop) carry >2x higher speaker weight than `0–300 Hz` F0 pitch (`0.338`).
-- **Misuse Guardrails**: Used purely as a research evaluation & synthesis consistency metric (`morph_profiles` / benchmark scoring), never as a biometric security authentication barrier.
+- **Permissive Production Models:**
+  - `qwen3:4b` (`Q4_K_M`, `2.33 GB` disk, `3.33 GB` VRAM, **`Apache-2.0`**) + Kaggle NF4 **QLoRA adapter** (`11,796,480` trainable params, `models/qwen3_4b_slu_lora/`).
+  - `DistilBERT-LoRA` (`distilbert-base-uncased` + PEFT LoRA `r=16, lr=2.67e-4, 5 epochs`, `1,010,851` trainable params, **`Apache-2.0`**, `models/slu_lora_adapter/`, `~0.25 GB` disk).
+  - `HybridConfidenceSLUService`: Tier-2 `DistilBERT-LoRA` (`conf >= 0.85, margin >= 0.25, non-OOS`) cascading to Tier-3 `Qwen3-4B`.
+  - `phi4-mini` (`3.8B`, `2.32 GB` disk, `3.06 GB` VRAM, **`MIT`**).
+  - Reference / Restricted baselines: `llama3.2:3b` / `llama3.1:8b` (`Meta Community License`; `8B` requires `43% CPU` spill locally); legacy `qwen2.5:3b` (`qwen-research`, deprecated for commercial use).
+- **Observed Benchmarks:**
+  - **`slu_qwen3_4b_repair` (3 seeds Ollama):** `MINDS-14 (56)` **`0.9940 ± 0.0105`**, `CLINC (156)` **`0.8378 ± 0.0048` (`OOS = 0.7755`)**, `IV QA` **`0.8986`**, Calibrated 3-Tier Rubric **`rho = 0.8459 ± 0.0388` (`MAE = 1.4167`)**, `MINDS-14 (498)` **`0.9315` Gold / `0.9167` Tiny-ASR**, `100%` schema compliance, cost **`$0.0160/1k`**. Proven TOST non-inferior to `Llama-3.1-8B` ($p_{\text{NI}} = 0.0035$) at `9.4x` lower cost.
+  - **`DistilBERT-LoRA`:** Local CPU **`0.9520` Gold (`28.8 ms`) / `0.9441` Tiny-ASR (`58.0 ms`)** on `MINDS-14 (498)`, **`0.9038` (`OOS = 0.7092`, `31.5 ms`)** on `CLINC (5,500)`, **`$0.0011/1k`**. Kaggle 3-seed T4: `0.9423 ± 0.0059` vs Linear Probe `0.7471` (`MINDS-14`), `0.9112 ± 0.0073` (`OOS = 0.7523`) vs `0.6657` (`CLINC-5500`).
+  - **`Qwen3-4B QLoRA` (Kaggle T4):** Lifts `MINDS-14 (498)` noisy F1 `0.8364 ->` **`0.9484`** (`1.0` schema) and `CLINC (156)` `0.8431 ->` **`0.9366` (`OOS = 0.8814`)**.
+
+---
+
+## 3. Layer C — `Kyutai Pocket TTS INT8` & `Piper VITS` Fallback
+
+- **Models & Licenses:** `Kyutai Pocket TTS INT8` (`~189 MB` ONNX, `238.87 MB` Peak RSS, `24 kHz`, 5 flow-matching steps; `CC-BY-4.0` weights + `MIT`/`Apache-2.0` runtime) and fallback `Piper VITS` (`en_US-lessac-low` / `en_US-ryan-low` `MIT`; `piper1-gpl` is `GPL-3.0-or-later`).
+- **Observed Benchmarks (`36` pairs across `12` unseen LibriSpeech speakers):**
+  - `CAM++` held-out **`0.5898`** (specificity margin **`+0.1402`**, `AUC = 0.7371`, `d' = 0.9224`, `EER = 0.3106`), `ECAPA512` **`0.8031`** (margin **`+0.1030`**), `RT-WER = 0.1084`, streaming **`ttfa_ms = 1913.7 ms`**, `avg_latency_ms = 2382.1 ms`, `CPU RTF = 0.5336`, `$0.0331/1k`. Outperforms `Piper+WSOLA` (`CAM++ = 0.4180`, `p < 0.001`) and `EdgeTTS` specificity (`+0.0937 CAM++`, `p < 0.001`).
+
+---
+
+## 4. Dual Biometric Encoders (`WeSpeaker CAM++ LM` & `ECAPA512 LM`)
+
+- **Models:** `wespeaker_en_voxceleb_CAM++_LM.onnx` (`512-D`, `27.93 MB`) & `voxceleb_ECAPA512_LM.onnx` (`192-D`), `CC-BY-4.0` weights / `Apache-2.0` `sherpa-onnx`.
+- **Observed Benchmarks:** Clean `other_60` `CAM++ d' = 2.6863` (`gap = 0.3744, AUC = 0.9619`) and `ECAPA512 EER = 0.0835` (`AUC = 0.9665`). Under `300–3400 Hz` telephony EQ, both collapse toward `EER 0.3333–0.4461`. `VoiceCloner` now emits `narrowband_warning=True` when Welch 95% spectral rolloff `<= 3600 Hz`.
+- **Misuse Guardrails:** Used purely for evaluation, voice-profile telemetry, and quality alerts—never security authentication or unauthorized impersonation.

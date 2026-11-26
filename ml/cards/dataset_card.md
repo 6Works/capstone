@@ -1,53 +1,38 @@
-# Dataset Card — Voice AI Interview Assistant Benchmark Suite
+# Dataset Card — Decoupled 6-Stage Voice AI Interview Assistant
 
-This card documents the four compact, license-clean benchmark manifests curated in `ml/datasets/prepare_benchmarks.py` and stored under `ml/datasets/manifests/`. All splits are generated deterministically (`seed=42`) with normalized SHA-256 text deduplication (`text_sha256`) and zero cross-split text overlap.
+This card documents all speech and text benchmark corpora curated in `ml/datasets/prepare_benchmarks.py` under `ml/datasets/manifests/`, plus real Indian-English evaluation via `ai4bharat/Svarah`. All local splits are generated deterministically (`seed=42`) with normalized SHA-256 deduplication (`text_sha256`) enforcing zero cross-split text leakage.
 
-## 1. Benchmark Inventory Summary
-
-| Manifest | Source | License | Modality | Total Items | Split Breakdown | Total Audio | Key Metrics Evaluated |
-| :--- | :--- | :--- | :--- | :---: | :--- | :---: | :--- |
-| `librispeech_60.json` | `openslr/librispeech_asr` (`clean/test`) | `CC-BY-4.0` | Speech FLAC | 60 (12 speakers x 5 utts) | `enroll: 12`, `val: 12`, `test: 36` | 10.06 min (`1.74–27.18 s`) | ASR WER/CER, Speaker Cosine Sim, STOI |
-| `minds14_en_140.json` | `PolyAI/minds14` (`en-US`, `en-GB`, `en-AU`) | `CC-BY-4.0` | Speech WAV | 140 (14 intents x 10 utts) | `dev: 42`, `val: 28`, `test: 70` | 20.11 min (`1.71–28.33 s`) | Accented ASR WER, Spoken Intent Macro-F1 |
-| `clinc_oos_200.json` | `clinc/clinc_oos` (`small` val/test) | `CC-BY-3.0` | Text | 200 (15 classes incl. `oos`) | `val: 100`, `test: 100` | N/A | Intent Macro-F1, OOS Detection, JSON Validity |
-| `interview_stress_v1.json` | External Azure `EdgeTTS` (`en-IN`, `en-US`) | `MIT` | Speech WAV (16 kHz mono) | 65 (`25` proper nouns + `40` QA turns) | `val: 15`, `test: 50` | 5.37 min (`3.12–11.09 s`) | Hotword/Noun Recall, Intent F1, Rubric Spearman rho |
-
-Total cached audio footprint on disk (`storage/benchmarks/`): **37.70 MB** across 265 audio clips (`gitignored`; manifests stay version-controlled).
+Total local cached benchmark corpus size (`storage/benchmarks/`): **491.32 MB** across seven manifests (`librispeech_60`, `librispeech_other_60`, `minds14_en_140`, `minds14_en_full`, `clinc_oos_200`, `clinc_oos_full`, `interview_stress_v1`), complemented on GPU evaluation by **1,000 held-out clips from `ai4bharat/Svarah`**.
 
 ---
 
-## 2. Detailed Dataset Composition
+## 1. Benchmark Inventory & Verified Licensing
 
-### 2.1 `librispeech_60` (Speaker & Clean Read-Speech Benchmark)
-- **Source & Collection**: Drawn from `openslr/librispeech_asr` (`clean`, `test` split via HuggingFace Datasets Server), selecting 12 unseen public-domain LibriVox speakers (`1320`, `2094`, `260`, `2961`, `3575`, `5639`, `6930`, `7127`, `7176`, `7729`, `8230`, `8463`), 5 utterances per speaker.
-- **Duration Distribution**: Minimum `1.74 s`, maximum `27.18 s`, mean `10.06 s`.
-- **Anti-Leakage & Split Protocol**: Utterance `0` per speaker -> `enroll` (voice-cloning reference only), utterance `1` -> `val` (hyperparameter selection), utterances `2–4` -> `test` (final reporting). Verified `0` `text_hash` collisions across `enroll`, `val`, and `test`.
-
-### 2.2 `minds14_en_140` (Accented Spoken Intent Benchmark)
-- **Source & Collection**: Drawn from `PolyAI/minds14` (`train` split) across three native English variants: `en-GB` (`57`), `en-US` (`44`), and `en-AU` (`39`), covering all **14 banking intents** equally (`10` deduplicated items per class: `abroad`, `address`, `app_error`, `atm_limit`, `balance`, `business_loan`, `card_issues`, `cash_deposit`, `direct_debit`, `freeze`, `high_value_payment`, `joint_account`, `latest_transactions`, `pay_bill`).
-- **Duration Distribution**: Minimum `1.71 s`, maximum `28.33 s`, mean `8.62 s`.
-- **Anti-Leakage & Split Protocol**: Deduplicated globally across accents via `text_sha256`, shuffled with `seed=42`, and stratified `3 dev / 2 val / 5 test` per intent (`42 / 28 / 70`). Zero `text_hash` intersection across splits.
-
-### 2.3 `clinc_oos_200` (Text SLU + Out-of-Scope Benchmark)
-- **Source & Collection**: Sampled from disjoint upstream splits of `clinc/clinc_oos` (`small` config): `val: 100` exclusively from HF `validation` and `test: 100` exclusively from HF `test`. Covers 15 classes (`oos` plus 14 in-domain classes: `meaning_of_life`, `improve_credit_score`, `change_language`, `timer`, `translate`, `insurance_change`, `payday`, `find_phone`, `replacement_card_duration`, `pto_request`, `travel_alert`, `fun_fact`, `transfer` at 14 items each, and `definition` at 4 items).
-- **Anti-Leakage & Split Protocol**: Cross-split `text_sha256` intersection enforced to `0` (`val & test = 0`).
-
-### 2.4 `interview_stress_v1` (Domain Proper-Noun & Rubric Stress Suite)
-- **Source & Circularity Avoidance**: 65 scripted interview utterances synthesized into 16 kHz mono WAV via external Azure **EdgeTTS** (`en-IN-PrabhatNeural`, `en-IN-NeerjaNeural`, `en-US-GuyNeural`, `en-US-JennyNeural`), completely disjoint from our evaluated neural cloning (`Pocket TTS`) and formant baselines so ASR/TTS benchmarks remain free of circular model bias.
-- **Subsets**:
-  - `proper_nouns` (`25` clips; `5 val`, `20 test`): Tests recognition of South-Asian names and domain technical terms (e.g., `Sachin`, `Aradhya`, `Nandu`, `Bablu`, `Siddharth`, `Krishnendu`, `FastAPI`, `CTranslate2`, `WeSpeaker`, `Kyutai`, `gRPC`).
-  - `interview_qa` (`40` clips; `10 val`, `30 test`): Covers `7` SLU intents (`greeting: 5`, `identity_query: 5`, `project_query: 5`, `calculation_query: 5`, `time_query: 3`, `answer: 13`, `farewell: 4`) and `3` rubric quality tiers (`high: 10` `[7–10]`, `mid: 26` `[4–7]`, `low: 4` `[1–5]`) with ordinal `expected_score_range` labels for Spearman correlation checks.
-- **Duration Distribution**: Minimum `3.12 s`, maximum `11.09 s`, mean `4.96 s`.
+| Manifest / Dataset | Source | Verified License | Modality | Total Items | Split Breakdown | Role & Key Audit Finding |
+| :--- | :--- | :--- | :--- | :---: | :--- | :--- |
+| `librispeech_60.json` | `openslr/librispeech_asr` (`clean/test`) | `CC-BY-4.0` | Speech FLAC | 60 (12 spk x 5) | `enroll: 12`, `val: 12`, `test: 36` | Clean ASR WER, Same/Diff Speaker Verification, TTS Cloning |
+| `librispeech_other_60.json` | `openslr/librispeech_asr` (`other/test`) | `CC-BY-4.0` | Speech FLAC | 60 (12 spk x 5) | `enroll: 12`, `val: 12`, `test: 36` | Challenging real-acoustic ASR (`Parakeet=0.0605` vs `small.en=0.0958`) & OOD ASV |
+| `minds14_en_140.json` | `PolyAI/minds14` (`en-US`, `en-GB`, `en-AU`) | `CC-BY-4.0` | Speech WAV | 140 (14 x 10) | `dev: 42`, `val: 28`, `test: 70` | Compact accented ASR & cross-layer SLU subset |
+| `minds14_en_full.json` | `PolyAI/minds14` (full deduplicated English) | `CC-BY-4.0` | Speech WAV (16 kHz) | 1,662 (`US:541`, `GB:538`, `AU:583`) | `dev: 914`, `val: 250`, `test: 498` | Real human SLU training (`dev`/`val`) & test (`498`); *caveat: reference text retains noisy crowd/Google-ASR strings creating a ~`0.25` WER floor even on `whisper-large-v3-turbo` (`0.2517`)* |
+| `clinc_oos_200.json` | `clinc/clinc_oos` (`small`) | `CC-BY-3.0` | Text | 200 (15 classes incl. `oos`) | `val: 100`, `test: 100` | Compact SLU regression manifest |
+| `clinc_oos_full.json` | `clinc/clinc_oos` (`small` complete corpus) | `CC-BY-3.0` | Text (151 classes) | 16,196 | `train: 7,596`, `val: 3,100`, `test: 5,500` | Full 150-intent + Out-of-Scope (`oos`) neural LoRA training & `5,500`-item test |
+| `interview_stress_v1.json` | External Azure `EdgeTTS` (`en-IN`, `en-US`) | **Research-Only Proxy** (consumer Read-Aloud endpoint; NOT `MIT`) | Speech WAV (16 kHz) | 65 (`25` PN + `40` QA) | `val: 15`, `test: 50` | Controlled South-Asian proper-noun & 50% unseen holdout stress + 10 ordinal rubric answers |
+| **`ai4bharat/Svarah`** *(Gated Eval Only)* | HuggingFace `ai4bharat/Svarah` (`test` slice) | **`CC-BY-4.0`** | Human Speech (`en-IN`) | **1,000** sampled (`885` non-digit, `115` digit-rich) | `test-only: 1,000` (never trained on) | Clean human Indian-English ASR evaluation (`whisper-small.en` `0.1521` vs `whisper-large-v3-turbo` **`0.0888`**, `p < 0.001`) |
 
 ---
 
-## 3. Acoustic Stress Protocol (Deterministic AWGN)
+## 2. Anti-Leakage, Holdout & Acoustic Stress Protocols
 
-Rather than duplicating noisy WAV files on disk, `ml/datasets/prepare_benchmarks.py:add_awgn(audio, snr_db, seed=42)` injects calibrated zero-mean white Gaussian noise on the fly at target signal-to-noise ratios (`clean`, `20 dB`, `10 dB`) given signal variance $\sigma_s^2 + 10^{-12}$ and noise power $\sigma_s^2 / 10^{\mathrm{SNR}/10}$, clipping softly to `[-1.0, 1.0]`.
+1. **Deduplication & Split Isolation:** Every manifest enforces zero `text_sha256` intersection across `train`/`dev`/`val`/`test`. Speaker sets (`librispeech_60`, `librispeech_other_60`) partition speaker IDs cleanly across `enroll` (cloning conditioning only), `val` (calibration), and `test` (reporting).
+2. **Closed-Roster vs. Zero-Shot Proper-Noun Holdout (`run_asr_ablation.py`):** On `interview_stress_v1` `proper_nouns`, 50% of unique target proper nouns (`25` normalized terms in `_HELD_OUT_LOWER`) are withheld completely from Layer A prompts, hotwords, and repair lexicons in a dedicated holdout pass (`closed_roster_recall` vs `unseen_zero_shot_recall`), alongside `non_entity_wer`, `repair_precision`, `overcorrection_rate`, and ITN-normalized WER (`compute_itn_wer`).
+3. **Deterministic AWGN, Cross-Channel Telephony & Narrowband Detection:**
+   - `add_awgn(audio, snr_db, seed)`: deterministic `20 dB` and `10 dB` AWGN stress.
+   - Cross-channel ASV (`eval_speaker_encoder.py`): 4th-order Butterworth telephony bandpass (`300–3400 Hz`) + `18 dB` AWGN + `-6 dB` gain attenuation. `VoiceCloner` now flags narrowband inputs automatically via Welch 95% spectral rolloff (`<= 3600 Hz`).
 
 ---
 
-## 4. Ethics, Bias, Contamination & Licensing Caveats
+## 3. Responsible Disclosure & Limitations
 
-1. **Pretraining Contamination Disclosure**: Whisper models were exposed to large public English web corpora and LibriSpeech-like read speech; therefore `librispeech_60` should only be interpreted alongside accented `minds14_en_140`, out-of-distribution `interview_stress_v1`, and `20 dB` / `10 dB` AWGN stress runs.
-2. **Demographic & Channel Limitations**: `PolyAI/minds14` spans US/UK/Australian accents but lacks Indian English (`en-IN`), motivating the inclusion of Azure `en-IN-PrabhatNeural` / `en-IN-NeerjaNeural` in `interview_stress_v1`. LibriSpeech read audiobooks exhibit distinct recording-channel EQ compared to live headset microphones (established in Session 2 error analysis).
-3. **Biometric Privacy & Permissive Commercial Licensing**: No private user voice recordings are stored in the repository; benchmark manifests use `CC-BY-4.0`, `CC-BY-3.0`, or `MIT` sources compatible with startup commercial deployment.
+- Synthetic audio (`interview_stress_v1`) rendered via EdgeTTS is labeled **Research-Only Proxy**; human `en-IN` ASR claims rest cleanly on gated **`ai4bharat/Svarah` (`CC-BY-4.0`, `N=1,000`)**.
+- `MINDS-14` transcripts remain valuable for noisy-ASR SLU transfer (`0.9441–0.9520` F1), whereas raw ASR WER comparisons must account for its crowd-ASR label noise (`~0.25` WER floor) alongside clean human `Svarah` (`0.0888`) and `LibriSpeech` (`0.022–0.060`).
+- No private user microphone captures or PII are committed (`storage/cloned_voices/` and `storage/benchmarks/` are gitignored).
